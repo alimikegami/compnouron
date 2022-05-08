@@ -10,15 +10,20 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserUseCase struct {
+type UserUseCase interface {
+	CreateUser(user *entity.User) error
+	Login(credential dto.Credential) (string, error)
+}
+
+type UserUseCaseImpl struct {
 	ur *repository.UserRepository
 }
 
-func CreateNewUserUseCase(ur *repository.UserRepository) *UserUseCase {
-	return &UserUseCase{ur: ur}
+func CreateNewUserUseCase(ur *repository.UserRepository) *UserUseCaseImpl {
+	return &UserUseCaseImpl{ur: ur}
 }
 
-func (us *UserUseCase) CreateUser(user *entity.User) error {
+func (us *UserUseCaseImpl) CreateUser(user *entity.User) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -29,7 +34,7 @@ func (us *UserUseCase) CreateUser(user *entity.User) error {
 	return err
 }
 
-func (us *UserUseCase) Login(credential *dto.Credential) (string, error) {
+func (us *UserUseCaseImpl) Login(credential *dto.Credential) (string, error) {
 	user := us.ur.GetUserByEmail(credential.Email)
 	if user == nil {
 		return "", fmt.Errorf("user not found")

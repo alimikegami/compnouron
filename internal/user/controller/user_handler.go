@@ -13,7 +13,7 @@ import (
 
 type UserController struct {
 	router *echo.Echo
-	userUC *usecase.UserUseCase
+	userUC *usecase.UserUseCaseImpl
 }
 
 func (uc *UserController) InitializeUserRoute(config middleware.JWTConfig) {
@@ -46,6 +46,6 @@ func (uc *UserController) Login(c echo.Context) error {
 	})
 }
 
-func CreateNewUserController(e *echo.Echo, userUC *usecase.UserUseCase) *UserController {
+func CreateNewUserController(e *echo.Echo, userUC *usecase.UserUseCaseImpl) *UserController {
 	return &UserController{router: e, userUC: userUC}
 }
