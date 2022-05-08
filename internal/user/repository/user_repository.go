@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	"github.com/alimikegami/compnouron/internal/user/entity"
 	"gorm.io/gorm"
 )
@@ -18,7 +16,6 @@ type userRepositoryImpl struct {
 
 func (ur *userRepositoryImpl) CreateUser(user *entity.User) error {
 	result := ur.db.Create(&user)
-	fmt.Println(result)
 	if result.Error != nil {
 		return result.Error
 	}
