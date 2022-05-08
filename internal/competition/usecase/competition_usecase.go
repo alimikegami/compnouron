@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/alimikegami/compnouron/internal/competition/dto"
 	"github.com/alimikegami/compnouron/internal/competition/entity"
@@ -31,16 +31,21 @@ func (cuc *CompetitionUseCase) CreateCompetition(competition dto.CompetitionRequ
 	return err
 }
 
-func (cuc *CompetitionUseCase) DeleteCompetition(competitionID uint, userID uint) {
+func (cuc *CompetitionUseCase) DeleteCompetition(competitionID uint, userID uint) error {
 	competition := cuc.ur.GetCompetitionByID(competitionID)
 	if competition == nil {
-		fmt.Println("competition does not exist")
-		return
+		return errors.New("competition does not exist")
 	}
 
-	if competition.UserID == userID {
-		cuc.ur.DeleteCompetition(competitionID)
+	if competition.UserID != userID {
+		return errors.New("action unauthorized")
 	}
+	err := cuc.ur.DeleteCompetition(competitionID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (cuc *CompetitionUseCase) UpdateCompetition(competition dto.CompetitionRequest, id uint) error {

@@ -45,7 +45,7 @@ func (cc *CompetitionController) CreateCompetition(c echo.Context) error {
 	err := cc.CompetitionUC.CreateCompetition(*competition, userID)
 	if err != nil {
 		fmt.Println(err)
-		return c.JSON(http.StatusBadRequest, response.Response{
+		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
 			Data:    nil,
@@ -70,7 +70,16 @@ func (cc *CompetitionController) DeleteCompetition(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-	cc.CompetitionUC.DeleteCompetition(uint(competitionIDUint), userID)
+	err = cc.CompetitionUC.DeleteCompetition(uint(competitionIDUint), userID)
+
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
 
 	return c.JSON(http.StatusOK, response.Response{
 		Status:  "success",
@@ -93,7 +102,7 @@ func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
 	if err != nil {
 		fmt.Println(err)
-		return c.JSON(http.StatusBadRequest, response.Response{
+		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
 			Data:    nil,
@@ -102,7 +111,7 @@ func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 	err = cc.CompetitionUC.UpdateCompetition(*competition, uint(competitionIDUint))
 	if err != nil {
 		fmt.Println(err)
-		return c.JSON(http.StatusBadRequest, response.Response{
+		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
 			Data:    nil,
