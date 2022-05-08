@@ -2,10 +2,12 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/alimikegami/compnouron/internal/competition/dto"
 	"github.com/alimikegami/compnouron/internal/competition/usecase"
+	"github.com/alimikegami/compnouron/pkg/response"
 	"github.com/alimikegami/compnouron/pkg/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -34,12 +36,26 @@ func (cc *CompetitionController) CreateCompetition(c echo.Context) error {
 	competition := new(dto.CompetitionRequest)
 	if err := c.Bind(competition); err != nil {
 		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
 	}
 	err := cc.CompetitionUC.CreateCompetition(*competition, userID)
 	if err != nil {
-		fmt.Println("error creating competition")
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
 	}
-	return nil
+	return c.JSON(http.StatusCreated, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    nil,
+	})
 }
 
 func (cc *CompetitionController) DeleteCompetition(c echo.Context) error {
@@ -47,11 +63,20 @@ func (cc *CompetitionController) DeleteCompetition(c echo.Context) error {
 	userID, _ := utils.GetUserDetails(c)
 	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
 	}
 	cc.CompetitionUC.DeleteCompetition(uint(competitionIDUint), userID)
 
-	return nil
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    nil,
+	})
 }
 
 func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
@@ -59,11 +84,33 @@ func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 	competition := new(dto.CompetitionRequest)
 	if err := c.Bind(competition); err != nil {
 		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
 	}
 	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
 	}
-	cc.CompetitionUC.UpdateCompetition(*competition, uint(competitionIDUint))
-	return nil
+	err = cc.CompetitionUC.UpdateCompetition(*competition, uint(competitionIDUint))
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    nil,
+	})
 }
