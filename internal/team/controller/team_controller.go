@@ -39,7 +39,7 @@ func (tc *TeamController) CreateTeam(c echo.Context) error {
 	err := tc.teamUC.CreateTeam(userID, *team)
 	if err != nil {
 		fmt.Println(err)
-		return c.JSON(http.StatusBadRequest, response.Response{
+		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
 			Data:    nil,
