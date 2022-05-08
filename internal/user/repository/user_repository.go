@@ -9,18 +9,14 @@ import (
 
 type UserRepository interface {
 	CreateUser(user *entity.User) error
-	GetUserByEmail(email string) entity.User
+	GetUserByEmail(email string) *entity.User
 }
 
-type UserRepositoryImpl struct {
+type userRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func CreateNewUserRepository(db *gorm.DB) *UserRepositoryImpl {
-	return &UserRepositoryImpl{db: db}
-}
-
-func (ur *UserRepositoryImpl) CreateUser(user *entity.User) error {
+func (ur *userRepositoryImpl) CreateUser(user *entity.User) error {
 	result := ur.db.Create(&user)
 	fmt.Println(result)
 	if result.Error != nil {
@@ -30,9 +26,13 @@ func (ur *UserRepositoryImpl) CreateUser(user *entity.User) error {
 	return nil
 }
 
-func (ur *UserRepositoryImpl) GetUserByEmail(email string) *entity.User {
+func (ur *userRepositoryImpl) GetUserByEmail(email string) *entity.User {
 	var user entity.User
 	ur.db.First(&user, "email = ?", email)
 
 	return &user
+}
+
+func CreateNewUserRepository(db *gorm.DB) UserRepository {
+	return &userRepositoryImpl{db: db}
 }

@@ -12,14 +12,14 @@ import (
 
 type UserUseCase interface {
 	CreateUser(user *entity.User) error
-	Login(credential dto.Credential) (string, error)
+	Login(credential *dto.Credential) (string, error)
 }
 
 type UserUseCaseImpl struct {
-	ur *repository.UserRepositoryImpl
+	ur repository.UserRepository
 }
 
-func CreateNewUserUseCase(ur *repository.UserRepositoryImpl) *UserUseCaseImpl {
+func CreateNewUserUseCase(ur repository.UserRepository) UserUseCase {
 	return &UserUseCaseImpl{ur: ur}
 }
 
