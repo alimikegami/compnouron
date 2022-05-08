@@ -16,10 +16,10 @@ type UserUseCase interface {
 }
 
 type UserUseCaseImpl struct {
-	ur *repository.UserRepository
+	ur *repository.UserRepositoryImpl
 }
 
-func CreateNewUserUseCase(ur *repository.UserRepository) *UserUseCaseImpl {
+func CreateNewUserUseCase(ur *repository.UserRepositoryImpl) *UserUseCaseImpl {
 	return &UserUseCaseImpl{ur: ur}
 }
 

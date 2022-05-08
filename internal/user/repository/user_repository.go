@@ -7,15 +7,20 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRepository struct {
+type UserRepository interface {
+	CreateUser(user *entity.User) error
+	GetUserByEmail(email string) entity.User
+}
+
+type UserRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func CreateNewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{db: db}
+func CreateNewUserRepository(db *gorm.DB) *UserRepositoryImpl {
+	return &UserRepositoryImpl{db: db}
 }
 
-func (ur *UserRepository) CreateUser(user *entity.User) error {
+func (ur *UserRepositoryImpl) CreateUser(user *entity.User) error {
 	result := ur.db.Create(&user)
 	fmt.Println(result)
 	if result.Error != nil {
@@ -25,7 +30,7 @@ func (ur *UserRepository) CreateUser(user *entity.User) error {
 	return nil
 }
 
-func (ur *UserRepository) GetUserByEmail(email string) *entity.User {
+func (ur *UserRepositoryImpl) GetUserByEmail(email string) *entity.User {
 	var user entity.User
 	ur.db.First(&user, "email = ?", email)
 
