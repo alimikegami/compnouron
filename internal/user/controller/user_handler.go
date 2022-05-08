@@ -56,7 +56,7 @@ func (uc *UserController) Login(c echo.Context) error {
 	token, err := uc.userUC.Login(credential)
 	if err != nil {
 		fmt.Println(err)
-		return c.JSON(http.StatusBadRequest, response.Response{
+		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
 			Data:    nil,

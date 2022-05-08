@@ -35,7 +35,7 @@ func (rc *RecruitmentController) CreateRecruitment(c echo.Context) error {
 	}
 	err := rc.recruitmentUC.CreateRecruitment(*recruitment)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, response.Response{
+		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
 			Data:    nil,
