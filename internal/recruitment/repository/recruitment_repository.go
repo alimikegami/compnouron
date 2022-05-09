@@ -7,15 +7,20 @@ import (
 	"gorm.io/gorm"
 )
 
-type RecruitmentRepository struct {
+type RecruitmentRepository interface {
+	CreateRecruitment(recruitment entity.Recruitment) error
+	UpdateRecruitment(recruitment entity.Recruitment) error
+}
+
+type RecruitmentRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func CreateNewRecruitmentRepository(db *gorm.DB) *RecruitmentRepository {
-	return &RecruitmentRepository{db: db}
+func CreateNewRecruitmentRepository(db *gorm.DB) RecruitmentRepository {
+	return &RecruitmentRepositoryImpl{db: db}
 }
 
-func (rr *RecruitmentRepository) CreateRecruitment(recruitment entity.Recruitment) error {
+func (rr *RecruitmentRepositoryImpl) CreateRecruitment(recruitment entity.Recruitment) error {
 	result := rr.db.Create(&recruitment)
 
 	if result.Error != nil {
@@ -25,7 +30,7 @@ func (rr *RecruitmentRepository) CreateRecruitment(recruitment entity.Recruitmen
 	return result.Error
 }
 
-func (rr *RecruitmentRepository) UpdateRecruitment(recruitment entity.Recruitment) error {
+func (rr *RecruitmentRepositoryImpl) UpdateRecruitment(recruitment entity.Recruitment) error {
 	result := rr.db.Model(&recruitment).Where("id = ?", recruitment.ID).Updates(recruitment)
 
 	if result.Error != nil {

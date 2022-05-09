@@ -6,15 +6,20 @@ import (
 	"github.com/alimikegami/compnouron/internal/recruitment/repository"
 )
 
-type RecruitmentUseCase struct {
-	rr *repository.RecruitmentRepository
+type RecruitmentUseCase interface {
+	CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error
+	UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error
 }
 
-func CreateNewRecruitmentUseCase(rr *repository.RecruitmentRepository) *RecruitmentUseCase {
-	return &RecruitmentUseCase{rr: rr}
+type RecruitmentUseCaseImpl struct {
+	rr repository.RecruitmentRepository
 }
 
-func (ruc *RecruitmentUseCase) CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error {
+func CreateNewRecruitmentUseCase(rr repository.RecruitmentRepository) RecruitmentUseCase {
+	return &RecruitmentUseCaseImpl{rr: rr}
+}
+
+func (ruc *RecruitmentUseCaseImpl) CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error {
 	recruitmentEntity := entity.Recruitment{
 		Role:        recruitmentRequest.Role,
 		Description: recruitmentRequest.Description,
@@ -24,7 +29,7 @@ func (ruc *RecruitmentUseCase) CreateRecruitment(recruitmentRequest dto.Recruitm
 	return err
 }
 
-func (ruc *RecruitmentUseCase) UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error {
+func (ruc *RecruitmentUseCaseImpl) UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error {
 	recruitmentEntity := entity.Recruitment{
 		ID:          id,
 		Role:        recruitmentRequest.Role,
