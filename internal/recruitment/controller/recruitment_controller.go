@@ -14,7 +14,7 @@ import (
 
 type RecruitmentController struct {
 	router        *echo.Echo
-	recruitmentUC *usecase.RecruitmentUseCase
+	recruitmentUC usecase.RecruitmentUseCase
 }
 
 func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JWTConfig) {
@@ -87,6 +87,6 @@ func (rc *RecruitmentController) UpdateRecruitment(c echo.Context) error {
 	})
 }
 
-func CreateNewRecruitmentController(e *echo.Echo, recruitmentUC *usecase.RecruitmentUseCase) *RecruitmentController {
+func CreateNewRecruitmentController(e *echo.Echo, recruitmentUC usecase.RecruitmentUseCase) *RecruitmentController {
 	return &RecruitmentController{router: e, recruitmentUC: recruitmentUC}
 }
