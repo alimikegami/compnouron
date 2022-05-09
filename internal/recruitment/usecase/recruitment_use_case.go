@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	"fmt"
-
 	"github.com/alimikegami/compnouron/internal/recruitment/dto"
 	"github.com/alimikegami/compnouron/internal/recruitment/entity"
 	"github.com/alimikegami/compnouron/internal/recruitment/repository"
@@ -22,7 +20,18 @@ func (ruc *RecruitmentUseCase) CreateRecruitment(recruitmentRequest dto.Recruitm
 		Description: recruitmentRequest.Description,
 		TeamID:      recruitmentRequest.TeamID,
 	}
-	fmt.Println(recruitmentEntity)
 	err := ruc.rr.CreateRecruitment(recruitmentEntity)
+	return err
+}
+
+func (ruc *RecruitmentUseCase) UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error {
+	recruitmentEntity := entity.Recruitment{
+		ID:          id,
+		Role:        recruitmentRequest.Role,
+		Description: recruitmentRequest.Description,
+		TeamID:      recruitmentRequest.TeamID,
+	}
+
+	err := ruc.rr.UpdateRecruitment(recruitmentEntity)
 	return err
 }
