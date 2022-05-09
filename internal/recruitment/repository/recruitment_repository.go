@@ -24,3 +24,13 @@ func (rr *RecruitmentRepository) CreateRecruitment(recruitment entity.Recruitmen
 
 	return result.Error
 }
+
+func (rr *RecruitmentRepository) UpdateRecruitment(recruitment entity.Recruitment) error {
+	result := rr.db.Model(&recruitment).Where("id = ?", recruitment.ID).Updates(recruitment)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
