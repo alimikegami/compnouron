@@ -110,7 +110,7 @@ func (rc *RecruitmentController) CreateRecruitmentApplication(c echo.Context) er
 		})
 	}
 
-	return c.JSON(http.StatusOK, response.Response{
+	return c.JSON(http.StatusCreated, response.Response{
 		Status:  "success",
 		Message: nil,
 		Data:    nil,
