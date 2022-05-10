@@ -5,4 +5,5 @@ type RecruitmentApplication struct {
 	UserID        uint
 	RecruitmentID uint
 	IsAccepted    uint8
+	Recruitment   Recruitment
 }

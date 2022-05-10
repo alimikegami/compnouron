@@ -8,6 +8,7 @@ import (
 	"github.com/alimikegami/compnouron/internal/recruitment/dto"
 	"github.com/alimikegami/compnouron/internal/recruitment/usecase"
 	"github.com/alimikegami/compnouron/pkg/response"
+	"github.com/alimikegami/compnouron/pkg/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -22,6 +23,7 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 	{
 		r.POST("", rc.CreateRecruitment, middleware.JWTWithConfig(config))
 		r.PUT("/:id", rc.UpdateRecruitment, middleware.JWTWithConfig(config))
+		r.POST("/applications", rc.CreateRecruitmentApplication, middleware.JWTWithConfig(config))
 	}
 }
 
@@ -81,6 +83,34 @@ func (rc *RecruitmentController) UpdateRecruitment(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    nil,
+	})
+}
+
+func (rc *RecruitmentController) CreateRecruitmentApplication(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
+	recruitmentApplication := new(dto.RecruitmentApplicationRequest)
+	if err := c.Bind(recruitmentApplication); err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	err := rc.recruitmentUC.CreateRecruitmentApplication(*recruitmentApplication, userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusCreated, response.Response{
 		Status:  "success",
 		Message: nil,
 		Data:    nil,

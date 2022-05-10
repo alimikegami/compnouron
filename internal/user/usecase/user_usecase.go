@@ -43,7 +43,7 @@ func (us *UserUseCaseImpl) Login(credential *dto.Credential) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("credentials dont match")
 	}
-	token, err := utils.CreateJWTToken(user.ID, user.Email)
+	token, err := utils.CreateSignedJWTToken(user.ID, user.Email)
 	if err != nil {
 		fmt.Println(err)
 	}
