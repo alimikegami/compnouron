@@ -10,6 +10,7 @@ import (
 type RecruitmentRepository interface {
 	CreateRecruitment(recruitment entity.Recruitment) error
 	UpdateRecruitment(recruitment entity.Recruitment) error
+	CreateRecruitmentApplication(recruitmentApplication entity.RecruitmentApplication) error
 }
 
 type RecruitmentRepositoryImpl struct {
@@ -32,6 +33,16 @@ func (rr *RecruitmentRepositoryImpl) CreateRecruitment(recruitment entity.Recrui
 
 func (rr *RecruitmentRepositoryImpl) UpdateRecruitment(recruitment entity.Recruitment) error {
 	result := rr.db.Model(&recruitment).Where("id = ?", recruitment.ID).Updates(recruitment)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (rr *RecruitmentRepositoryImpl) CreateRecruitmentApplication(recruitmentApplication entity.RecruitmentApplication) error {
+	result := rr.db.Create(&recruitmentApplication)
 
 	if result.Error != nil {
 		return result.Error

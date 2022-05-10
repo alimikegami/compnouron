@@ -5,8 +5,3 @@ type RecruitmentRequest struct {
 	Description string `json:"description"`
 	TeamID      uint   `json:"teamID"`
 }
-
-type RecruitmentApplicationRequest struct {
-	RecruitmentID uint `json:"recruitmentID"`
-	UserID        uint `json:"userID"`
-}

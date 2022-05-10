@@ -9,6 +9,7 @@ import (
 type RecruitmentUseCase interface {
 	CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error
 	UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error
+	CreateRecruitmentApplication(recruitmentApplication dto.RecruitmentApplicationRequest, userID uint) error
 }
 
 type RecruitmentUseCaseImpl struct {
@@ -38,5 +39,17 @@ func (ruc *RecruitmentUseCaseImpl) UpdateRecruitment(recruitmentRequest dto.Recr
 	}
 
 	err := ruc.rr.UpdateRecruitment(recruitmentEntity)
+	return err
+}
+
+func (ruc *RecruitmentUseCaseImpl) CreateRecruitmentApplication(recruitmentApplicationRequest dto.RecruitmentApplicationRequest, userID uint) error {
+	recruitmentApplicationEntity := entity.RecruitmentApplication{
+		UserID:        userID,
+		RecruitmentID: recruitmentApplicationRequest.RecruitmentID,
+		IsAccepted:    0,
+	}
+
+	err := ruc.rr.CreateRecruitmentApplication(recruitmentApplicationEntity)
+
 	return err
 }
