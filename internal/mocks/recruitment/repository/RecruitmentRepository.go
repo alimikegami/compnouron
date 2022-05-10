@@ -42,6 +42,50 @@ func (_m *RecruitmentRepository) CreateRecruitmentApplication(recruitmentApplica
 	return r0
 }
 
+// GetRecruitmentApplicationByRecruitmentID provides a mock function with given fields: id
+func (_m *RecruitmentRepository) GetRecruitmentApplicationByRecruitmentID(id uint) ([]entity.RecruitmentApplication, error) {
+	ret := _m.Called(id)
+
+	var r0 []entity.RecruitmentApplication
+	if rf, ok := ret.Get(0).(func(uint) []entity.RecruitmentApplication); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.RecruitmentApplication)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRecruitmentByID provides a mock function with given fields: id
+func (_m *RecruitmentRepository) GetRecruitmentByID(id uint) (entity.Recruitment, error) {
+	ret := _m.Called(id)
+
+	var r0 entity.Recruitment
+	if rf, ok := ret.Get(0).(func(uint) entity.Recruitment); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(entity.Recruitment)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpdateRecruitment provides a mock function with given fields: recruitment
 func (_m *RecruitmentRepository) UpdateRecruitment(recruitment entity.Recruitment) error {
 	ret := _m.Called(recruitment)
