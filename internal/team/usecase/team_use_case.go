@@ -25,3 +25,16 @@ func (tuc *TeamUseCase) CreateTeam(userID uint, team dto.TeamRequest) error {
 	err := tuc.tr.CreateTeam(teamEntity)
 	return err
 }
+
+func (tuc *TeamUseCase) UpdateTeam(userID uint, team dto.TeamRequest, teamID uint) error {
+	teamEntity := entity.Team{
+		ID:          teamID,
+		Name:        team.Name,
+		Description: team.Description,
+		Capacity:    team.Capacity,
+		UserID:      userID,
+	}
+
+	err := tuc.tr.UpdateTeam(teamEntity)
+	return err
+}
