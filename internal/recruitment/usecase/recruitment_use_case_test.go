@@ -21,6 +21,7 @@ func TestSuccessfulCreateRecruitmentApplication(t *testing.T) {
 		UserID:        1,
 		RecruitmentID: 1,
 		IsAccepted:    0,
+		IsRejected:    0,
 	}).Return(nil)
 	testUseCase := CreateNewRecruitmentUseCase(mockRepo)
 	err := testUseCase.CreateRecruitmentApplication(dto.RecruitmentApplicationRequest{
@@ -37,6 +38,7 @@ func TestInvalidCreateRecruitmentApplicationForeignKey(t *testing.T) {
 		UserID:        1,
 		RecruitmentID: 2,
 		IsAccepted:    0,
+		IsRejected:    0,
 	}).Return(errors.New("Error 1452: Cannot add or update a child row: a foreign key constraint fails (`compnouron`.`recruitment_applications`, CONSTRAINT `fk_recruitment_applications_recruitment` FOREIGN KEY (`recruitment_id`) REFERENCES `recruitments` (`id`))"))
 	testUseCase := CreateNewRecruitmentUseCase(mockRepo)
 	err := testUseCase.CreateRecruitmentApplication(dto.RecruitmentApplicationRequest{

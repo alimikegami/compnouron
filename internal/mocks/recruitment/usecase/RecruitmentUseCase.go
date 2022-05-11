@@ -14,6 +14,20 @@ type RecruitmentUseCase struct {
 	mock.Mock
 }
 
+// AcceptRecruitmentApplication provides a mock function with given fields: id
+func (_m *RecruitmentUseCase) AcceptRecruitmentApplication(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateRecruitment provides a mock function with given fields: recruitmentRequest
 func (_m *RecruitmentUseCase) CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error {
 	ret := _m.Called(recruitmentRequest)
@@ -84,6 +98,20 @@ func (_m *RecruitmentUseCase) GetRecruitmentDetailsByID(id uint) (dto.Recruitmen
 	}
 
 	return r0, r1
+}
+
+// RejectRecruitmentApplication provides a mock function with given fields: id
+func (_m *RecruitmentUseCase) RejectRecruitmentApplication(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UpdateRecruitment provides a mock function with given fields: recruitmentRequest, id
