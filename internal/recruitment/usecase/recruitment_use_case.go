@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"fmt"
+
 	"github.com/alimikegami/compnouron/internal/recruitment/dto"
 	"github.com/alimikegami/compnouron/internal/recruitment/entity"
 	"github.com/alimikegami/compnouron/internal/recruitment/repository"
@@ -11,6 +13,7 @@ type RecruitmentUseCase interface {
 	UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error
 	CreateRecruitmentApplication(recruitmentApplication dto.RecruitmentApplicationRequest, userID uint) error
 	GetRecruitmentDetailsByID(id uint) (dto.RecruitmentDetailsResponse, error)
+	GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error)
 }
 
 type RecruitmentUseCaseImpl struct {
@@ -89,4 +92,21 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentDetailsByID(id uint) (dto.Recru
 		Recruitment:             recruitmentResponse,
 		RecruitmentApplications: recruitmentApplicationsResponse,
 	}, nil
+}
+
+func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error) {
+	var recruitments dto.RecruitmentsResponse
+	result, err := ruc.rr.GetRecruitmentByUserID(id)
+	fmt.Println(result)
+	for _, recruitment := range result {
+		recruitments = append(recruitments, dto.RecruitmentResponse{
+			ID:          recruitment.ID,
+			Role:        recruitment.Role,
+			Description: recruitment.Description,
+			TeamID:      recruitment.TeamID,
+			TeamName:    recruitment.Team.Name,
+		})
+	}
+
+	return recruitments, err
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/alimikegami/compnouron/internal/recruitment/entity"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type RecruitmentRepository interface {
@@ -14,6 +15,7 @@ type RecruitmentRepository interface {
 	CreateRecruitmentApplication(recruitmentApplication entity.RecruitmentApplication) error
 	GetRecruitmentByID(id uint) (entity.Recruitment, error)
 	GetRecruitmentApplicationByRecruitmentID(id uint) ([]entity.RecruitmentApplication, error)
+	GetRecruitmentByUserID(id uint) ([]entity.Recruitment, error)
 }
 
 type RecruitmentRepositoryImpl struct {
@@ -72,4 +74,14 @@ func (rr *RecruitmentRepositoryImpl) GetRecruitmentApplicationByRecruitmentID(id
 	}
 
 	return recruitmentApplications, nil
+}
+
+func (rr *RecruitmentRepositoryImpl) GetRecruitmentByUserID(id uint) ([]entity.Recruitment, error) {
+	var recruitments []entity.Recruitment
+	result := rr.db.Preload(clause.Associations).Find(&recruitments)
+	if result.Error != nil {
+		return recruitments, result.Error
+	}
+
+	return recruitments, nil
 }

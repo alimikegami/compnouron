@@ -25,6 +25,7 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 		r.PUT("/:id", rc.UpdateRecruitment, middleware.JWTWithConfig(config))
 		r.POST("/applications", rc.CreateRecruitmentApplication, middleware.JWTWithConfig(config))
 		r.GET("/:id/applications", rc.GetRecruitmentDetailsByID, middleware.JWTWithConfig(config))
+		r.GET("/user", rc.GetRecruitmentByUserID, middleware.JWTWithConfig(config))
 
 	}
 }
@@ -131,6 +132,24 @@ func (rc *RecruitmentController) GetRecruitmentDetailsByID(c echo.Context) error
 	}
 
 	result, err := rc.recruitmentUC.GetRecruitmentDetailsByID(uint(recruitmentIDUint))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    result,
+	})
+}
+
+func (rc *RecruitmentController) GetRecruitmentByUserID(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
+	result, err := rc.recruitmentUC.GetRecruitmentByUserID(userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
