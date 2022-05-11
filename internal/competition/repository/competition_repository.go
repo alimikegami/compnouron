@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/alimikegami/compnouron/internal/competition/entity"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type CompetitionRepository struct {
@@ -30,11 +31,14 @@ func (cr *CompetitionRepository) DeleteCompetition(ID uint) error {
 	return nil
 }
 
-func (cr *CompetitionRepository) GetCompetitionByID(ID uint) *entity.Competition {
+func (cr *CompetitionRepository) GetCompetitionByID(ID uint) (entity.Competition, error) {
 	var competition entity.Competition
-	cr.db.First(&competition, ID)
+	result := cr.db.Preload(clause.Associations).First(&competition, ID)
+	if result.Error != nil {
+		return entity.Competition{}, result.Error
+	}
 
-	return &competition
+	return competition, nil
 }
 
 func (cr *CompetitionRepository) UpdateCompetition(competition entity.Competition) error {

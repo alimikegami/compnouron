@@ -32,15 +32,18 @@ func (cuc *CompetitionUseCase) CreateCompetition(competition dto.CompetitionRequ
 }
 
 func (cuc *CompetitionUseCase) DeleteCompetition(competitionID uint, userID uint) error {
-	competition := cuc.ur.GetCompetitionByID(competitionID)
-	if competition == nil {
+	competition, err := cuc.ur.GetCompetitionByID(competitionID)
+	if err != nil {
+		return err
+	}
+	if competition == (entity.Competition{}) {
 		return errors.New("competition does not exist")
 	}
 
 	if competition.UserID != userID {
 		return errors.New("action unauthorized")
 	}
-	err := cuc.ur.DeleteCompetition(competitionID)
+	err = cuc.ur.DeleteCompetition(competitionID)
 	if err != nil {
 		return err
 	}
@@ -61,4 +64,23 @@ func (cuc *CompetitionUseCase) UpdateCompetition(competition dto.CompetitionRequ
 	}
 	err := cuc.ur.UpdateCompetition(*competitionEntity)
 	return err
+}
+
+func (cuc *CompetitionUseCase) GetCompetitionByID(id uint) (dto.CompetitionRequest, error) {
+	competitionEntity, err := cuc.ur.GetCompetitionByID(id)
+	if err != nil {
+		return dto.CompetitionRequest{}, err
+	}
+
+	competitionRequest := dto.CompetitionRequest{
+		Name:                 competitionEntity.Name,
+		ContactPerson:        competitionEntity.ContactPerson,
+		Description:          competitionEntity.Description,
+		IsTheSameInstitution: competitionEntity.IsTheSameInstitution,
+		IsTeam:               competitionEntity.IsTeam,
+		TeamCapacity:         competitionEntity.TeamCapacity,
+		Level:                competitionEntity.Level,
+	}
+
+	return competitionRequest, nil
 }

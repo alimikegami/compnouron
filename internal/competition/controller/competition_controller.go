@@ -25,6 +25,7 @@ func CreateNewCompetitionController(e *echo.Echo, CompetitionUC *usecase.Competi
 func (cc *CompetitionController) InitializeCompetitionRoute(config middleware.JWTConfig) {
 	r := cc.router.Group("/competitions")
 	{
+		r.GET("/:id", cc.GetCompetitionByID)
 		r.POST("", cc.CreateCompetition, middleware.JWTWithConfig(config))
 		r.DELETE("/:id", cc.DeleteCompetition, middleware.JWTWithConfig(config))
 		r.PUT("/:id", cc.UpdateCompetition, middleware.JWTWithConfig(config))
@@ -121,5 +122,34 @@ func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 		Status:  "success",
 		Message: nil,
 		Data:    nil,
+	})
+}
+
+func (cc *CompetitionController) GetCompetitionByID(c echo.Context) error {
+	competitionID := c.Param("id")
+	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	competitionResponse, err := cc.CompetitionUC.GetCompetitionByID(uint(competitionIDUint))
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    competitionResponse,
 	})
 }
