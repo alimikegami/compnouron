@@ -18,5 +18,5 @@ type TeamMember struct {
 	TeamID uint `json:"teamId"`
 	UserID uint `json:"userId"`
 	User   userEntity.User
-	Team   Team
+	Team   Team `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

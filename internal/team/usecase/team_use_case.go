@@ -25,3 +25,9 @@ func (tuc *TeamUseCase) CreateTeam(userID uint, team dto.TeamRequest) error {
 	err := tuc.tr.CreateTeam(teamEntity)
 	return err
 }
+
+func (tuc *TeamUseCase) DeleteTeam(id uint) error {
+	err := tuc.tr.DeleteTeam(id)
+
+	return err
+}
