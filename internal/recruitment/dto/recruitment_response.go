@@ -7,3 +7,5 @@ type RecruitmentResponse struct {
 	TeamID      uint   `json:"teamID"`
 	TeamName    string `json:"teamName"`
 }
+
+type RecruitmentsResponse []RecruitmentResponse
