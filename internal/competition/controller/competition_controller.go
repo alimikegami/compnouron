@@ -26,6 +26,7 @@ func (cc *CompetitionController) InitializeCompetitionRoute(config middleware.JW
 	r := cc.router.Group("/competitions")
 	{
 		r.POST("", cc.CreateCompetition, middleware.JWTWithConfig(config))
+		r.GET("", cc.GetCompetitions)
 		r.DELETE("/:id", cc.DeleteCompetition, middleware.JWTWithConfig(config))
 		r.PUT("/:id", cc.UpdateCompetition, middleware.JWTWithConfig(config))
 	}
@@ -122,4 +123,43 @@ func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 		Message: nil,
 		Data:    nil,
 	})
+}
+
+func (cc *CompetitionController) GetCompetitions(c echo.Context) error {
+	limit := c.QueryParam("limit")
+	offset := c.QueryParam("offset")
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	offsetInt, err := strconv.Atoi(offset)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	competitionsResponse, err := cc.CompetitionUC.GetCompetitions(limitInt, offsetInt)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    competitionsResponse,
+	})
+
 }

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/alimikegami/compnouron/db/pagination"
 	"github.com/alimikegami/compnouron/internal/competition/entity"
 	"gorm.io/gorm"
 )
@@ -45,4 +46,15 @@ func (cr *CompetitionRepository) UpdateCompetition(competition entity.Competitio
 	}
 
 	return nil
+}
+
+func (cr *CompetitionRepository) GetCompetitions(limit int, offset int) ([]entity.Competition, error) {
+	var competitions []entity.Competition
+	result := cr.db.Scopes(pagination.Paginate(limit, offset)).Find(&competitions)
+
+	if result.Error != nil {
+		return []entity.Competition{}, result.Error
+	}
+
+	return competitions, nil
 }
