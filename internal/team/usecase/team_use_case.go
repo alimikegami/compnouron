@@ -37,6 +37,18 @@ func (tuc *TeamUseCase) DeleteTeam(id uint) error {
 	return err
 }
 
+func (tuc *TeamUseCase) UpdateTeam(userID uint, team dto.TeamRequest, teamID uint) error {
+	teamEntity := entity.Team{
+		ID:          teamID,
+		Name:        team.Name,
+		Description: team.Description,
+		Capacity:    team.Capacity,
+	}
+
+	err := tuc.tr.UpdateTeam(teamEntity)
+	return err
+}
+
 func (tuc *TeamUseCase) GetTeamsByUserID(userID uint) ([]dto.BriefTeamResponse, error) {
 	var teamsResponse []dto.BriefTeamResponse
 	result, err := tuc.tr.GetTeamsByUserID(userID)

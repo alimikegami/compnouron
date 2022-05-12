@@ -40,6 +40,19 @@ func (cr *TeamRepository) AddTeamMember(userID uint, teamID uint, isLeader uint)
 	return nil
 }
 
+func (cr *TeamRepository) UpdateTeam(team entity.Team) error {
+	result := cr.db.Model(&team).Where("id = ?", team.ID).Updates(team)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected < 1 {
+		return errors.New("no affected rows")
+	}
+
+	return nil
+}
+
 func (cr *TeamRepository) DeleteTeam(id uint) error {
 	result := cr.db.Delete(&entity.Team{}, id)
 	if result.Error != nil {
