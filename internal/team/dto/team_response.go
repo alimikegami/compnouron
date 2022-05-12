@@ -1,5 +1,10 @@
 package dto
 
+type BriefTeamResponse struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
 type TeamDetailsResponse struct {
 	Name        string               `json:"name"`
 	Description string               `json:"description"`

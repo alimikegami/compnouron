@@ -39,6 +39,17 @@ func (cr *TeamRepository) AddTeamMember(userID uint, teamID uint, isLeader uint)
 	return nil
 }
 
+func (tr *TeamRepository) GetTeamsByUserID(ID uint) ([]entity.Team, error) {
+	var teams []entity.Team
+	result := tr.db.Joins("JOIN team_members ON team_members.team_id = teams.id").Where("team_members.user_id = ?", ID).Find(&teams)
+
+	if result.Error != nil {
+		return []entity.Team{}, result.Error
+	}
+
+	return teams, nil
+}
+
 func (tr *TeamRepository) GetTeamByID(teamID uint) (entity.Team, error) {
 	var team entity.Team
 	result := tr.db.Model(entity.Team{ID: teamID}).First(&team)
@@ -54,6 +65,7 @@ func (tr *TeamRepository) GetTeamMembersByID(teamID uint) ([]entity.TeamMember, 
 	var teamMembers []entity.TeamMember
 
 	result := tr.db.Preload(clause.Associations).Where("team_id = ?", teamID).Find(&teamMembers)
+	fmt.Println(teamMembers)
 	if result.Error != nil {
 		return []entity.TeamMember{}, result.Error
 	}

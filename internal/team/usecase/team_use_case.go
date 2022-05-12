@@ -31,6 +31,23 @@ func (tuc *TeamUseCase) CreateTeam(userID uint, team dto.TeamRequest) error {
 	return err
 }
 
+func (tuc *TeamUseCase) GetTeamsByUserID(userID uint) ([]dto.BriefTeamResponse, error) {
+	var teamsResponse []dto.BriefTeamResponse
+	result, err := tuc.tr.GetTeamsByUserID(userID)
+	if err != nil {
+		return teamsResponse, err
+	}
+
+	for _, teamResponse := range result {
+		teamsResponse = append(teamsResponse, dto.BriefTeamResponse{
+			ID:   teamResponse.ID,
+			Name: teamResponse.Name,
+		})
+	}
+
+	return teamsResponse, nil
+}
+
 func (tuc *TeamUseCase) GetTeamDetailsByID(teamID uint) (dto.TeamDetailsResponse, error) {
 	team, err := tuc.tr.GetTeamByID(teamID)
 

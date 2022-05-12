@@ -22,6 +22,7 @@ func (tc *TeamController) InitializeTeamRoute(config middleware.JWTConfig) {
 	r := tc.router.Group("/teams")
 	{
 		r.POST("", tc.CreateTeam, middleware.JWTWithConfig(config))
+		r.GET("/users/:id", tc.GetTeamsByUserID)
 		r.GET("/:id", tc.GetTeamDetailsByID)
 	}
 }
@@ -52,6 +53,33 @@ func (tc *TeamController) CreateTeam(c echo.Context) error {
 		Status:  "success",
 		Message: nil,
 		Data:    nil,
+	})
+}
+
+func (tc *TeamController) GetTeamsByUserID(c echo.Context) error {
+	userID := c.Param("id")
+	userIDUint, err := strconv.ParseUint(userID, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	result, err := tc.teamUC.GetTeamsByUserID(uint(userIDUint))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    result,
 	})
 }
 
