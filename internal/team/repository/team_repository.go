@@ -16,19 +16,20 @@ func CreateNewTeamRepository(db *gorm.DB) *TeamRepository {
 	return &TeamRepository{db: db}
 }
 
-func (cr *TeamRepository) CreateTeam(team entity.Team) error {
+func (cr *TeamRepository) CreateTeam(team entity.Team) (entity.Team, error) {
 	result := cr.db.Create(&team)
 	if result.Error != nil {
-		return result.Error
+		return team, result.Error
 	}
 
-	return nil
+	return team, nil
 }
 
-func (cr *TeamRepository) AddTeamMember(userID uint, teamID uint) error {
+func (cr *TeamRepository) AddTeamMember(userID uint, teamID uint, isLeader uint) error {
 	result := cr.db.Create(&entity.TeamMember{
-		TeamID: teamID,
-		UserID: userID,
+		TeamID:   teamID,
+		UserID:   userID,
+		IsLeader: isLeader,
 	})
 
 	if result.Error != nil {

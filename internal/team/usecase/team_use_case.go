@@ -19,10 +19,15 @@ func (tuc *TeamUseCase) CreateTeam(userID uint, team dto.TeamRequest) error {
 		Name:        team.Name,
 		Description: team.Description,
 		Capacity:    team.Capacity,
-		UserID:      userID,
 	}
 
-	err := tuc.tr.CreateTeam(teamEntity)
+	teamEntity, err := tuc.tr.CreateTeam(teamEntity)
+	if err != nil {
+		return err
+	}
+
+	err = tuc.tr.AddTeamMember(userID, teamEntity.ID, 1)
+
 	return err
 }
 
