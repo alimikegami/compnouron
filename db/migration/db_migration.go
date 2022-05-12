@@ -18,6 +18,10 @@ func Migrate(db *gorm.DB) {
 		db.Migrator().CreateTable(&compEntity.Competition{})
 	}
 
+	if !db.Migrator().HasTable(&compEntity.CompetitionRegistration{}) {
+		db.Migrator().CreateTable(&compEntity.CompetitionRegistration{})
+	}
+
 	if !db.Migrator().HasTable(&teamEntity.Team{}) {
 		db.Migrator().CreateTable(&teamEntity.Team{})
 	}

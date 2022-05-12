@@ -46,3 +46,11 @@ func (cr *CompetitionRepository) UpdateCompetition(competition entity.Competitio
 
 	return nil
 }
+
+func (cr *CompetitionRepository) Register(competitionRegistration entity.CompetitionRegistration) error {
+	result := cr.db.Create(&competitionRegistration)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
