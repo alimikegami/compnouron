@@ -8,6 +8,7 @@ type TeamDetailsResponse struct {
 }
 
 type TeamMemberResponse struct {
-	UserID uint   `json:"id"`
-	Name   string `json:"name"`
+	UserID   uint   `json:"id"`
+	Name     string `json:"name"`
+	IsLeader uint   `json:"isLeader"`
 }
