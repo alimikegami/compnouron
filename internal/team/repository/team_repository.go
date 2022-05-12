@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/alimikegami/compnouron/internal/team/entity"
@@ -34,6 +35,19 @@ func (cr *TeamRepository) AddTeamMember(userID uint, teamID uint, isLeader uint)
 
 	if result.Error != nil {
 		return result.Error
+	}
+
+	return nil
+}
+
+func (cr *TeamRepository) DeleteTeam(id uint) error {
+	result := cr.db.Delete(&entity.Team{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected < 1 {
+		return errors.New("no rows affected")
 	}
 
 	return nil

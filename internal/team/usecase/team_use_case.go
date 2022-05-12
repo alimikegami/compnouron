@@ -31,6 +31,12 @@ func (tuc *TeamUseCase) CreateTeam(userID uint, team dto.TeamRequest) error {
 	return err
 }
 
+func (tuc *TeamUseCase) DeleteTeam(id uint) error {
+	err := tuc.tr.DeleteTeam(id)
+
+	return err
+}
+
 func (tuc *TeamUseCase) GetTeamsByUserID(userID uint) ([]dto.BriefTeamResponse, error) {
 	var teamsResponse []dto.BriefTeamResponse
 	result, err := tuc.tr.GetTeamsByUserID(userID)
