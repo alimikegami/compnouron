@@ -36,6 +36,7 @@ func (cr *TeamRepository) AddTeamMember(userID uint, teamID uint) error {
 	}
 
 	return nil
+}
 
 func (tr *TeamRepository) GetTeamByID(teamID uint) (entity.Team, error) {
 	var team entity.Team
