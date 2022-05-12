@@ -33,4 +33,8 @@ func Migrate(db *gorm.DB) {
 	if !db.Migrator().HasTable(&recruitmentEntity.RecruitmentApplication{}) {
 		db.Migrator().CreateTable(&recruitmentEntity.RecruitmentApplication{})
 	}
+
+	if !db.Migrator().HasTable(&teamEntity.TeamMember{}) {
+		db.Migrator().CreateTable(&teamEntity.TeamMember{})
+	}
 }

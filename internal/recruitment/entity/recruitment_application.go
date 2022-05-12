@@ -7,6 +7,7 @@ type RecruitmentApplication struct {
 	UserID        uint
 	RecruitmentID uint
 	IsAccepted    uint8
+	IsRejected    uint8
 	Recruitment   Recruitment
 	User          entity.User
 }

@@ -12,11 +12,3 @@ type Team struct {
 	UserID      uint   `json:"userID"`
 	User        userEntity.User
 }
-
-type TeamMember struct {
-	ID     uint `json:"id"`
-	TeamID uint `json:"teamId"`
-	UserID uint `json:"userId"`
-	User   userEntity.User
-	Team   Team
-}

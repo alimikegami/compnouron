@@ -25,6 +25,19 @@ func (cr *TeamRepository) CreateTeam(team entity.Team) error {
 	return nil
 }
 
+func (cr *TeamRepository) AddTeamMember(userID uint, teamID uint) error {
+	result := cr.db.Create(&entity.TeamMember{
+		TeamID: teamID,
+		UserID: userID,
+	})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
 func (tr *TeamRepository) GetTeamByID(teamID uint) (entity.Team, error) {
 	var team entity.Team
 	result := tr.db.Model(entity.Team{ID: teamID}).First(&team)

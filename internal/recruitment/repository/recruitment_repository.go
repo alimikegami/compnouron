@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/alimikegami/compnouron/internal/recruitment/entity"
@@ -16,6 +17,9 @@ type RecruitmentRepository interface {
 	GetRecruitmentByID(id uint) (entity.Recruitment, error)
 	GetRecruitmentApplicationByRecruitmentID(id uint) ([]entity.RecruitmentApplication, error)
 	GetRecruitmentByUserID(id uint) ([]entity.Recruitment, error)
+	RejectRecruitmentApplication(id uint) error
+	GetRecruitmentApplicationByID(id uint) (entity.RecruitmentApplication, error)
+	AcceptRecruitmentApplication(id uint) error
 }
 
 type RecruitmentRepositoryImpl struct {
@@ -84,4 +88,51 @@ func (rr *RecruitmentRepositoryImpl) GetRecruitmentByUserID(id uint) ([]entity.R
 	}
 
 	return recruitments, nil
+}
+
+func (rr *RecruitmentRepositoryImpl) RejectRecruitmentApplication(id uint) error {
+	var recruitmentApplication entity.RecruitmentApplication
+	result := rr.db.First(&recruitmentApplication, id)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	recruitmentApplication.IsAccepted = 0
+	recruitmentApplication.IsRejected = 1
+	result = rr.db.Save(recruitmentApplication)
+
+	if result.RowsAffected != 1 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func (rr *RecruitmentRepositoryImpl) AcceptRecruitmentApplication(id uint) error {
+	var recruitmentApplication entity.RecruitmentApplication
+	result := rr.db.First(&recruitmentApplication, id)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	recruitmentApplication.IsAccepted = 1
+	recruitmentApplication.IsRejected = 0
+	result = rr.db.Save(recruitmentApplication)
+
+	if result.RowsAffected != 1 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func (rr *RecruitmentRepositoryImpl) GetRecruitmentApplicationByID(id uint) (entity.RecruitmentApplication, error) {
+	var recruitmentApplication entity.RecruitmentApplication
+	result := rr.db.Preload(clause.Associations).Find(&recruitmentApplication)
+	fmt.Println(result)
+	if result.Error != nil {
+		return recruitmentApplication, result.Error
+	}
+
+	return recruitmentApplication, nil
 }
