@@ -21,3 +21,14 @@ func (cr *TeamRepository) CreateTeam(team entity.Team) error {
 
 	return nil
 }
+
+func (tr *TeamRepository) GetTeamsByUserID(ID uint) ([]entity.Team, error) {
+	var teams []entity.Team
+	result := tr.db.Where("user_id = ?", ID).Find(&teams)
+
+	if result.Error != nil {
+		return teams, result.Error
+	}
+
+	return teams, nil
+}

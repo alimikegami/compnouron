@@ -25,3 +25,20 @@ func (tuc *TeamUseCase) CreateTeam(userID uint, team dto.TeamRequest) error {
 	err := tuc.tr.CreateTeam(teamEntity)
 	return err
 }
+
+func (tuc *TeamUseCase) GetTeamsByUserID(userID uint) ([]dto.BriefTeamResponse, error) {
+	var teamsResponse []dto.BriefTeamResponse
+	result, err := tuc.tr.GetTeamsByUserID(userID)
+	if err != nil {
+		return teamsResponse, err
+	}
+
+	for _, teamResponse := range result {
+		teamsResponse = append(teamsResponse, dto.BriefTeamResponse{
+			ID:   teamResponse.ID,
+			Name: teamResponse.Name,
+		})
+	}
+
+	return teamsResponse, nil
+}
