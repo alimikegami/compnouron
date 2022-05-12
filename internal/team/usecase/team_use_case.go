@@ -40,6 +40,9 @@ func (tuc *TeamUseCase) GetTeamDetailsByID(teamID uint) (dto.TeamDetailsResponse
 	}
 
 	members, err := tuc.tr.GetTeamMembersByID(teamID)
+	if err != nil {
+		return dto.TeamDetailsResponse{}, err
+	}
 	for _, member := range members {
 		teamDetails.TeamMembers = append(teamDetails.TeamMembers, dto.TeamMemberResponse{
 			UserID: member.ID,
