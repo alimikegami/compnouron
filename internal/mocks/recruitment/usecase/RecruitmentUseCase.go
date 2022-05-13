@@ -56,6 +56,20 @@ func (_m *RecruitmentUseCase) CreateRecruitmentApplication(recruitmentApplicatio
 	return r0
 }
 
+// DeleteRecruitmentByID provides a mock function with given fields: id
+func (_m *RecruitmentUseCase) DeleteRecruitmentByID(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetRecruitmentByID provides a mock function with given fields: id
 func (_m *RecruitmentUseCase) GetRecruitmentByID(id uint) (dto.RecruitmentResponse, error) {
 	ret := _m.Called(id)
@@ -75,19 +89,6 @@ func (_m *RecruitmentUseCase) GetRecruitmentByID(id uint) (dto.RecruitmentRespon
 	}
 
 	return r0, r1
-
- // DeleteRecruitmentByID provides a mock function with given fields: id
-func (_m *RecruitmentUseCase) DeleteRecruitmentByID(id uint) error {
-	ret := _m.Called(id)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(uint) error); ok {
-		r0 = rf(id)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
 }
 
 // GetRecruitmentByUserID provides a mock function with given fields: id

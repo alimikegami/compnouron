@@ -223,7 +223,16 @@ func (rc *RecruitmentController) AcceptRecruitmentApplication(c echo.Context) er
 }
 
 func (rc *RecruitmentController) GetRecruitmentByID(c echo.Context) error {
-  recruitment := new(dto.RecruitmentRequest)
+	recruitmentID := c.Param("id")
+	recruitmentIDUint, err := strconv.ParseUint(recruitmentID, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	recruitment := new(dto.RecruitmentRequest)
 	if err := c.Bind(recruitment); err != nil {
 		fmt.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Response{
@@ -234,10 +243,18 @@ func (rc *RecruitmentController) GetRecruitmentByID(c echo.Context) error {
 	}
 
 	res, err := rc.recruitmentUC.GetRecruitmentByID(uint(recruitmentIDUint))
-  return c.JSON(http.StatusOK, response.Response{
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
 		Status:  "success",
 		Message: nil,
-    Data:    res,
+		Data:    res,
 	})
 }
 
