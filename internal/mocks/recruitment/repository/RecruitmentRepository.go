@@ -14,6 +14,20 @@ type RecruitmentRepository struct {
 	mock.Mock
 }
 
+// AcceptRecruitmentApplication provides a mock function with given fields: id
+func (_m *RecruitmentRepository) AcceptRecruitmentApplication(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateRecruitment provides a mock function with given fields: recruitment
 func (_m *RecruitmentRepository) CreateRecruitment(recruitment entity.Recruitment) error {
 	ret := _m.Called(recruitment)
@@ -40,6 +54,41 @@ func (_m *RecruitmentRepository) CreateRecruitmentApplication(recruitmentApplica
 	}
 
 	return r0
+}
+
+// DeleteRecruitmentByID provides a mock function with given fields: id
+func (_m *RecruitmentRepository) DeleteRecruitmentByID(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GetRecruitmentApplicationByID provides a mock function with given fields: id
+func (_m *RecruitmentRepository) GetRecruitmentApplicationByID(id uint) (entity.RecruitmentApplication, error) {
+	ret := _m.Called(id)
+
+	var r0 entity.RecruitmentApplication
+	if rf, ok := ret.Get(0).(func(uint) entity.RecruitmentApplication); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(entity.RecruitmentApplication)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetRecruitmentApplicationByRecruitmentID provides a mock function with given fields: id
@@ -107,6 +156,20 @@ func (_m *RecruitmentRepository) GetRecruitmentByUserID(id uint) ([]entity.Recru
 	}
 
 	return r0, r1
+}
+
+// RejectRecruitmentApplication provides a mock function with given fields: id
+func (_m *RecruitmentRepository) RejectRecruitmentApplication(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UpdateRecruitment provides a mock function with given fields: recruitment

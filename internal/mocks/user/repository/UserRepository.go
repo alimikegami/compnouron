@@ -14,18 +14,39 @@ type UserRepository struct {
 	mock.Mock
 }
 
-// CreateUser provides a mock function with given fields: user
-func (_m *UserRepository) CreateUser(user *entity.User) error {
-	ret := _m.Called(user)
+// AddUserSkills provides a mock function with given fields: skill
+func (_m *UserRepository) AddUserSkills(skill []entity.Skill) error {
+	ret := _m.Called(skill)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*entity.User) error); ok {
-		r0 = rf(user)
+	if rf, ok := ret.Get(0).(func([]entity.Skill) error); ok {
+		r0 = rf(skill)
 	} else {
 		r0 = ret.Error(0)
 	}
 
 	return r0
+}
+
+// CreateUser provides a mock function with given fields: user
+func (_m *UserRepository) CreateUser(user entity.User) (uint, error) {
+	ret := _m.Called(user)
+
+	var r0 uint
+	if rf, ok := ret.Get(0).(func(entity.User) uint); ok {
+		r0 = rf(user)
+	} else {
+		r0 = ret.Get(0).(uint)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(entity.User) error); ok {
+		r1 = rf(user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetUserByEmail provides a mock function with given fields: email

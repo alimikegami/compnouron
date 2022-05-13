@@ -1,27 +1,31 @@
 package usecase
 
 import (
-	"fmt"
-
 	"github.com/alimikegami/compnouron/internal/recruitment/dto"
 	"github.com/alimikegami/compnouron/internal/recruitment/entity"
 	"github.com/alimikegami/compnouron/internal/recruitment/repository"
+	teamRepository "github.com/alimikegami/compnouron/internal/team/repository"
 )
 
 type RecruitmentUseCase interface {
 	CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error
 	UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error
+	GetRecruitmentByID(id uint) (dto.RecruitmentResponse, error)
 	CreateRecruitmentApplication(recruitmentApplication dto.RecruitmentApplicationRequest, userID uint) error
 	GetRecruitmentDetailsByID(id uint) (dto.RecruitmentDetailsResponse, error)
 	GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error)
+	RejectRecruitmentApplication(id uint) error
+	AcceptRecruitmentApplication(id uint) error
+	DeleteRecruitmentByID(id uint) error
 }
 
 type RecruitmentUseCaseImpl struct {
 	rr repository.RecruitmentRepository
+	tr teamRepository.TeamRepository
 }
 
-func CreateNewRecruitmentUseCase(rr repository.RecruitmentRepository) RecruitmentUseCase {
-	return &RecruitmentUseCaseImpl{rr: rr}
+func CreateNewRecruitmentUseCase(rr repository.RecruitmentRepository, tr teamRepository.TeamRepository) RecruitmentUseCase {
+	return &RecruitmentUseCaseImpl{rr: rr, tr: tr}
 }
 
 func (ruc *RecruitmentUseCaseImpl) CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error {
@@ -51,6 +55,7 @@ func (ruc *RecruitmentUseCaseImpl) CreateRecruitmentApplication(recruitmentAppli
 		UserID:        userID,
 		RecruitmentID: recruitmentApplicationRequest.RecruitmentID,
 		IsAccepted:    0,
+		IsRejected:    0,
 	}
 
 	err := ruc.rr.CreateRecruitmentApplication(recruitmentApplicationEntity)
@@ -84,6 +89,7 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentDetailsByID(id uint) (dto.Recru
 			UserID:        recruitmentApplication.UserID,
 			RecruitmentID: recruitmentApplication.RecruitmentID,
 			IsAccepted:    recruitmentApplication.IsAccepted,
+			IsRejected:    recruitmentApplication.IsRejected,
 			UserName:      recruitmentApplication.User.Name,
 		})
 	}
@@ -97,7 +103,6 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentDetailsByID(id uint) (dto.Recru
 func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error) {
 	var recruitments dto.RecruitmentsResponse
 	result, err := ruc.rr.GetRecruitmentByUserID(id)
-	fmt.Println(result)
 	for _, recruitment := range result {
 		recruitments = append(recruitments, dto.RecruitmentResponse{
 			ID:          recruitment.ID,
@@ -109,4 +114,50 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByUserID(id uint) (dto.Recruitm
 	}
 
 	return recruitments, err
+}
+
+func (ruc *RecruitmentUseCaseImpl) RejectRecruitmentApplication(id uint) error {
+	err := ruc.rr.RejectRecruitmentApplication(id)
+
+	return err
+}
+
+func (ruc *RecruitmentUseCaseImpl) AcceptRecruitmentApplication(id uint) error {
+	err := ruc.rr.AcceptRecruitmentApplication(id)
+	if err != nil {
+		return err
+	}
+
+	recruitmentApplication, err := ruc.rr.GetRecruitmentApplicationByID(id)
+	if err != nil {
+		return err
+	}
+	err = ruc.tr.AddTeamMember(recruitmentApplication.UserID, recruitmentApplication.Recruitment.TeamID, 0)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByID(id uint) (dto.RecruitmentResponse, error) {
+	recruitment, err := ruc.rr.GetRecruitmentByID(id)
+	if err != nil {
+		return dto.RecruitmentResponse{}, err
+	}
+
+	recruitmentResponse := dto.RecruitmentResponse{
+		ID:          recruitment.ID,
+		Role:        recruitment.Role,
+		Description: recruitment.Description,
+		TeamID:      recruitment.TeamID,
+		TeamName:    recruitment.Team.Name,
+	}
+
+	return recruitmentResponse, nil
+}
+
+func (ruc *RecruitmentUseCaseImpl) DeleteRecruitmentByID(id uint) error {
+	err := ruc.rr.DeleteRecruitmentByID(id)
+
+	return err
 }

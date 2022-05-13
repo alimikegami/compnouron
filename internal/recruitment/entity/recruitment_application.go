@@ -7,6 +7,7 @@ type RecruitmentApplication struct {
 	UserID        uint
 	RecruitmentID uint
 	IsAccepted    uint8
-	Recruitment   Recruitment
+	IsRejected    uint8
+	Recruitment   Recruitment `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	User          entity.User
 }

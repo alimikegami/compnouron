@@ -22,11 +22,14 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 	r := rc.router.Group("/recruitments")
 	{
 		r.POST("", rc.CreateRecruitment, middleware.JWTWithConfig(config))
+		r.GET("/:id", rc.GetRecruitmentByID)
 		r.PUT("/:id", rc.UpdateRecruitment, middleware.JWTWithConfig(config))
 		r.POST("/applications", rc.CreateRecruitmentApplication, middleware.JWTWithConfig(config))
 		r.GET("/:id/applications", rc.GetRecruitmentDetailsByID, middleware.JWTWithConfig(config))
 		r.GET("/user", rc.GetRecruitmentByUserID, middleware.JWTWithConfig(config))
-
+		r.PUT("/applications/:id/accept", rc.AcceptRecruitmentApplication, middleware.JWTWithConfig(config))
+		r.PUT("/applications/:id/reject", rc.RejectRecruitmentApplication, middleware.JWTWithConfig(config))
+		r.DELETE("/:id", rc.DeleteRecruitmentByID, middleware.JWTWithConfig(config))
 	}
 }
 
@@ -162,6 +165,106 @@ func (rc *RecruitmentController) GetRecruitmentByUserID(c echo.Context) error {
 		Status:  "success",
 		Message: nil,
 		Data:    result,
+	})
+}
+
+func (rc *RecruitmentController) RejectRecruitmentApplication(c echo.Context) error {
+	recruitmentApplicationID := c.Param("id")
+	recruitmentApplicationIDUint, err := strconv.ParseUint(recruitmentApplicationID, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	err = rc.recruitmentUC.RejectRecruitmentApplication(uint(recruitmentApplicationIDUint))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    nil,
+	})
+}
+
+func (rc *RecruitmentController) AcceptRecruitmentApplication(c echo.Context) error {
+	recruitmentApplicationID := c.Param("id")
+	recruitmentApplicationIDUint, err := strconv.ParseUint(recruitmentApplicationID, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	err = rc.recruitmentUC.AcceptRecruitmentApplication(uint(recruitmentApplicationIDUint))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    nil,
+	})
+}
+
+func (rc *RecruitmentController) GetRecruitmentByID(c echo.Context) error {
+  recruitment := new(dto.RecruitmentRequest)
+	if err := c.Bind(recruitment); err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	res, err := rc.recruitmentUC.GetRecruitmentByID(uint(recruitmentIDUint))
+  return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+    Data:    res,
+	})
+}
+
+func (rc *RecruitmentController) DeleteRecruitmentByID(c echo.Context) error {
+	recruitmentID := c.Param("id")
+	recruitmentIDUint, err := strconv.ParseUint(recruitmentID, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	err = rc.recruitmentUC.DeleteRecruitmentByID(uint(recruitmentIDUint))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    nil,
 	})
 }
 

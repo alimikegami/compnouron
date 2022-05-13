@@ -73,7 +73,7 @@ func main() {
 	tc.InitializeTeamRoute(config)
 
 	rr := recruitmentRepository.CreateNewRecruitmentRepository(db)
-	ruc := recruitmentUseCase.CreateNewRecruitmentUseCase(rr)
+	ruc := recruitmentUseCase.CreateNewRecruitmentUseCase(rr, *tr)
 	rc := recruitmentController.CreateNewRecruitmentController(e, ruc)
 	rc.InitializeRecruitmentRoute(config)
 	e.Logger.Fatal(e.Start(":1323"))

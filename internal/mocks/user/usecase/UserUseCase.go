@@ -4,8 +4,6 @@ package mocks
 
 import (
 	dto "github.com/alimikegami/compnouron/internal/user/dto"
-	entity "github.com/alimikegami/compnouron/internal/user/entity"
-
 	mock "github.com/stretchr/testify/mock"
 
 	testing "testing"
@@ -17,11 +15,11 @@ type UserUseCase struct {
 }
 
 // CreateUser provides a mock function with given fields: user
-func (_m *UserUseCase) CreateUser(user *entity.User) error {
+func (_m *UserUseCase) CreateUser(user *dto.UserRegistrationRequest) error {
 	ret := _m.Called(user)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*entity.User) error); ok {
+	if rf, ok := ret.Get(0).(func(*dto.UserRegistrationRequest) error); ok {
 		r0 = rf(user)
 	} else {
 		r0 = ret.Error(0)
