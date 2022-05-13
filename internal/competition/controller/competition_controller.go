@@ -31,6 +31,7 @@ func (cc *CompetitionController) InitializeCompetitionRoute(config middleware.JW
 		r.PUT("/:id", cc.UpdateCompetition, middleware.JWTWithConfig(config))
 		r.PUT("/registrations/:id/accept", cc.AcceptRecruitmentApplication, middleware.JWTWithConfig(config))
 		r.PUT("/registrations/:id/reject", cc.RejectRecruitmentApplication, middleware.JWTWithConfig(config))
+		r.GET("/:id/registrations", cc.GetCompetitionRegistration, middleware.JWTWithConfig(config))
 	}
 }
 
@@ -206,5 +207,33 @@ func (cc *CompetitionController) AcceptRecruitmentApplication(c echo.Context) er
 		Status:  "success",
 		Message: nil,
 		Data:    nil,
+	})
+}
+
+func (cc *CompetitionController) GetCompetitionRegistration(c echo.Context) error {
+	competitionID := c.Param("id")
+	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	res, err := cc.CompetitionUC.GetCompetitionRegistration(uint(competitionIDUint))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    res,
 	})
 }
