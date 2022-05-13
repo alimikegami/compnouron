@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/alimikegami/compnouron/internal/competition/entity"
 	"gorm.io/gorm"
 )
@@ -52,5 +54,42 @@ func (cr *CompetitionRepository) Register(competitionRegistration entity.Competi
 	if result.Error != nil {
 		return result.Error
 	}
+	return nil
+}
+
+// func (cr *CompetitionRepository) GetCompetitionRegistration(competitionID uint) ([]entity.CompetitionRegistration, error) {
+// 	var competitionRegistration []entity.CompetitionRegistration
+
+// 	result := cr.db.Preload(clause.Associations).Where("competition_id = ?", competitionID).Find(&competitionRegistration)
+// 	if result.Error != nil {
+// 		return []entity.CompetitionRegistration{}, result.Error
+// 	}
+
+// 	return competitionRegistration, nil
+// }
+
+func (cr *CompetitionRepository) RejectCompetitionRegistration(id uint) error {
+	result := cr.db.Model(&entity.CompetitionRegistration{}).Where("id = ?", id).Update("is_accepted", 0)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected != 1 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func (cr *CompetitionRepository) AcceptCompetitionRegistration(id uint) error {
+	result := cr.db.Model(&entity.CompetitionRegistration{}).Where("id = ?", id).Update("is_accepted", 1)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected != 1 {
+		return errors.New("no rows affected")
+	}
+
 	return nil
 }

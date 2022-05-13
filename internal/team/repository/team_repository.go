@@ -92,7 +92,6 @@ func (tr *TeamRepository) GetTeamMembersByID(teamID uint) ([]entity.TeamMember, 
 	var teamMembers []entity.TeamMember
 
 	result := tr.db.Preload(clause.Associations).Where("team_id = ?", teamID).Find(&teamMembers)
-	fmt.Println(teamMembers)
 	if result.Error != nil {
 		return []entity.TeamMember{}, result.Error
 	}
