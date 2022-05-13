@@ -15,6 +15,7 @@ type RecruitmentUseCase interface {
 	GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error)
 	RejectRecruitmentApplication(id uint) error
 	AcceptRecruitmentApplication(id uint) error
+	DeleteRecruitmentByID(id uint) error
 }
 
 type RecruitmentUseCaseImpl struct {
@@ -135,4 +136,10 @@ func (ruc *RecruitmentUseCaseImpl) AcceptRecruitmentApplication(id uint) error {
 		return err
 	}
 	return nil
+}
+
+func (ruc *RecruitmentUseCaseImpl) DeleteRecruitmentByID(id uint) error {
+	err := ruc.rr.DeleteRecruitmentByID(id)
+
+	return err
 }
