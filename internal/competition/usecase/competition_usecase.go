@@ -61,6 +61,25 @@ func (cuc *CompetitionUseCase) UpdateCompetition(competition dto.CompetitionRequ
 	return err
 }
 
+func (cuc *CompetitionUseCase) GetCompetitions(limit int, offset int) ([]dto.CompetitionResponse, error) {
+	var competitionsResponse []dto.CompetitionResponse
+	competitionsEntity, err := cuc.ur.GetCompetitions(limit, offset)
+	if err != nil {
+		return []dto.CompetitionResponse{}, err
+	}
+
+	for _, competition := range competitionsEntity {
+		competitionsResponse = append(competitionsResponse, dto.CompetitionResponse{
+			Name:          competition.Name,
+			ContactPerson: competition.ContactPerson,
+			IsTeam:        competition.IsTeam,
+			Level:         competition.Level,
+		})
+	}
+
+	return competitionsResponse, nil
+}
+
 func (cuc *CompetitionUseCase) Register(competitionRegistration dto.CompetitionRegistrationRequest) error {
 	competitionRegistrationEntity := entity.CompetitionRegistration{
 		UserID:        competitionRegistration.UserID,
