@@ -56,6 +56,27 @@ func (_m *RecruitmentUseCase) CreateRecruitmentApplication(recruitmentApplicatio
 	return r0
 }
 
+// GetRecruitmentByID provides a mock function with given fields: id
+func (_m *RecruitmentUseCase) GetRecruitmentByID(id uint) (dto.RecruitmentResponse, error) {
+	ret := _m.Called(id)
+
+	var r0 dto.RecruitmentResponse
+	if rf, ok := ret.Get(0).(func(uint) dto.RecruitmentResponse); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(dto.RecruitmentResponse)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRecruitmentByUserID provides a mock function with given fields: id
 func (_m *RecruitmentUseCase) GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error) {
 	ret := _m.Called(id)

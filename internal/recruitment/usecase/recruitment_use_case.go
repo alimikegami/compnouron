@@ -10,6 +10,7 @@ import (
 type RecruitmentUseCase interface {
 	CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error
 	UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error
+	GetRecruitmentByID(id uint) (dto.RecruitmentResponse, error)
 	CreateRecruitmentApplication(recruitmentApplication dto.RecruitmentApplicationRequest, userID uint) error
 	GetRecruitmentDetailsByID(id uint) (dto.RecruitmentDetailsResponse, error)
 	GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error)
@@ -135,4 +136,21 @@ func (ruc *RecruitmentUseCaseImpl) AcceptRecruitmentApplication(id uint) error {
 		return err
 	}
 	return nil
+}
+
+func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByID(id uint) (dto.RecruitmentResponse, error) {
+	recruitment, err := ruc.rr.GetRecruitmentByID(id)
+	if err != nil {
+		return dto.RecruitmentResponse{}, err
+	}
+
+	recruitmentResponse := dto.RecruitmentResponse{
+		ID:          recruitment.ID,
+		Role:        recruitment.Role,
+		Description: recruitment.Description,
+		TeamID:      recruitment.TeamID,
+		TeamName:    recruitment.Team.Name,
+	}
+
+	return recruitmentResponse, nil
 }
