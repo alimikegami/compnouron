@@ -3,7 +3,7 @@ package entity
 import userEntity "github.com/alimikegami/compnouron/internal/user/entity"
 
 type TeamMember struct {
-	ID       uint
+	ID       uint `gorm:"primaryKey"`
 	TeamID   uint
 	UserID   uint
 	IsLeader uint

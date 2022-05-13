@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/alimikegami/compnouron/internal/user/dto"
-	"github.com/alimikegami/compnouron/internal/user/entity"
 	"github.com/alimikegami/compnouron/internal/user/usecase"
 	"github.com/alimikegami/compnouron/pkg/response"
 	"github.com/labstack/echo/v4"
@@ -23,7 +22,7 @@ func (uc *UserController) InitializeUserRoute(config middleware.JWTConfig) {
 }
 
 func (uc *UserController) CreateUser(c echo.Context) error {
-	u := new(entity.User)
+	u := new(dto.UserRegistrationRequest)
 	if err := c.Bind(u); err != nil {
 		fmt.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Response{
@@ -51,7 +50,12 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 func (uc *UserController) Login(c echo.Context) error {
 	credential := new(dto.Credential)
 	if err := c.Bind(credential); err != nil {
-		fmt.Println("error: error on binding request body")
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
 	}
 	token, err := uc.userUC.Login(credential)
 	if err != nil {
