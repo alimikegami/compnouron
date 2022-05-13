@@ -71,3 +71,15 @@ func (cuc *CompetitionUseCase) Register(competitionRegistration dto.CompetitionR
 	err := cuc.ur.Register(competitionRegistrationEntity)
 	return err
 }
+
+func (cuc *CompetitionUseCase) RejectCompetitionRegistration(id uint) error {
+	err := cuc.ur.RejectCompetitionRegistration(id)
+
+	return err
+}
+
+func (cuc *CompetitionUseCase) AcceptCompetitionRegistration(id uint) error {
+	err := cuc.ur.AcceptCompetitionRegistration(id)
+
+	return err
+}
