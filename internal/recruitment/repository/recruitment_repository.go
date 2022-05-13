@@ -20,6 +20,7 @@ type RecruitmentRepository interface {
 	RejectRecruitmentApplication(id uint) error
 	GetRecruitmentApplicationByID(id uint) (entity.RecruitmentApplication, error)
 	AcceptRecruitmentApplication(id uint) error
+	DeleteRecruitmentByID(id uint) error
 }
 
 type RecruitmentRepositoryImpl struct {
@@ -135,4 +136,17 @@ func (rr *RecruitmentRepositoryImpl) GetRecruitmentApplicationByID(id uint) (ent
 	}
 
 	return recruitmentApplication, nil
+}
+
+func (rr *RecruitmentRepositoryImpl) DeleteRecruitmentByID(id uint) error {
+	result := rr.db.Delete(&entity.Recruitment{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected < 1 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
 }

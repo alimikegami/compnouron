@@ -29,7 +29,7 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 		r.GET("/user", rc.GetRecruitmentByUserID, middleware.JWTWithConfig(config))
 		r.PUT("/applications/:id/accept", rc.AcceptRecruitmentApplication, middleware.JWTWithConfig(config))
 		r.PUT("/applications/:id/reject", rc.RejectRecruitmentApplication, middleware.JWTWithConfig(config))
-
+		r.DELETE("/:id", rc.DeleteRecruitmentByID, middleware.JWTWithConfig(config))
 	}
 }
 
@@ -223,16 +223,7 @@ func (rc *RecruitmentController) AcceptRecruitmentApplication(c echo.Context) er
 }
 
 func (rc *RecruitmentController) GetRecruitmentByID(c echo.Context) error {
-	recruitmentID := c.Param("id")
-	recruitmentIDUint, err := strconv.ParseUint(recruitmentID, 10, 32)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, response.Response{
-			Status:  "error",
-			Message: err.Error(),
-			Data:    nil,
-		})
-	}
-	recruitment := new(dto.RecruitmentRequest)
+  recruitment := new(dto.RecruitmentRequest)
 	if err := c.Bind(recruitment); err != nil {
 		fmt.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Response{
@@ -243,6 +234,25 @@ func (rc *RecruitmentController) GetRecruitmentByID(c echo.Context) error {
 	}
 
 	res, err := rc.recruitmentUC.GetRecruitmentByID(uint(recruitmentIDUint))
+  return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+    Data:    res,
+	})
+}
+
+func (rc *RecruitmentController) DeleteRecruitmentByID(c echo.Context) error {
+	recruitmentID := c.Param("id")
+	recruitmentIDUint, err := strconv.ParseUint(recruitmentID, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	err = rc.recruitmentUC.DeleteRecruitmentByID(uint(recruitmentIDUint))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
@@ -254,7 +264,7 @@ func (rc *RecruitmentController) GetRecruitmentByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, response.Response{
 		Status:  "success",
 		Message: nil,
-		Data:    res,
+		Data:    nil,
 	})
 }
 
