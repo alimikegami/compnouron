@@ -14,7 +14,7 @@ type JwtCustomClaims struct {
 	jwt.StandardClaims
 }
 
-func CreateJWTToken(id uint, email string) (string, error) {
+func CreateJWTToken(id uint, email string) *jwt.Token {
 	claims := &JwtCustomClaims{
 		id,
 		email,
@@ -24,6 +24,11 @@ func CreateJWTToken(id uint, email string) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token
+}
+
+func CreateSignedJWTToken(id uint, email string) (string, error) {
+	token := CreateJWTToken(id, email)
 	encodedToken, err := token.SignedString([]byte(os.Getenv("SIGNING_KEY")))
 	if err != nil {
 		return "", err

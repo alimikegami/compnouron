@@ -11,7 +11,7 @@ import (
 )
 
 type UserUseCase interface {
-	CreateUser(user *entity.User) error
+	CreateUser(user *dto.UserRegistrationRequest) error
 	Login(credential *dto.Credential) (string, error)
 }
 
@@ -23,14 +23,35 @@ func CreateNewUserUseCase(ur repository.UserRepository) UserUseCase {
 	return &UserUseCaseImpl{ur: ur}
 }
 
-func (us *UserUseCaseImpl) CreateUser(user *entity.User) error {
+func (us *UserUseCaseImpl) CreateUser(user *dto.UserRegistrationRequest) error {
+	var skills []entity.Skill
+
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 	user.Password = string(hash)
-	err = us.ur.CreateUser(user)
+	userEntity := entity.User{
+		Name:              user.Name,
+		Email:             user.Email,
+		Password:          string(hash),
+		PhoneNumber:       user.PhoneNumber,
+		SchoolInstitution: user.SchoolInstitution,
+	}
 
+	userID, err := us.ur.CreateUser(userEntity)
+	if err != nil {
+		return err
+	}
+
+	for _, skill := range user.Skills {
+		skills = append(skills, entity.Skill{
+			Name:   skill.Name,
+			UserID: userID,
+		})
+	}
+
+	err = us.ur.AddUserSkills(skills)
 	return err
 }
 
@@ -43,7 +64,7 @@ func (us *UserUseCaseImpl) Login(credential *dto.Credential) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("credentials dont match")
 	}
-	token, err := utils.CreateJWTToken(user.ID, user.Email)
+	token, err := utils.CreateSignedJWTToken(user.ID, user.Email)
 	if err != nil {
 		fmt.Println(err)
 	}

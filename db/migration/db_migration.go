@@ -14,6 +14,10 @@ func Migrate(db *gorm.DB) {
 		db.Migrator().CreateTable(&entity.User{})
 	}
 
+	if (!db.Migrator().HasTable(&entity.Skill{})) {
+		db.Migrator().CreateTable(&entity.Skill{})
+	}
+
 	if !db.Migrator().HasTable(&compEntity.Competition{}) {
 		db.Migrator().CreateTable(&compEntity.Competition{})
 	}
@@ -22,7 +26,19 @@ func Migrate(db *gorm.DB) {
 		db.Migrator().CreateTable(&teamEntity.Team{})
 	}
 
+	if !db.Migrator().HasTable(&teamEntity.TeamMember{}) {
+		db.Migrator().CreateTable(&teamEntity.TeamMember{})
+	}
+
+	if !db.Migrator().HasTable(&compEntity.CompetitionRegistration{}) {
+		db.Migrator().CreateTable(&compEntity.CompetitionRegistration{})
+	}
+
 	if !db.Migrator().HasTable(&recruitmentEntity.Recruitment{}) {
 		db.Migrator().CreateTable(&recruitmentEntity.Recruitment{})
+	}
+
+	if !db.Migrator().HasTable(&recruitmentEntity.RecruitmentApplication{}) {
+		db.Migrator().CreateTable(&recruitmentEntity.RecruitmentApplication{})
 	}
 }

@@ -6,20 +6,29 @@ import (
 )
 
 type UserRepository interface {
-	CreateUser(user *entity.User) error
+	CreateUser(user entity.User) (uint, error)
 	GetUserByEmail(email string) *entity.User
+	AddUserSkills(skill []entity.Skill) error
 }
 
 type userRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func (ur *userRepositoryImpl) CreateUser(user *entity.User) error {
+func (ur *userRepositoryImpl) CreateUser(user entity.User) (uint, error) {
 	result := ur.db.Create(&user)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+
+	return user.ID, nil
+}
+
+func (ur *userRepositoryImpl) AddUserSkills(skill []entity.Skill) error {
+	result := ur.db.Create(&skill)
 	if result.Error != nil {
 		return result.Error
 	}
-
 	return nil
 }
 
