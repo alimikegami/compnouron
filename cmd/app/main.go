@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/alimikegami/compnouron/db/migration"
@@ -19,7 +18,6 @@ import (
 	"github.com/alimikegami/compnouron/internal/user/repository"
 	"github.com/alimikegami/compnouron/internal/user/usecase"
 	"github.com/alimikegami/compnouron/pkg/utils"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/mysql"
@@ -32,7 +30,7 @@ func initializeDatabaseConnection() (*gorm.DB, error) {
 	port := os.Getenv("DB_PORT")
 	address := os.Getenv("DB_ADDRESS")
 	databaseName := os.Getenv("DB_NAME")
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, port, address, databaseName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, address, port, databaseName)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	return db, err
 }
@@ -40,10 +38,10 @@ func initializeDatabaseConnection() (*gorm.DB, error) {
 func main() {
 	e := echo.New()
 
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// err := godotenv.Load("../../.env")
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
 
 	db, err := initializeDatabaseConnection()
 	if err != nil {
