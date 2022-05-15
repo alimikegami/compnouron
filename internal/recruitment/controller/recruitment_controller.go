@@ -32,7 +32,6 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 		r.DELETE("/:id", rc.DeleteRecruitmentByID, middleware.JWTWithConfig(config))
 		r.PUT("/:id/open", rc.OpenRecruitmentApplicationPeriod, middleware.JWTWithConfig(config))
 		r.PUT("/:id/close", rc.CloseRecruitmentApplicationPeriod, middleware.JWTWithConfig(config))
-
 	}
 }
 
@@ -127,6 +126,7 @@ func (rc *RecruitmentController) CreateRecruitmentApplication(c echo.Context) er
 }
 
 func (rc *RecruitmentController) GetRecruitments(c echo.Context) error {
+	keyword := c.QueryParam("keyword")
 	limit := c.QueryParam("limit")
 	offset := c.QueryParam("offset")
 	limitInt, err := strconv.Atoi(limit)
@@ -149,7 +149,14 @@ func (rc *RecruitmentController) GetRecruitments(c echo.Context) error {
 		})
 	}
 
-	result, err := rc.recruitmentUC.GetRecruitments(limitInt, offsetInt)
+	var result []dto.BriefRecruitmentResponse
+
+	if keyword != "" {
+		result, err = rc.recruitmentUC.SearchRecruitment(limitInt, offsetInt, keyword)
+	} else {
+		result, err = rc.recruitmentUC.GetRecruitments(limitInt, offsetInt)
+	}
+
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",

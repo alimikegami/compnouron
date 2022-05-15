@@ -25,6 +25,7 @@ type RecruitmentRepository interface {
 	OpenRecruitmentApplicationPeriod(id uint) error
 	CloseRecruitmentApplicationPeriod(id uint) error
 	GetRecruitments(limit int, offset int) ([]entity.Recruitment, error)
+	SearchRecruitment(limit int, offset int, keyword string) ([]entity.Recruitment, error)
 }
 
 type RecruitmentRepositoryImpl struct {
@@ -101,6 +102,18 @@ func (rr *RecruitmentRepositoryImpl) GetRecruitmentByUserID(id uint) ([]entity.R
 	result := rr.db.Preload(clause.Associations).Find(&recruitments)
 	if result.Error != nil {
 		return recruitments, result.Error
+	}
+
+	return recruitments, nil
+}
+
+func (rr *RecruitmentRepositoryImpl) GetAcceptedRecruitmentsApplications(id uint) (entity.Recruitment, error) {
+	var recruitments entity.Recruitment
+
+	result := rr.db.Preload("RecruitmentApplications", "is_accepted = 0 AND is_rejected = 0").Where("id = ?", id).Find(&recruitments)
+
+	if result.Error != nil {
+		return entity.Recruitment{}, result.Error
 	}
 
 	return recruitments, nil
@@ -190,4 +203,14 @@ func (rr *RecruitmentRepositoryImpl) CloseRecruitmentApplicationPeriod(id uint) 
 	}
 
 	return nil
+}
+
+func (rr *RecruitmentRepositoryImpl) SearchRecruitment(limit int, offset int, keyword string) ([]entity.Recruitment, error) {
+	var recruitments []entity.Recruitment
+	result := rr.db.Scopes(pagination.Paginate(limit, offset)).Preload("Team").Where("role LIKE ?", "%"+keyword+"%").Find(&recruitments)
+	if result.Error != nil {
+		return []entity.Recruitment{}, result.Error
+	}
+
+	return recruitments, nil
 }

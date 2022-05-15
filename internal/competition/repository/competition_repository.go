@@ -77,7 +77,7 @@ func (cr *CompetitionRepository) Register(competitionRegistration entity.Competi
 func (cr *CompetitionRepository) GetCompetitionRegistration(competitionID uint) (entity.Competition, error) {
 	var competitionRegistration entity.Competition
 
-	result := cr.db.Preload("CompetitionRegistrations").Where("id = ?", competitionID).Find(&competitionRegistration)
+	result := cr.db.Preload("CompetitionRegistrations", "acceptance_status = 0").Where("id = ?", competitionID).Find(&competitionRegistration)
 	if result.Error != nil {
 		return entity.Competition{}, result.Error
 	}
@@ -88,7 +88,7 @@ func (cr *CompetitionRepository) GetCompetitionRegistration(competitionID uint) 
 func (cr *CompetitionRepository) GetAcceptedCompetitionParticipants(competitionID uint) (entity.Competition, error) {
 	var competition entity.Competition
 
-	result := cr.db.Preload("CompetitionRegistrations", "acceptance_status = 2").Where("id = ?", competitionID).Find(&competition)
+	result := cr.db.Preload("CompetitionRegistrations", "acceptance_status = 1").Where("id = ?", competitionID).Find(&competition)
 
 	if result.Error != nil {
 		return entity.Competition{}, result.Error
