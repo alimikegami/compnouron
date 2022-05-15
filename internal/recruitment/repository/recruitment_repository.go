@@ -21,6 +21,8 @@ type RecruitmentRepository interface {
 	GetRecruitmentApplicationByID(id uint) (entity.RecruitmentApplication, error)
 	AcceptRecruitmentApplication(id uint) error
 	DeleteRecruitmentByID(id uint) error
+	OpenRecruitmentApplicationPeriod(id uint) error
+	CloseRecruitmentApplicationPeriod(id uint) error
 }
 
 type RecruitmentRepositoryImpl struct {
@@ -145,6 +147,32 @@ func (rr *RecruitmentRepositoryImpl) DeleteRecruitmentByID(id uint) error {
 	}
 
 	if result.RowsAffected < 1 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func (rr *RecruitmentRepositoryImpl) OpenRecruitmentApplicationPeriod(id uint) error {
+	result := rr.db.Model(&entity.Recruitment{}).Where("id = ?", id).Update("application_acceptance_status", 1)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected != 1 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func (rr *RecruitmentRepositoryImpl) CloseRecruitmentApplicationPeriod(id uint) error {
+	result := rr.db.Model(&entity.Recruitment{}).Where("id = ?", id).Update("application_acceptance_status", 2)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected != 1 {
 		return errors.New("no rows affected")
 	}
 
