@@ -148,3 +148,13 @@ func (cr *CompetitionRepository) OpenCompetitionRegistrationPeriod(id uint) erro
 
 	return nil
 }
+
+func (cr *CompetitionRepository) SearchCompetition(limit int, offset int, keyword string) ([]entity.Competition, error) {
+	var competitions []entity.Competition
+	result := cr.db.Scopes(pagination.Paginate(limit, offset)).Where("name LIKE ?", "%"+keyword+"%").Find(&competitions)
+	if result.Error != nil {
+		return []entity.Competition{}, result.Error
+	}
+
+	return competitions, nil
+}
