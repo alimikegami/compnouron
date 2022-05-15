@@ -35,7 +35,6 @@ func (cc *CompetitionController) InitializeCompetitionRoute(config middleware.JW
 		r.PUT("/:id/open", cc.OpenCompetitionRegistrationPeriod, middleware.JWTWithConfig(config))
 		r.PUT("/:id/close", cc.CloseCompetitionRegistrationPeriod, middleware.JWTWithConfig(config))
 		r.GET("/:id/registrations", cc.GetCompetitionRegistration, middleware.JWTWithConfig(config))
-		r.GET("/:id/registrations/accepted", cc.GetAcceptedCompetitionParticipants, middleware.JWTWithConfig(config))
 	}
 }
 
@@ -308,6 +307,7 @@ func (cc *CompetitionController) OpenCompetitionRegistrationPeriod(c echo.Contex
 }
 
 func (cc *CompetitionController) GetCompetitionRegistration(c echo.Context) error {
+	status := c.QueryParam("status")
 	competitionID := c.Param("id")
 	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
 
@@ -318,36 +318,12 @@ func (cc *CompetitionController) GetCompetitionRegistration(c echo.Context) erro
 			Data:    nil,
 		})
 	}
-
-	res, err := cc.CompetitionUC.GetCompetitionRegistration(uint(competitionIDUint))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, response.Response{
-			Status:  "error",
-			Message: err.Error(),
-			Data:    nil,
-		})
+	var res interface{}
+	if status == "accepted" {
+		res, err = cc.CompetitionUC.GetAcceptedCompetitionParticipants(uint(competitionIDUint))
+	} else {
+		res, err = cc.CompetitionUC.GetCompetitionRegistration(uint(competitionIDUint))
 	}
-
-	return c.JSON(http.StatusOK, response.Response{
-		Status:  "success",
-		Message: nil,
-		Data:    res,
-	})
-}
-
-func (cc *CompetitionController) GetAcceptedCompetitionParticipants(c echo.Context) error {
-	competitionID := c.Param("id")
-	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, response.Response{
-			Status:  "error",
-			Message: err.Error(),
-			Data:    nil,
-		})
-	}
-
-	res, err := cc.CompetitionUC.GetAcceptedCompetitionParticipants(uint(competitionIDUint))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",

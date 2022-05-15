@@ -200,6 +200,29 @@ func (_m *RecruitmentUseCase) RejectRecruitmentApplication(id uint) error {
 	return r0
 }
 
+// SearchRecruitment provides a mock function with given fields: limit, offset, keyword
+func (_m *RecruitmentUseCase) SearchRecruitment(limit int, offset int, keyword string) ([]dto.BriefRecruitmentResponse, error) {
+	ret := _m.Called(limit, offset, keyword)
+
+	var r0 []dto.BriefRecruitmentResponse
+	if rf, ok := ret.Get(0).(func(int, int, string) []dto.BriefRecruitmentResponse); ok {
+		r0 = rf(limit, offset, keyword)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]dto.BriefRecruitmentResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int, int, string) error); ok {
+		r1 = rf(limit, offset, keyword)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpdateRecruitment provides a mock function with given fields: recruitmentRequest, id
 func (_m *RecruitmentUseCase) UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error {
 	ret := _m.Called(recruitmentRequest, id)

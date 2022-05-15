@@ -7,3 +7,16 @@ type CompetitionResponse struct {
 	IsTeam        int8   `json:"isTeam"`
 	Level         string `json:"level"`
 }
+
+type DetailedCompetitionResponse struct {
+	ID                       uint `gorm:"primaryKey"`
+	Name                     string
+	Description              string
+	ContactPerson            string
+	IsTeam                   int8
+	RegistrationPeriodStatus int8
+	TeamCapacity             int8
+	Level                    string
+	UserID                   uint
+	UserName                 string
+}
