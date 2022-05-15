@@ -47,7 +47,7 @@ func (cuc *CompetitionUseCase) DeleteCompetition(competitionID uint, userID uint
 	return nil
 }
 
-func (cuc *CompetitionUseCase) UpdateCompetition(competition dto.CompetitionRequest, id uint) error {
+func (cuc *CompetitionUseCase) UpdateCompetition(competition dto.CompetitionRequest, id uint, userID uint) error {
 	competitionEntity := &entity.Competition{
 		ID:            id,
 		Name:          competition.Name,
@@ -57,7 +57,16 @@ func (cuc *CompetitionUseCase) UpdateCompetition(competition dto.CompetitionRequ
 		TeamCapacity:  competition.TeamCapacity,
 		Level:         competition.Level,
 	}
-	err := cuc.ur.UpdateCompetition(*competitionEntity)
+
+	competitionData, err := cuc.ur.GetCompetitionByID(id)
+	if err != nil {
+		return err
+	}
+	if competitionData.ID != userID {
+		return errors.New("action unauthorized")
+	}
+
+	err = cuc.ur.UpdateCompetition(*competitionEntity)
 	return err
 }
 
@@ -125,6 +134,46 @@ func (cuc *CompetitionUseCase) CloseCompetitionRegistrationPeriod(id uint) error
 func (cuc *CompetitionUseCase) GetCompetitionRegistration(id uint) (interface{}, error) {
 
 	competition, err := cuc.ur.GetCompetitionRegistration(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if competition.IsTeam == 1 {
+		var competitionRegistrationsResponse []dto.TeamCompetitionRegistrationResponse
+		for _, competitionRegistration := range competition.CompetitionRegistrations {
+			competitionRegistrationsResponse = append(competitionRegistrationsResponse, dto.TeamCompetitionRegistrationResponse{
+				ID:               competitionRegistration.ID,
+				TeamID:           competitionRegistration.TeamID,
+				TeamName:         competitionRegistration.Team.Name,
+				CompetitionID:    competitionRegistration.CompetitionID,
+				AcceptanceStatus: competitionRegistration.AcceptanceStatus,
+			})
+		}
+
+		return competitionRegistrationsResponse, nil
+	}
+
+	var competitionRegistrationsResponse []dto.IndividualCompetitionRegistrationResponse
+	for _, competitionRegistration := range competition.CompetitionRegistrations {
+		competitionRegistrationsResponse = append(competitionRegistrationsResponse, dto.IndividualCompetitionRegistrationResponse{
+			ID:                competitionRegistration.ID,
+			UserID:            competitionRegistration.User.ID,
+			UserName:          competitionRegistration.User.Name,
+			PhoneNumber:       competitionRegistration.User.PhoneNumber,
+			Email:             competitionRegistration.User.Email,
+			SchoolInstitution: competitionRegistration.User.SchoolInstitution,
+			CompetitionID:     competitionRegistration.CompetitionID,
+			AcceptanceStatus:  competitionRegistration.AcceptanceStatus,
+		})
+	}
+
+	return competitionRegistrationsResponse, nil
+}
+
+func (cuc *CompetitionUseCase) GetAcceptedCompetitionParticipants(id uint) (interface{}, error) {
+
+	competition, err := cuc.ur.GetAcceptedCompetitionParticipants(id)
 
 	if err != nil {
 		return nil, err

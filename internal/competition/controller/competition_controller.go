@@ -35,6 +35,7 @@ func (cc *CompetitionController) InitializeCompetitionRoute(config middleware.JW
 		r.PUT("/:id/open", cc.OpenCompetitionRegistrationPeriod, middleware.JWTWithConfig(config))
 		r.PUT("/:id/close", cc.CloseCompetitionRegistrationPeriod, middleware.JWTWithConfig(config))
 		r.GET("/:id/registrations", cc.GetCompetitionRegistration, middleware.JWTWithConfig(config))
+		r.GET("/:id/registrations/accepted", cc.GetAcceptedCompetitionParticipants, middleware.JWTWithConfig(config))
 	}
 }
 
@@ -97,6 +98,7 @@ func (cc *CompetitionController) DeleteCompetition(c echo.Context) error {
 
 func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 	competitionID := c.Param("id")
+	userID, _ := utils.GetUserDetails(c)
 	competition := new(dto.CompetitionRequest)
 	if err := c.Bind(competition); err != nil {
 		fmt.Println(err)
@@ -115,7 +117,7 @@ func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-	err = cc.CompetitionUC.UpdateCompetition(*competition, uint(competitionIDUint))
+	err = cc.CompetitionUC.UpdateCompetition(*competition, uint(competitionIDUint), userID)
 	if err != nil {
 		fmt.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Response{
@@ -318,6 +320,34 @@ func (cc *CompetitionController) GetCompetitionRegistration(c echo.Context) erro
 	}
 
 	res, err := cc.CompetitionUC.GetCompetitionRegistration(uint(competitionIDUint))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    res,
+	})
+}
+
+func (cc *CompetitionController) GetAcceptedCompetitionParticipants(c echo.Context) error {
+	competitionID := c.Param("id")
+	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	res, err := cc.CompetitionUC.GetAcceptedCompetitionParticipants(uint(competitionIDUint))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
