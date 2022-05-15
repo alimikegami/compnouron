@@ -28,6 +28,20 @@ func (_m *RecruitmentRepository) AcceptRecruitmentApplication(id uint) error {
 	return r0
 }
 
+// CloseRecruitmentApplicationPeriod provides a mock function with given fields: id
+func (_m *RecruitmentRepository) CloseRecruitmentApplicationPeriod(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateRecruitment provides a mock function with given fields: recruitment
 func (_m *RecruitmentRepository) CreateRecruitment(recruitment entity.Recruitment) error {
 	ret := _m.Called(recruitment)
@@ -156,6 +170,20 @@ func (_m *RecruitmentRepository) GetRecruitmentByUserID(id uint) ([]entity.Recru
 	}
 
 	return r0, r1
+}
+
+// OpenRecruitmentApplicationPeriod provides a mock function with given fields: id
+func (_m *RecruitmentRepository) OpenRecruitmentApplicationPeriod(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // RejectRecruitmentApplication provides a mock function with given fields: id
