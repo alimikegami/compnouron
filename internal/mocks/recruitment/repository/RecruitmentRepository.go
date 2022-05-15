@@ -172,6 +172,29 @@ func (_m *RecruitmentRepository) GetRecruitmentByUserID(id uint) ([]entity.Recru
 	return r0, r1
 }
 
+// GetRecruitments provides a mock function with given fields: limit, offset
+func (_m *RecruitmentRepository) GetRecruitments(limit int, offset int) ([]entity.Recruitment, error) {
+	ret := _m.Called(limit, offset)
+
+	var r0 []entity.Recruitment
+	if rf, ok := ret.Get(0).(func(int, int) []entity.Recruitment); ok {
+		r0 = rf(limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.Recruitment)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+		r1 = rf(limit, offset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // OpenRecruitmentApplicationPeriod provides a mock function with given fields: id
 func (_m *RecruitmentRepository) OpenRecruitmentApplicationPeriod(id uint) error {
 	ret := _m.Called(id)

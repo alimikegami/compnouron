@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/alimikegami/compnouron/db/pagination"
 	"github.com/alimikegami/compnouron/internal/recruitment/entity"
 
 	"gorm.io/gorm"
@@ -23,6 +24,7 @@ type RecruitmentRepository interface {
 	DeleteRecruitmentByID(id uint) error
 	OpenRecruitmentApplicationPeriod(id uint) error
 	CloseRecruitmentApplicationPeriod(id uint) error
+	GetRecruitments(limit int, offset int) ([]entity.Recruitment, error)
 }
 
 type RecruitmentRepositoryImpl struct {
@@ -41,6 +43,17 @@ func (rr *RecruitmentRepositoryImpl) CreateRecruitment(recruitment entity.Recrui
 	}
 
 	return result.Error
+}
+
+func (rr *RecruitmentRepositoryImpl) GetRecruitments(limit int, offset int) ([]entity.Recruitment, error) {
+	var recruitments []entity.Recruitment
+	result := rr.db.Scopes(pagination.Paginate(limit, offset)).Preload(clause.Associations).Find(&recruitments)
+
+	if result.Error != nil {
+		return []entity.Recruitment{}, result.Error
+	}
+
+	return recruitments, nil
 }
 
 func (rr *RecruitmentRepositoryImpl) UpdateRecruitment(recruitment entity.Recruitment) error {

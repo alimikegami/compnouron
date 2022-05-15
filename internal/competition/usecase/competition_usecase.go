@@ -79,6 +79,7 @@ func (cuc *CompetitionUseCase) GetCompetitions(limit int, offset int) ([]dto.Com
 
 	for _, competition := range competitionsEntity {
 		competitionsResponse = append(competitionsResponse, dto.CompetitionResponse{
+			ID:            competition.ID,
 			Name:          competition.Name,
 			ContactPerson: competition.ContactPerson,
 			IsTeam:        competition.IsTeam,
