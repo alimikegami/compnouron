@@ -30,8 +30,8 @@ func (cc *CompetitionController) InitializeCompetitionRoute(config middleware.JW
 		r.POST("/register", cc.Register, middleware.JWTWithConfig(config))
 		r.DELETE("/:id", cc.DeleteCompetition, middleware.JWTWithConfig(config))
 		r.PUT("/:id", cc.UpdateCompetition, middleware.JWTWithConfig(config))
-		r.PUT("/registrations/:id/accept", cc.AcceptRecruitmentApplication, middleware.JWTWithConfig(config))
-		r.PUT("/registrations/:id/reject", cc.RejectRecruitmentApplication, middleware.JWTWithConfig(config))
+		r.PUT("/registrations/:id/accept", cc.AcceptCompetitionRegistration, middleware.JWTWithConfig(config))
+		r.PUT("/registrations/:id/reject", cc.RejectCompetitionRegistration, middleware.JWTWithConfig(config))
 		r.GET("/:id/registrations", cc.GetCompetitionRegistration, middleware.JWTWithConfig(config))
 	}
 }
@@ -134,15 +134,15 @@ func (cc *CompetitionController) GetCompetitions(c echo.Context) error {
 	offset := c.QueryParam("offset")
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
-    fmt.Println(err)
+		fmt.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Response{
 			Status:  "error",
 			Message: err.Error(),
 			Data:    nil,
 		})
 	}
-  
-  offsetInt, err := strconv.Atoi(offset)
+
+	offsetInt, err := strconv.Atoi(offset)
 	if err != nil {
 		fmt.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Response{
@@ -151,7 +151,7 @@ func (cc *CompetitionController) GetCompetitions(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-  competitionsResponse, err := cc.CompetitionUC.GetCompetitions(limitInt, offsetInt)
+	competitionsResponse, err := cc.CompetitionUC.GetCompetitions(limitInt, offsetInt)
 	if err != nil {
 		fmt.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Response{
@@ -160,13 +160,13 @@ func (cc *CompetitionController) GetCompetitions(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-  return c.JSON(http.StatusOK, response.Response{
+	return c.JSON(http.StatusOK, response.Response{
 		Status:  "success",
 		Message: nil,
 		Data:    competitionsResponse,
-  })
+	})
 }
-    
+
 func (cc *CompetitionController) Register(c echo.Context) error {
 	competitionRegistration := new(dto.CompetitionRegistrationRequest)
 	if err := c.Bind(competitionRegistration); err != nil {
@@ -195,7 +195,7 @@ func (cc *CompetitionController) Register(c echo.Context) error {
 	})
 }
 
-func (cc *CompetitionController) RejectRecruitmentApplication(c echo.Context) error {
+func (cc *CompetitionController) RejectCompetitionRegistration(c echo.Context) error {
 	competitionRegistrationID := c.Param("id")
 	competitionRegistrationIDUint, err := strconv.ParseUint(competitionRegistrationID, 10, 32)
 	if err != nil {
@@ -222,7 +222,7 @@ func (cc *CompetitionController) RejectRecruitmentApplication(c echo.Context) er
 	})
 }
 
-func (cc *CompetitionController) AcceptRecruitmentApplication(c echo.Context) error {
+func (cc *CompetitionController) AcceptCompetitionRegistration(c echo.Context) error {
 	competitionRegistrationID := c.Param("id")
 	competitionRegistrationIDUint, err := strconv.ParseUint(competitionRegistrationID, 10, 32)
 	if err != nil {

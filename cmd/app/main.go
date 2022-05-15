@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
+	_ "github.com/alimikegami/compnouron/cmd/app/docs"
 	"github.com/alimikegami/compnouron/db/migration"
 	competitionController "github.com/alimikegami/compnouron/internal/competition/controller"
 	competitionRepository "github.com/alimikegami/compnouron/internal/competition/repository"
@@ -18,8 +20,10 @@ import (
 	"github.com/alimikegami/compnouron/internal/user/repository"
 	"github.com/alimikegami/compnouron/internal/user/usecase"
 	"github.com/alimikegami/compnouron/pkg/utils"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -35,14 +39,30 @@ func initializeDatabaseConnection() (*gorm.DB, error) {
 	return db, err
 }
 
+// @title           Swagger Example API
+// @version         1.0
+// @description     This is a sample server celler server.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.basic  BasicAuth
+
 func main() {
 	e := echo.New()
 
-	// err := godotenv.Load("../../.env")
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
-
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	db, err := initializeDatabaseConnection()
 	if err != nil {
 		fmt.Println("Connection to the database has not been established")
@@ -74,5 +94,6 @@ func main() {
 	ruc := recruitmentUseCase.CreateNewRecruitmentUseCase(rr, *tr)
 	rc := recruitmentController.CreateNewRecruitmentController(e, ruc)
 	rc.InitializeRecruitmentRoute(config)
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	e.Logger.Fatal(e.Start(":1323"))
 }

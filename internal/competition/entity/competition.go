@@ -12,6 +12,7 @@ type Competition struct {
 	Description   string
 	ContactPerson string
 	IsTeam        int8
+	IsOpen        int8 `gorm:"default:null"`
 	TeamCapacity  int8
 	Level         string
 	CreatedAt     time.Time `json:"createdAt"`
