@@ -111,3 +111,29 @@ func (cr *CompetitionRepository) AcceptCompetitionRegistration(id uint) error {
 
 	return nil
 }
+
+func (cr *CompetitionRepository) CloseCompetitionRegistrationPeriod(id uint) error {
+	result := cr.db.Model(&entity.Competition{}).Where("id = ?", id).Update("is_open", 0)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected != 1 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func (cr *CompetitionRepository) OpenCompetitionRegistrationPeriod(id uint) error {
+	result := cr.db.Model(&entity.Competition{}).Where("id = ?", id).Update("is_open", 1)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected != 1 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
