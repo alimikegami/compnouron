@@ -149,6 +149,29 @@ func (_m *RecruitmentUseCase) GetRecruitmentDetailsByID(id uint) (dto.Recruitmen
 	return r0, r1
 }
 
+// GetRecruitments provides a mock function with given fields: limit, offset
+func (_m *RecruitmentUseCase) GetRecruitments(limit int, offset int) ([]dto.BriefRecruitmentResponse, error) {
+	ret := _m.Called(limit, offset)
+
+	var r0 []dto.BriefRecruitmentResponse
+	if rf, ok := ret.Get(0).(func(int, int) []dto.BriefRecruitmentResponse); ok {
+		r0 = rf(limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]dto.BriefRecruitmentResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+		r1 = rf(limit, offset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // OpenRecruitmentApplicationPeriod provides a mock function with given fields: id
 func (_m *RecruitmentUseCase) OpenRecruitmentApplicationPeriod(id uint) error {
 	ret := _m.Called(id)
