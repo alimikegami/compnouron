@@ -34,6 +34,7 @@ func (cc *CompetitionController) InitializeCompetitionRoute(config middleware.JW
 		r.PUT("/registrations/:id/reject", cc.RejectCompetitionRegistration, middleware.JWTWithConfig(config))
 		r.PUT("/:id/open", cc.OpenCompetitionRegistrationPeriod, middleware.JWTWithConfig(config))
 		r.PUT("/:id/close", cc.CloseCompetitionRegistrationPeriod, middleware.JWTWithConfig(config))
+		r.GET("/:id", cc.GetCompetitionRegistration, middleware.JWTWithConfig(config))
 		r.GET("/:id/registrations", cc.GetCompetitionRegistration, middleware.JWTWithConfig(config))
 	}
 }
@@ -133,6 +134,7 @@ func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 }
 
 func (cc *CompetitionController) GetCompetitions(c echo.Context) error {
+	keyword := c.QueryParam("keyword")
 	limit := c.QueryParam("limit")
 	offset := c.QueryParam("offset")
 	limitInt, err := strconv.Atoi(limit)
@@ -154,7 +156,14 @@ func (cc *CompetitionController) GetCompetitions(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-	competitionsResponse, err := cc.CompetitionUC.GetCompetitions(limitInt, offsetInt)
+	var competitionsResponse []dto.CompetitionResponse
+	if keyword != "" {
+		competitionsResponse, err = cc.CompetitionUC.SearchCompetition(limitInt, offsetInt, keyword)
+
+	} else {
+		competitionsResponse, err = cc.CompetitionUC.GetCompetitions(limitInt, offsetInt)
+
+	}
 	if err != nil {
 		fmt.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Response{

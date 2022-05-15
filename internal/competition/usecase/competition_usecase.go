@@ -211,3 +211,23 @@ func (cuc *CompetitionUseCase) GetAcceptedCompetitionParticipants(id uint) (inte
 
 	return competitionRegistrationsResponse, nil
 }
+
+func (cuc *CompetitionUseCase) SearchCompetition(limit int, offset int, keyword string) ([]dto.CompetitionResponse, error) {
+	var competitionsResponse []dto.CompetitionResponse
+	competitions, err := cuc.ur.SearchCompetition(limit, offset, keyword)
+	if err != nil {
+		return []dto.CompetitionResponse{}, err
+	}
+
+	for _, competition := range competitions {
+		competitionsResponse = append(competitionsResponse, dto.CompetitionResponse{
+			ID:            competition.ID,
+			Name:          competition.Name,
+			ContactPerson: competition.ContactPerson,
+			IsTeam:        competition.IsTeam,
+			Level:         competition.Level,
+		})
+	}
+
+	return competitionsResponse, nil
+}
