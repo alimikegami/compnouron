@@ -151,14 +151,14 @@ func (ruc *RecruitmentUseCaseImpl) AcceptRecruitmentApplication(id uint) error {
 		return err
 	}
 
-	// recruitmentApplication, err := ruc.rr.GetRecruitmentApplicationByID(id)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = ruc.tr.AddTeamMember(recruitmentApplication.UserID, recruitmentApplication.Recruitment.TeamID, 0)
-	// if err != nil {
-	// 	return err
-	// }
+	recruitmentApplication, err := ruc.rr.GetRecruitmentApplicationByID(id)
+	if err != nil {
+		return err
+	}
+	err = ruc.tr.AddTeamMember(recruitmentApplication.UserID, recruitmentApplication.Recruitment.TeamID, 0)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
