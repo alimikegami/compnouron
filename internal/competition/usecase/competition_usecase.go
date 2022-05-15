@@ -81,13 +81,20 @@ func (cuc *CompetitionUseCase) GetCompetitions(limit int, offset int) ([]dto.Com
 }
 
 func (cuc *CompetitionUseCase) Register(competitionRegistration dto.CompetitionRegistrationRequest) error {
+	comp, err := cuc.ur.GetCompetitionByID(competitionRegistration.CompetitionID)
+	if err != nil {
+		return err
+	}
+	if comp.IsOpen == 0 {
+		return errors.New("registration period is over")
+	}
 	competitionRegistrationEntity := entity.CompetitionRegistration{
 		UserID:        competitionRegistration.UserID,
 		CompetitionID: competitionRegistration.CompetitionID,
 		TeamID:        competitionRegistration.TeamID,
 	}
 
-	err := cuc.ur.Register(competitionRegistrationEntity)
+	err = cuc.ur.Register(competitionRegistrationEntity)
 	return err
 }
 
@@ -99,6 +106,18 @@ func (cuc *CompetitionUseCase) RejectCompetitionRegistration(id uint) error {
 
 func (cuc *CompetitionUseCase) AcceptCompetitionRegistration(id uint) error {
 	err := cuc.ur.AcceptCompetitionRegistration(id)
+
+	return err
+}
+
+func (cuc *CompetitionUseCase) OpenCompetitionRegistrationPeriod(id uint) error {
+	err := cuc.ur.OpenCompetitionRegistrationPeriod(id)
+
+	return err
+}
+
+func (cuc *CompetitionUseCase) CloseCompetitionRegistrationPeriod(id uint) error {
+	err := cuc.ur.CloseCompetitionRegistrationPeriod(id)
 
 	return err
 }
