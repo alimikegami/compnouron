@@ -1,11 +1,11 @@
 package dto
 
 type TeamCompetitionRegistrationResponse struct {
-	ID            uint   `json:"id"`
-	TeamID        uint   `json:"teamID"`
-	TeamName      string `json:"teamName"`
-	CompetitionID uint   `json:"competitionID"`
-	IsAccepted    uint   `json:"isAccepted"`
+	ID               uint   `json:"id"`
+	TeamID           uint   `json:"teamID"`
+	TeamName         string `json:"teamName"`
+	CompetitionID    uint   `json:"competitionID"`
+	AcceptanceStatus uint   `json:"AcceptanceStatus"`
 }
 
 type IndividualCompetitionRegistrationResponse struct {
@@ -16,5 +16,5 @@ type IndividualCompetitionRegistrationResponse struct {
 	PhoneNumber       string `json:"phoneNumber"`
 	SchoolInstitution string `json:"schoolInstitution"`
 	CompetitionID     uint   `json:"competitionID"`
-	IsAccepted        uint   `json:"isAccepted"`
+	AcceptanceStatus  uint   `json:"AcceptanceStatus"`
 }

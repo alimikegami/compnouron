@@ -85,7 +85,7 @@ func (cuc *CompetitionUseCase) Register(competitionRegistration dto.CompetitionR
 	if err != nil {
 		return err
 	}
-	if comp.IsOpen == 0 {
+	if comp.RegistrationPeriodStatus == 0 {
 		return errors.New("registration period is over")
 	}
 	competitionRegistrationEntity := entity.CompetitionRegistration{
@@ -124,13 +124,7 @@ func (cuc *CompetitionUseCase) CloseCompetitionRegistrationPeriod(id uint) error
 
 func (cuc *CompetitionUseCase) GetCompetitionRegistration(id uint) (interface{}, error) {
 
-	competition, err := cuc.ur.GetCompetitionByID(id)
-
-	if err != nil {
-		return nil, err
-	}
-
-	competitionRegistrations, err := cuc.ur.GetCompetitionRegistration(id)
+	competition, err := cuc.ur.GetCompetitionRegistration(id)
 
 	if err != nil {
 		return nil, err
@@ -138,13 +132,13 @@ func (cuc *CompetitionUseCase) GetCompetitionRegistration(id uint) (interface{},
 
 	if competition.IsTeam == 1 {
 		var competitionRegistrationsResponse []dto.TeamCompetitionRegistrationResponse
-		for _, competitionRegistration := range competitionRegistrations {
+		for _, competitionRegistration := range competition.CompetitionRegistrations {
 			competitionRegistrationsResponse = append(competitionRegistrationsResponse, dto.TeamCompetitionRegistrationResponse{
-				ID:            competitionRegistration.ID,
-				TeamID:        competitionRegistration.TeamID,
-				TeamName:      competitionRegistration.Team.Name,
-				CompetitionID: competitionRegistration.CompetitionID,
-				IsAccepted:    competitionRegistration.IsAccepted,
+				ID:               competitionRegistration.ID,
+				TeamID:           competitionRegistration.TeamID,
+				TeamName:         competitionRegistration.Team.Name,
+				CompetitionID:    competitionRegistration.CompetitionID,
+				AcceptanceStatus: competitionRegistration.AcceptanceStatus,
 			})
 		}
 
@@ -152,7 +146,7 @@ func (cuc *CompetitionUseCase) GetCompetitionRegistration(id uint) (interface{},
 	}
 
 	var competitionRegistrationsResponse []dto.IndividualCompetitionRegistrationResponse
-	for _, competitionRegistration := range competitionRegistrations {
+	for _, competitionRegistration := range competition.CompetitionRegistrations {
 		competitionRegistrationsResponse = append(competitionRegistrationsResponse, dto.IndividualCompetitionRegistrationResponse{
 			ID:                competitionRegistration.ID,
 			UserID:            competitionRegistration.User.ID,
@@ -161,7 +155,7 @@ func (cuc *CompetitionUseCase) GetCompetitionRegistration(id uint) (interface{},
 			Email:             competitionRegistration.User.Email,
 			SchoolInstitution: competitionRegistration.User.SchoolInstitution,
 			CompetitionID:     competitionRegistration.CompetitionID,
-			IsAccepted:        competitionRegistration.IsAccepted,
+			AcceptanceStatus:  competitionRegistration.AcceptanceStatus,
 		})
 	}
 

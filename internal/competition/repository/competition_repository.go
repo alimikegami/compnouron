@@ -7,7 +7,6 @@ import (
 
 	"github.com/alimikegami/compnouron/internal/competition/entity"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type CompetitionRepository struct {
@@ -75,19 +74,19 @@ func (cr *CompetitionRepository) Register(competitionRegistration entity.Competi
 	return nil
 }
 
-func (cr *CompetitionRepository) GetCompetitionRegistration(competitionID uint) ([]entity.CompetitionRegistration, error) {
-	var competitionRegistration []entity.CompetitionRegistration
+func (cr *CompetitionRepository) GetCompetitionRegistration(competitionID uint) (entity.Competition, error) {
+	var competitionRegistration entity.Competition
 
-	result := cr.db.Preload(clause.Associations).Where("competition_id = ?", competitionID).Find(&competitionRegistration)
+	result := cr.db.Preload("CompetitionRegistrations").Where("id = ?", competitionID).Find(&competitionRegistration)
 	if result.Error != nil {
-		return []entity.CompetitionRegistration{}, result.Error
+		return entity.Competition{}, result.Error
 	}
 
 	return competitionRegistration, nil
 }
 
 func (cr *CompetitionRepository) RejectCompetitionRegistration(id uint) error {
-	result := cr.db.Model(&entity.CompetitionRegistration{}).Where("id = ?", id).Update("is_accepted", 0)
+	result := cr.db.Model(&entity.CompetitionRegistration{}).Where("id = ?", id).Update("acceptance_status", 2)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -100,7 +99,7 @@ func (cr *CompetitionRepository) RejectCompetitionRegistration(id uint) error {
 }
 
 func (cr *CompetitionRepository) AcceptCompetitionRegistration(id uint) error {
-	result := cr.db.Model(&entity.CompetitionRegistration{}).Where("id = ?", id).Update("is_accepted", 1)
+	result := cr.db.Model(&entity.CompetitionRegistration{}).Where("id = ?", id).Update("acceptance_status", 1)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -113,7 +112,7 @@ func (cr *CompetitionRepository) AcceptCompetitionRegistration(id uint) error {
 }
 
 func (cr *CompetitionRepository) CloseCompetitionRegistrationPeriod(id uint) error {
-	result := cr.db.Model(&entity.Competition{}).Where("id = ?", id).Update("is_open", 0)
+	result := cr.db.Model(&entity.Competition{}).Where("id = ?", id).Update("is_open", 2)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -126,7 +125,7 @@ func (cr *CompetitionRepository) CloseCompetitionRegistrationPeriod(id uint) err
 }
 
 func (cr *CompetitionRepository) OpenCompetitionRegistrationPeriod(id uint) error {
-	result := cr.db.Model(&entity.Competition{}).Where("id = ?", id).Update("is_open", 1)
+	result := cr.db.Model(&entity.Competition{}).Where("id = ?", id).Update("registration_period_status", 1)
 	if result.Error != nil {
 		return result.Error
 	}
