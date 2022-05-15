@@ -17,6 +17,8 @@ type RecruitmentUseCase interface {
 	RejectRecruitmentApplication(id uint) error
 	AcceptRecruitmentApplication(id uint) error
 	DeleteRecruitmentByID(id uint) error
+	OpenRecruitmentApplicationPeriod(id uint) error
+	CloseRecruitmentApplicationPeriod(id uint) error
 }
 
 type RecruitmentUseCaseImpl struct {
@@ -30,9 +32,10 @@ func CreateNewRecruitmentUseCase(rr repository.RecruitmentRepository, tr teamRep
 
 func (ruc *RecruitmentUseCaseImpl) CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error {
 	recruitmentEntity := entity.Recruitment{
-		Role:        recruitmentRequest.Role,
-		Description: recruitmentRequest.Description,
-		TeamID:      recruitmentRequest.TeamID,
+		Role:                        recruitmentRequest.Role,
+		Description:                 recruitmentRequest.Description,
+		TeamID:                      recruitmentRequest.TeamID,
+		ApplicationAcceptanceStatus: 0,
 	}
 	err := ruc.rr.CreateRecruitment(recruitmentEntity)
 	return err
@@ -128,14 +131,14 @@ func (ruc *RecruitmentUseCaseImpl) AcceptRecruitmentApplication(id uint) error {
 		return err
 	}
 
-	recruitmentApplication, err := ruc.rr.GetRecruitmentApplicationByID(id)
-	if err != nil {
-		return err
-	}
-	err = ruc.tr.AddTeamMember(recruitmentApplication.UserID, recruitmentApplication.Recruitment.TeamID, 0)
-	if err != nil {
-		return err
-	}
+	// recruitmentApplication, err := ruc.rr.GetRecruitmentApplicationByID(id)
+	// if err != nil {
+	// 	return err
+	// }
+	// err = ruc.tr.AddTeamMember(recruitmentApplication.UserID, recruitmentApplication.Recruitment.TeamID, 0)
+	// if err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
@@ -158,6 +161,18 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByID(id uint) (dto.RecruitmentR
 
 func (ruc *RecruitmentUseCaseImpl) DeleteRecruitmentByID(id uint) error {
 	err := ruc.rr.DeleteRecruitmentByID(id)
+
+	return err
+}
+
+func (ruc *RecruitmentUseCaseImpl) OpenRecruitmentApplicationPeriod(id uint) error {
+	err := ruc.rr.OpenRecruitmentApplicationPeriod(id)
+
+	return err
+}
+
+func (ruc *RecruitmentUseCaseImpl) CloseRecruitmentApplicationPeriod(id uint) error {
+	err := ruc.rr.CloseRecruitmentApplicationPeriod(id)
 
 	return err
 }

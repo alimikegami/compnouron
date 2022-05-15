@@ -15,6 +15,5 @@ type RecruitmentApplication struct {
 	IsOpen        uint8
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	Recruitment   Recruitment `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	User          entity.User
 }

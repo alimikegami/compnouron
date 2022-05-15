@@ -30,6 +30,9 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 		r.PUT("/applications/:id/accept", rc.AcceptRecruitmentApplication, middleware.JWTWithConfig(config))
 		r.PUT("/applications/:id/reject", rc.RejectRecruitmentApplication, middleware.JWTWithConfig(config))
 		r.DELETE("/:id", rc.DeleteRecruitmentByID, middleware.JWTWithConfig(config))
+		r.PUT("/:id/open", rc.OpenRecruitmentApplicationPeriod, middleware.JWTWithConfig(config))
+		r.PUT("/:id/close", rc.CloseRecruitmentApplicationPeriod, middleware.JWTWithConfig(config))
+
 	}
 }
 
@@ -270,6 +273,60 @@ func (rc *RecruitmentController) DeleteRecruitmentByID(c echo.Context) error {
 	}
 
 	err = rc.recruitmentUC.DeleteRecruitmentByID(uint(recruitmentIDUint))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    nil,
+	})
+}
+
+func (rc *RecruitmentController) OpenRecruitmentApplicationPeriod(c echo.Context) error {
+	competition := c.Param("id")
+	competitionUint, err := strconv.ParseUint(competition, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	err = rc.recruitmentUC.OpenRecruitmentApplicationPeriod(uint(competitionUint))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    nil,
+	})
+}
+
+func (rc *RecruitmentController) CloseRecruitmentApplicationPeriod(c echo.Context) error {
+	competition := c.Param("id")
+	competitionUint, err := strconv.ParseUint(competition, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	err = rc.recruitmentUC.CloseRecruitmentApplicationPeriod(uint(competitionUint))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
