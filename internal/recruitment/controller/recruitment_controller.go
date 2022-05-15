@@ -22,7 +22,7 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 	r := rc.router.Group("/recruitments")
 	{
 		r.POST("", rc.CreateRecruitment, middleware.JWTWithConfig(config))
-		r.GET("/:id", rc.GetRecruitmentByID)
+		r.GET("", rc.GetRecruitments)
 		r.PUT("/:id", rc.UpdateRecruitment, middleware.JWTWithConfig(config))
 		r.POST("/applications", rc.CreateRecruitmentApplication, middleware.JWTWithConfig(config))
 		r.GET("/:id/applications", rc.GetRecruitmentDetailsByID, middleware.JWTWithConfig(config))
@@ -123,6 +123,45 @@ func (rc *RecruitmentController) CreateRecruitmentApplication(c echo.Context) er
 		Status:  "success",
 		Message: nil,
 		Data:    nil,
+	})
+}
+
+func (rc *RecruitmentController) GetRecruitments(c echo.Context) error {
+	limit := c.QueryParam("limit")
+	offset := c.QueryParam("offset")
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	offsetInt, err := strconv.Atoi(offset)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	result, err := rc.recruitmentUC.GetRecruitments(limitInt, offsetInt)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    result,
 	})
 }
 

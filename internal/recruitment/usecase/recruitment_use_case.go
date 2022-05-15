@@ -19,6 +19,7 @@ type RecruitmentUseCase interface {
 	DeleteRecruitmentByID(id uint) error
 	OpenRecruitmentApplicationPeriod(id uint) error
 	CloseRecruitmentApplicationPeriod(id uint) error
+	GetRecruitments(limit int, offset int) ([]dto.BriefRecruitmentResponse, error)
 }
 
 type RecruitmentUseCaseImpl struct {
@@ -64,6 +65,24 @@ func (ruc *RecruitmentUseCaseImpl) CreateRecruitmentApplication(recruitmentAppli
 	err := ruc.rr.CreateRecruitmentApplication(recruitmentApplicationEntity)
 
 	return err
+}
+
+func (ruc *RecruitmentUseCaseImpl) GetRecruitments(limit int, offset int) ([]dto.BriefRecruitmentResponse, error) {
+	var briefRecruitmentResponse []dto.BriefRecruitmentResponse
+	recruitmentsEntity, err := ruc.rr.GetRecruitments(limit, offset)
+	if err != nil {
+		return []dto.BriefRecruitmentResponse{}, err
+	}
+
+	for _, recruitment := range recruitmentsEntity {
+		briefRecruitmentResponse = append(briefRecruitmentResponse, dto.BriefRecruitmentResponse{
+			ID:       recruitment.ID,
+			Role:     recruitment.Role,
+			TeamName: recruitment.Team.Name,
+		})
+	}
+
+	return briefRecruitmentResponse, nil
 }
 
 func (ruc *RecruitmentUseCaseImpl) GetRecruitmentDetailsByID(id uint) (dto.RecruitmentDetailsResponse, error) {
