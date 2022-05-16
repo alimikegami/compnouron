@@ -105,8 +105,8 @@ func (_m *RecruitmentUseCase) GetRecruitmentByID(id uint) (dto.RecruitmentRespon
 	return r0, r1
 }
 
-// GetRecruitmentByUserID provides a mock function with given fields: id
-func (_m *RecruitmentUseCase) GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error) {
+// GetRecruitmentByTeamID provides a mock function with given fields: id
+func (_m *RecruitmentUseCase) GetRecruitmentByTeamID(id uint) (dto.RecruitmentsResponse, error) {
 	ret := _m.Called(id)
 
 	var r0 dto.RecruitmentsResponse

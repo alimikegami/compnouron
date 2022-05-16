@@ -149,8 +149,8 @@ func (_m *RecruitmentRepository) GetRecruitmentByID(id uint) (entity.Recruitment
 	return r0, r1
 }
 
-// GetRecruitmentByUserID provides a mock function with given fields: id
-func (_m *RecruitmentRepository) GetRecruitmentByUserID(id uint) ([]entity.Recruitment, error) {
+// GetRecruitmentByTeamID provides a mock function with given fields: id
+func (_m *RecruitmentRepository) GetRecruitmentByTeamID(id uint) ([]entity.Recruitment, error) {
 	ret := _m.Called(id)
 
 	var r0 []entity.Recruitment

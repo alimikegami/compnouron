@@ -13,7 +13,7 @@ type RecruitmentUseCase interface {
 	GetRecruitmentByID(id uint) (dto.RecruitmentResponse, error)
 	CreateRecruitmentApplication(recruitmentApplication dto.RecruitmentApplicationRequest, userID uint) error
 	GetRecruitmentDetailsByID(id uint) (dto.RecruitmentDetailsResponse, error)
-	GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error)
+	GetRecruitmentByTeamID(id uint) (dto.RecruitmentsResponse, error)
 	RejectRecruitmentApplication(id uint) error
 	AcceptRecruitmentApplication(id uint) error
 	DeleteRecruitmentByID(id uint) error
@@ -57,10 +57,9 @@ func (ruc *RecruitmentUseCaseImpl) UpdateRecruitment(recruitmentRequest dto.Recr
 
 func (ruc *RecruitmentUseCaseImpl) CreateRecruitmentApplication(recruitmentApplicationRequest dto.RecruitmentApplicationRequest, userID uint) error {
 	recruitmentApplicationEntity := entity.RecruitmentApplication{
-		UserID:        userID,
-		RecruitmentID: recruitmentApplicationRequest.RecruitmentID,
-		IsAccepted:    0,
-		IsRejected:    0,
+		UserID:           userID,
+		RecruitmentID:    recruitmentApplicationRequest.RecruitmentID,
+		AcceptanceStatus: 0,
 	}
 
 	err := ruc.rr.CreateRecruitmentApplication(recruitmentApplicationEntity)
@@ -108,12 +107,11 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentDetailsByID(id uint) (dto.Recru
 
 	for _, recruitmentApplication := range recruitmentApplications {
 		recruitmentApplicationsResponse = append(recruitmentApplicationsResponse, dto.RecruitmentApplicationResponse{
-			ID:            recruitmentApplication.ID,
-			UserID:        recruitmentApplication.UserID,
-			RecruitmentID: recruitmentApplication.RecruitmentID,
-			IsAccepted:    recruitmentApplication.IsAccepted,
-			IsRejected:    recruitmentApplication.IsRejected,
-			UserName:      recruitmentApplication.User.Name,
+			ID:               recruitmentApplication.ID,
+			UserID:           recruitmentApplication.UserID,
+			RecruitmentID:    recruitmentApplication.RecruitmentID,
+			AcceptanceStatus: recruitmentApplication.AcceptanceStatus,
+			UserName:         recruitmentApplication.User.Name,
 		})
 	}
 
@@ -123,9 +121,9 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentDetailsByID(id uint) (dto.Recru
 	}, nil
 }
 
-func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error) {
+func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByTeamID(id uint) (dto.RecruitmentsResponse, error) {
 	var recruitments dto.RecruitmentsResponse
-	result, err := ruc.rr.GetRecruitmentByUserID(id)
+	result, err := ruc.rr.GetRecruitmentByTeamID(id)
 	for _, recruitment := range result {
 		recruitments = append(recruitments, dto.RecruitmentResponse{
 			ID:          recruitment.ID,
