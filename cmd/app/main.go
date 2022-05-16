@@ -91,7 +91,7 @@ func main() {
 	tc.InitializeTeamRoute(config)
 
 	rr := recruitmentRepository.CreateNewRecruitmentRepository(db)
-	ruc := recruitmentUseCase.CreateNewRecruitmentUseCase(rr, *tr)
+	ruc := recruitmentUseCase.CreateNewRecruitmentUseCase(rr, tr)
 	rc := recruitmentController.CreateNewRecruitmentController(e, ruc)
 	rc.InitializeRecruitmentRoute(config)
 	e.GET("/swagger/*", echoSwagger.WrapHandler)

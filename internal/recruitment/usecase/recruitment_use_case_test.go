@@ -9,20 +9,20 @@ type MockRecruitmentRepository struct {
 }
 
 // func TestSuccessfulCreateRecruitmentApplication(t *testing.T) {
-// 	mockRepo := mocks.NewRecruitmentRepository(t)
-// 	mockRepo.On("CreateRecruitmentApplication", entity.RecruitmentApplication{
-// 		UserID:        1,
-// 		RecruitmentID: 1,
-// 		IsAccepted:    0,
-// 		IsRejected:    0,
+// 	recruitmentMockRepo := recruitmentMock.NewRecruitmentRepository(t)
+// 	teamMockRepo :=
+// 	recruitmentMockRepo.On("CreateRecruitmentApplication", entity.RecruitmentApplication{
+// 		UserID:           1,
+// 		RecruitmentID:    1,
+// 		AcceptanceStatus: 0,
 // 	}).Return(nil)
-// 	testUseCase := CreateNewRecruitmentUseCase(mockRepo)
+// 	testUseCase := CreateNewRecruitmentUseCase(recruitmentMockRepo)
 // 	err := testUseCase.CreateRecruitmentApplication(dto.RecruitmentApplicationRequest{
 // 		RecruitmentID: 1,
 // 	}, 1)
 
 // 	assert.Nil(t, err, "No error")
-// 	mockRepo.AssertExpectations(t)
+// 	recruitmentMockRepo.AssertExpectations(t)
 // }
 
 // func TestInvalidCreateRecruitmentApplicationForeignKey(t *testing.T) {

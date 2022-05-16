@@ -15,7 +15,7 @@ import (
 
 type TeamController struct {
 	router *echo.Echo
-	teamUC *usecase.TeamUseCase
+	teamUC usecase.TeamUseCase
 }
 
 func (tc *TeamController) InitializeTeamRoute(config middleware.JWTConfig) {
@@ -182,6 +182,6 @@ func (tc *TeamController) GetTeamDetailsByID(c echo.Context) error {
 	})
 }
 
-func CreateNewTeamController(e *echo.Echo, teamUC *usecase.TeamUseCase) *TeamController {
+func CreateNewTeamController(e *echo.Echo, teamUC usecase.TeamUseCase) *TeamController {
 	return &TeamController{router: e, teamUC: teamUC}
 }
