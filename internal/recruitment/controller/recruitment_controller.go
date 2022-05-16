@@ -26,7 +26,7 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 		r.PUT("/:id", rc.UpdateRecruitment, middleware.JWTWithConfig(config))
 		r.POST("/applications", rc.CreateRecruitmentApplication, middleware.JWTWithConfig(config))
 		r.GET("/:id/applications", rc.GetRecruitmentDetailsByID, middleware.JWTWithConfig(config))
-		r.GET("/user", rc.GetRecruitmentByUserID, middleware.JWTWithConfig(config))
+		r.GET("/teams/:id", rc.GetRecruitmentByTeamID, middleware.JWTWithConfig(config))
 		r.PUT("/applications/:id/accept", rc.AcceptRecruitmentApplication, middleware.JWTWithConfig(config))
 		r.PUT("/applications/:id/reject", rc.RejectRecruitmentApplication, middleware.JWTWithConfig(config))
 		r.DELETE("/:id", rc.DeleteRecruitmentByID, middleware.JWTWithConfig(config))
@@ -199,9 +199,17 @@ func (rc *RecruitmentController) GetRecruitmentDetailsByID(c echo.Context) error
 	})
 }
 
-func (rc *RecruitmentController) GetRecruitmentByUserID(c echo.Context) error {
-	userID, _ := utils.GetUserDetails(c)
-	result, err := rc.recruitmentUC.GetRecruitmentByUserID(userID)
+func (rc *RecruitmentController) GetRecruitmentByTeamID(c echo.Context) error {
+	userID := c.Param("id")
+	userIDUint, err := strconv.ParseUint(userID, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	result, err := rc.recruitmentUC.GetRecruitmentByTeamID(uint(userIDUint))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",

@@ -17,7 +17,7 @@ type RecruitmentRepository interface {
 	CreateRecruitmentApplication(recruitmentApplication entity.RecruitmentApplication) error
 	GetRecruitmentByID(id uint) (entity.Recruitment, error)
 	GetRecruitmentApplicationByRecruitmentID(id uint) ([]entity.RecruitmentApplication, error)
-	GetRecruitmentByUserID(id uint) ([]entity.Recruitment, error)
+	GetRecruitmentByTeamID(id uint) ([]entity.Recruitment, error)
 	RejectRecruitmentApplication(id uint) error
 	GetRecruitmentApplicationByID(id uint) (entity.RecruitmentApplication, error)
 	AcceptRecruitmentApplication(id uint) error
@@ -58,7 +58,7 @@ func (rr *RecruitmentRepositoryImpl) GetRecruitments(limit int, offset int) ([]e
 }
 
 func (rr *RecruitmentRepositoryImpl) UpdateRecruitment(recruitment entity.Recruitment) error {
-	result := rr.db.Model(&recruitment).Where("id = ?", recruitment.ID).Updates(recruitment)
+	result := rr.db.Debug().Model(&recruitment).Where("id = ?", recruitment.ID).Updates(recruitment)
 
 	if result.Error != nil {
 		return result.Error
@@ -97,9 +97,10 @@ func (rr *RecruitmentRepositoryImpl) GetRecruitmentApplicationByRecruitmentID(id
 	return recruitmentApplications, nil
 }
 
-func (rr *RecruitmentRepositoryImpl) GetRecruitmentByUserID(id uint) ([]entity.Recruitment, error) {
+func (rr *RecruitmentRepositoryImpl) GetRecruitmentByTeamID(id uint) ([]entity.Recruitment, error) {
 	var recruitments []entity.Recruitment
-	result := rr.db.Preload(clause.Associations).Find(&recruitments)
+	result := rr.db.Debug().Preload(clause.Associations).Where("team_id = ?", id).Find(&recruitments)
+	fmt.Println(recruitments)
 	if result.Error != nil {
 		return recruitments, result.Error
 	}
@@ -120,15 +121,10 @@ func (rr *RecruitmentRepositoryImpl) GetAcceptedRecruitmentsApplications(id uint
 }
 
 func (rr *RecruitmentRepositoryImpl) RejectRecruitmentApplication(id uint) error {
-	var recruitmentApplication entity.RecruitmentApplication
-	result := rr.db.First(&recruitmentApplication, id)
+	result := rr.db.Model(&entity.RecruitmentApplication{}).Where("id = ?", id).Update("acceptance_status", 2)
 	if result.Error != nil {
 		return result.Error
 	}
-
-	recruitmentApplication.IsAccepted = 0
-	recruitmentApplication.IsRejected = 1
-	result = rr.db.Save(recruitmentApplication)
 
 	if result.RowsAffected != 1 {
 		return errors.New("no rows affected")
@@ -138,15 +134,10 @@ func (rr *RecruitmentRepositoryImpl) RejectRecruitmentApplication(id uint) error
 }
 
 func (rr *RecruitmentRepositoryImpl) AcceptRecruitmentApplication(id uint) error {
-	var recruitmentApplication entity.RecruitmentApplication
-	result := rr.db.First(&recruitmentApplication, id)
+	result := rr.db.Debug().Model(&entity.RecruitmentApplication{}).Where("id = ?", id).Update("acceptance_status", 1)
 	if result.Error != nil {
 		return result.Error
 	}
-
-	recruitmentApplication.IsAccepted = 1
-	recruitmentApplication.IsRejected = 0
-	result = rr.db.Save(recruitmentApplication)
 
 	if result.RowsAffected != 1 {
 		return errors.New("no rows affected")
