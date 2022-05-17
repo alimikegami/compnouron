@@ -6,6 +6,19 @@ definitions:
       name:
         type: string
     type: object
+  dto.CompetitionResponse:
+    properties:
+      ID:
+        type: integer
+      contactPerson:
+        type: string
+      isTeam:
+        type: integer
+      level:
+        type: string
+      name:
+        type: string
+    type: object
   dto.RecruitmentApplicationResponse:
     properties:
       ID:
@@ -130,6 +143,384 @@ paths:
       summary: Get detailed team's data by team ID
       tags:
       - Teams
+  /competitions:
+    get:
+      description: This endpoint will return the competitions data with pagination
+        implemented and also with keyword searching capability
+      parameters:
+      - description: rows retrieved limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: skipped rows
+        in: query
+        name: offset
+        required: true
+        type: integer
+      - description: competition name keyword
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.CompetitionResponse'
+                  type: array
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get competitions data
+      tags:
+      - Competitions
+    post:
+      consumes:
+      - application/json
+      description: Given the request body, create a competition record in the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create new competition
+      tags:
+      - Competitions
+  /competitions/{id}:
+    delete:
+      description: Given the ID path parameters, this endpoint will delete the existing
+        competition's data
+      parameters:
+      - description: Competition ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Delete competition's data
+      tags:
+      - Competitions
+    put:
+      consumes:
+      - application/json
+      description: Given the request body and the ID path parameters, this endpoint
+        will update the existing competition's data
+      parameters:
+      - description: Competition ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update competition's data
+      tags:
+      - Competitions
+  /competitions/{id}/close:
+    put:
+      description: Given the competition ID path parameters, this endpoint will close
+        the competition registration period
+      parameters:
+      - description: Competition ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Close competition registration period
+      tags:
+      - Competitions
+  /competitions/{id}/open:
+    put:
+      description: Given the competition ID path parameters, this endpoint will open
+        the competition registration period
+      parameters:
+      - description: Competition ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Open competition registration period
+      tags:
+      - Competitions
+  /competitions/{id}/registrations:
+    get:
+      description: Given the ID path parameters and the status query parameteres,
+        this endpoint will retrieve the competition registration data of a particular
+        ID and accepted status if the query parameters are given
+      parameters:
+      - description: filter to get accepted registrations record
+        in: query
+        name: status
+        required: true
+        type: integer
+      - description: Competition ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get competition registration data
+      tags:
+      - Competitions
+  /competitions/registrations:
+    post:
+      consumes:
+      - application/json
+      description: Given the request body, create a competition registration record
+        in the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create new competition registrations
+      tags:
+      - Competitions
+  /competitions/registrations/{id}/accept:
+    put:
+      description: Given the competition registration ID path parameters, this endpoint
+        will accept the competition registration
+      parameters:
+      - description: Competition ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Accept competition application
+      tags:
+      - Competitions
+  /competitions/registrations/{id}/reject:
+    put:
+      description: Given the competition registration ID path parameters, this endpoint
+        will reject the competition registration
+      parameters:
+      - description: Competition ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Reject competition application
+      tags:
+      - Competitions
   /recruitments:
     get:
       description: This endpoint will return the recruitments data with pagination
