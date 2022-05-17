@@ -25,7 +25,7 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 		r.GET("", rc.GetRecruitments)
 		r.PUT("/:id", rc.UpdateRecruitment, middleware.JWTWithConfig(config))
 		r.POST("/applications", rc.CreateRecruitmentApplication, middleware.JWTWithConfig(config))
-		r.GET("/:id/applications", rc.GetRecruitmentDetailsByID, middleware.JWTWithConfig(config))
+		r.GET("/:id", rc.GetRecruitmentDetailsByID, middleware.JWTWithConfig(config))
 		r.GET("/teams/:id", rc.GetRecruitmentByTeamID, middleware.JWTWithConfig(config))
 		r.PUT("/applications/:id/accept", rc.AcceptRecruitmentApplication, middleware.JWTWithConfig(config))
 		r.PUT("/applications/:id/reject", rc.RejectRecruitmentApplication, middleware.JWTWithConfig(config))
@@ -35,6 +35,16 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 	}
 }
 
+// CreateRecruitment godoc
+// @Summary      Create new recruitment
+// @Description  Given the request body, create a recruiment record in the database
+// @Tags         Recruitments
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /recruitments [post]
 func (rc *RecruitmentController) CreateRecruitment(c echo.Context) error {
 	recruitment := new(dto.RecruitmentRequest)
 	if err := c.Bind(recruitment); err != nil {
@@ -61,6 +71,17 @@ func (rc *RecruitmentController) CreateRecruitment(c echo.Context) error {
 	})
 }
 
+// UpdateRecruitment godoc
+// @Summary      Update recruitment's data
+// @Description  Given the request body and the ID path parameters, this endpoint will update the existing recruitment's data
+// @Tags         Recruitments
+// @Accept       json
+// @Produce      json
+// @Param id path int true "Recruitment ID"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /recruitments/{id} [put]
 func (rc *RecruitmentController) UpdateRecruitment(c echo.Context) error {
 	recruitmentID := c.Param("id")
 	recruitmentIDUint, err := strconv.ParseUint(recruitmentID, 10, 32)
@@ -97,6 +118,16 @@ func (rc *RecruitmentController) UpdateRecruitment(c echo.Context) error {
 	})
 }
 
+// CreateRecruitmentApplication godoc
+// @Summary      Create new recruitment appliation
+// @Description  Given the request body, create a recruiment application record in the database
+// @Tags         Recruitments
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /recruitments/applications [post]
 func (rc *RecruitmentController) CreateRecruitmentApplication(c echo.Context) error {
 	userID, _ := utils.GetUserDetails(c)
 	recruitmentApplication := new(dto.RecruitmentApplicationRequest)
@@ -125,6 +156,18 @@ func (rc *RecruitmentController) CreateRecruitmentApplication(c echo.Context) er
 	})
 }
 
+// GetRecruitments godoc
+// @Summary      Get recruitments's data
+// @Description  This endpoint will return the recruitments data with pagination implemented and also with keyword searching capability
+// @Tags         Recruitments
+// @Produce      json
+// @Param        limit     query      int     true  "rows retrieved limit"
+// @Param        offset    query      int     true  "skipped rows"
+// @Param        keyword   query      string  false  "recruitment role keyword"
+// @Success      200  {object}   response.Response{data=dto.RecruitmentsResponse,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /recruitments [get]
 func (rc *RecruitmentController) GetRecruitments(c echo.Context) error {
 	keyword := c.QueryParam("keyword")
 	limit := c.QueryParam("limit")
@@ -172,6 +215,16 @@ func (rc *RecruitmentController) GetRecruitments(c echo.Context) error {
 	})
 }
 
+// GetRecruitmentDetailsByID godoc
+// @Summary      Get detailed recruitment's data
+// @Description  Given the recruitment ID on path parameter, this endpoint will return the detailed data associated with that particular recruitment
+// @Tags         Recruitments
+// @Produce      json
+// @Param id path int true "Recruitment ID"
+// @Success      200  {object}   response.Response{data=dto.RecruitmentDetailsResponse,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /recruitments/{id} [get]
 func (rc *RecruitmentController) GetRecruitmentDetailsByID(c echo.Context) error {
 	recruitmentID := c.Param("id")
 	recruitmentIDUint, err := strconv.ParseUint(recruitmentID, 10, 32)
@@ -199,6 +252,16 @@ func (rc *RecruitmentController) GetRecruitmentDetailsByID(c echo.Context) error
 	})
 }
 
+// GetRecruitmentByTeamID godoc
+// @Summary      Get recruitment's data of a particular team
+// @Description  Given the team ID on path parameter, this endpoint will return the recruitment data associated with that team
+// @Tags         Recruitments
+// @Produce      json
+// @Param id path int true "Team ID"
+// @Success      200  {object}   response.Response{data=dto.RecruitmentsResponse,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /recruitments/teams/{id} [get]
 func (rc *RecruitmentController) GetRecruitmentByTeamID(c echo.Context) error {
 	userID := c.Param("id")
 	userIDUint, err := strconv.ParseUint(userID, 10, 32)
@@ -225,6 +288,16 @@ func (rc *RecruitmentController) GetRecruitmentByTeamID(c echo.Context) error {
 	})
 }
 
+// RejectRecruitmentApplication godoc
+// @Summary      Reject recruitment application
+// @Description  Given the recruitment application ID path parameters, this endpoint will reject the recruitment application
+// @Tags         Recruitments
+// @Produce      json
+// @Param id path int true "Recruitment ID"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /recruitments/applications/{id}/reject [put]
 func (rc *RecruitmentController) RejectRecruitmentApplication(c echo.Context) error {
 	recruitmentApplicationID := c.Param("id")
 	recruitmentApplicationIDUint, err := strconv.ParseUint(recruitmentApplicationID, 10, 32)
@@ -252,6 +325,16 @@ func (rc *RecruitmentController) RejectRecruitmentApplication(c echo.Context) er
 	})
 }
 
+// AcceptRecruitmentApplication godoc
+// @Summary      Accept recruitment application
+// @Description  Given the recruitment application ID path parameters, this endpoint will accept the recruitment application
+// @Tags         Recruitments
+// @Produce      json
+// @Param id path int true "Recruitment ID"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /recruitments/applications/{id}/accept [put]
 func (rc *RecruitmentController) AcceptRecruitmentApplication(c echo.Context) error {
 	recruitmentApplicationID := c.Param("id")
 	recruitmentApplicationIDUint, err := strconv.ParseUint(recruitmentApplicationID, 10, 32)
@@ -315,6 +398,16 @@ func (rc *RecruitmentController) GetRecruitmentByID(c echo.Context) error {
 	})
 }
 
+// DeleteRecruitmentByID godoc
+// @Summary      Delete recruitment's data
+// @Description  Given the ID path parameters, this endpoint will delete the existing recruitment's data
+// @Tags         Recruitments
+// @Produce      json
+// @Param id path int true "Recruitment ID"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /recruitments/{id} [delete]
 func (rc *RecruitmentController) DeleteRecruitmentByID(c echo.Context) error {
 	recruitmentID := c.Param("id")
 	recruitmentIDUint, err := strconv.ParseUint(recruitmentID, 10, 32)
@@ -342,6 +435,16 @@ func (rc *RecruitmentController) DeleteRecruitmentByID(c echo.Context) error {
 	})
 }
 
+// OpenRecruitmentApplicationPeriod godoc
+// @Summary      Open recruitment application period
+// @Description  Given the recruitment ID path parameters, this endpoint will open the recruitment application period
+// @Tags         Recruitments
+// @Produce      json
+// @Param id path int true "Recruitment ID"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /recruitments/{id}/open [put]
 func (rc *RecruitmentController) OpenRecruitmentApplicationPeriod(c echo.Context) error {
 	competition := c.Param("id")
 	competitionUint, err := strconv.ParseUint(competition, 10, 32)
@@ -369,6 +472,16 @@ func (rc *RecruitmentController) OpenRecruitmentApplicationPeriod(c echo.Context
 	})
 }
 
+// CloseRecruitmentApplicationPeriod godoc
+// @Summary      Close recruitment application period
+// @Description  Given the recruitment ID path parameters, this endpoint will close the recruitment application period
+// @Tags         Recruitments
+// @Produce      json
+// @Param id path int true "Recruitment ID"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /recruitments/{id}/close [put]
 func (rc *RecruitmentController) CloseRecruitmentApplicationPeriod(c echo.Context) error {
 	competition := c.Param("id")
 	competitionUint, err := strconv.ParseUint(competition, 10, 32)

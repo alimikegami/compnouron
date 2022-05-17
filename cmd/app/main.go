@@ -39,7 +39,7 @@ func initializeDatabaseConnection() (*gorm.DB, error) {
 	return db, err
 }
 
-// @title           Swagger Example API
+// @title           Compnouron API
 // @version         1.0
 // @description     This is a sample server celler server.
 // @termsOfService  http://swagger.io/terms/
@@ -51,8 +51,7 @@ func initializeDatabaseConnection() (*gorm.DB, error) {
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host      localhost:8080
-// @BasePath  /api/v1
+// @host      localhost:1323
 
 // @securityDefinitions.basic  BasicAuth
 
