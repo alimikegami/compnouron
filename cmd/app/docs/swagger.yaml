@@ -28,6 +28,13 @@ definitions:
       name:
         type: string
     type: object
+  dto.TokenResponse:
+    properties:
+      token:
+        type: string
+      tokenType:
+        type: string
+    type: object
   response.Response:
     properties:
       data: {}
@@ -234,6 +241,71 @@ paths:
       summary: Get team's data by user ID
       tags:
       - Teams
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Given the request body, create a new user record in the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create new user account
+      tags:
+      - Users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Given the credentials, authenticate the credentials and returns
+        the JWT token if the credentials matched the record in the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TokenResponse'
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Login
+      tags:
+      - Users
 securityDefinitions:
   BasicAuth:
     type: basic
