@@ -8,29 +8,45 @@ import (
 	"github.com/alimikegami/compnouron/internal/competition/repository"
 )
 
-type CompetitionUseCase struct {
-	ur *repository.CompetitionRepository
+type CompetitionUseCaseImpl struct {
+	ur repository.CompetitionRepository
 }
 
-func CreateNewCompetitionUseCase(ur *repository.CompetitionRepository) *CompetitionUseCase {
-	return &CompetitionUseCase{ur: ur}
+type CompetitionUseCase interface {
+	CreateCompetition(competition dto.CompetitionRequest, userID uint) error
+	DeleteCompetition(competitionID uint, userID uint) error
+	UpdateCompetition(competition dto.CompetitionRequest, id uint, userID uint) error
+	GetCompetitions(limit int, offset int) ([]dto.CompetitionResponse, error)
+	Register(competitionRegistration dto.CompetitionRegistrationRequest) error
+	RejectCompetitionRegistration(id uint) error
+	AcceptCompetitionRegistration(id uint) error
+	OpenCompetitionRegistrationPeriod(id uint) error
+	CloseCompetitionRegistrationPeriod(id uint) error
+	GetCompetitionRegistration(id uint) (interface{}, error)
+	GetAcceptedCompetitionParticipants(id uint) (interface{}, error)
+	SearchCompetition(limit int, offset int, keyword string) ([]dto.CompetitionResponse, error)
 }
 
-func (cuc *CompetitionUseCase) CreateCompetition(competition dto.CompetitionRequest, userID uint) error {
+func CreateNewCompetitionUseCase(ur repository.CompetitionRepository) CompetitionUseCase {
+	return &CompetitionUseCaseImpl{ur: ur}
+}
+
+func (cuc *CompetitionUseCaseImpl) CreateCompetition(competition dto.CompetitionRequest, userID uint) error {
 	competitionEntity := &entity.Competition{
-		Name:          competition.Name,
-		Description:   competition.Description,
-		ContactPerson: competition.ContactPerson,
-		IsTeam:        competition.IsTeam,
-		TeamCapacity:  competition.TeamCapacity,
-		Level:         competition.Level,
-		UserID:        userID,
+		Name:                 competition.Name,
+		Description:          competition.Description,
+		ContactPerson:        competition.ContactPerson,
+		IsTeam:               competition.IsTeam,
+		IsTheSameInstitution: competition.IsTheSameInstitution,
+		TeamCapacity:         competition.TeamCapacity,
+		Level:                competition.Level,
+		UserID:               userID,
 	}
 	err := cuc.ur.CreateCompetition(competitionEntity)
 	return err
 }
 
-func (cuc *CompetitionUseCase) DeleteCompetition(competitionID uint, userID uint) error {
+func (cuc *CompetitionUseCaseImpl) DeleteCompetition(competitionID uint, userID uint) error {
 	competition, err := cuc.ur.GetCompetitionByID(competitionID)
 	if err != nil {
 		return err
@@ -47,15 +63,16 @@ func (cuc *CompetitionUseCase) DeleteCompetition(competitionID uint, userID uint
 	return nil
 }
 
-func (cuc *CompetitionUseCase) UpdateCompetition(competition dto.CompetitionRequest, id uint, userID uint) error {
+func (cuc *CompetitionUseCaseImpl) UpdateCompetition(competition dto.CompetitionRequest, id uint, userID uint) error {
 	competitionEntity := &entity.Competition{
-		ID:            id,
-		Name:          competition.Name,
-		Description:   competition.Description,
-		ContactPerson: competition.ContactPerson,
-		IsTeam:        competition.IsTeam,
-		TeamCapacity:  competition.TeamCapacity,
-		Level:         competition.Level,
+		ID:                   id,
+		Name:                 competition.Name,
+		Description:          competition.Description,
+		ContactPerson:        competition.ContactPerson,
+		IsTheSameInstitution: competition.IsTheSameInstitution,
+		IsTeam:               competition.IsTeam,
+		TeamCapacity:         competition.TeamCapacity,
+		Level:                competition.Level,
 	}
 
 	competitionData, err := cuc.ur.GetCompetitionByID(id)
@@ -70,7 +87,7 @@ func (cuc *CompetitionUseCase) UpdateCompetition(competition dto.CompetitionRequ
 	return err
 }
 
-func (cuc *CompetitionUseCase) GetCompetitions(limit int, offset int) ([]dto.CompetitionResponse, error) {
+func (cuc *CompetitionUseCaseImpl) GetCompetitions(limit int, offset int) ([]dto.CompetitionResponse, error) {
 	var competitionsResponse []dto.CompetitionResponse
 	competitionsEntity, err := cuc.ur.GetCompetitions(limit, offset)
 	if err != nil {
@@ -90,7 +107,7 @@ func (cuc *CompetitionUseCase) GetCompetitions(limit int, offset int) ([]dto.Com
 	return competitionsResponse, nil
 }
 
-func (cuc *CompetitionUseCase) Register(competitionRegistration dto.CompetitionRegistrationRequest) error {
+func (cuc *CompetitionUseCaseImpl) Register(competitionRegistration dto.CompetitionRegistrationRequest) error {
 	comp, err := cuc.ur.GetCompetitionByID(competitionRegistration.CompetitionID)
 	if err != nil {
 		return err
@@ -108,31 +125,31 @@ func (cuc *CompetitionUseCase) Register(competitionRegistration dto.CompetitionR
 	return err
 }
 
-func (cuc *CompetitionUseCase) RejectCompetitionRegistration(id uint) error {
+func (cuc *CompetitionUseCaseImpl) RejectCompetitionRegistration(id uint) error {
 	err := cuc.ur.RejectCompetitionRegistration(id)
 
 	return err
 }
 
-func (cuc *CompetitionUseCase) AcceptCompetitionRegistration(id uint) error {
+func (cuc *CompetitionUseCaseImpl) AcceptCompetitionRegistration(id uint) error {
 	err := cuc.ur.AcceptCompetitionRegistration(id)
 
 	return err
 }
 
-func (cuc *CompetitionUseCase) OpenCompetitionRegistrationPeriod(id uint) error {
+func (cuc *CompetitionUseCaseImpl) OpenCompetitionRegistrationPeriod(id uint) error {
 	err := cuc.ur.OpenCompetitionRegistrationPeriod(id)
 
 	return err
 }
 
-func (cuc *CompetitionUseCase) CloseCompetitionRegistrationPeriod(id uint) error {
+func (cuc *CompetitionUseCaseImpl) CloseCompetitionRegistrationPeriod(id uint) error {
 	err := cuc.ur.CloseCompetitionRegistrationPeriod(id)
 
 	return err
 }
 
-func (cuc *CompetitionUseCase) GetCompetitionRegistration(id uint) (interface{}, error) {
+func (cuc *CompetitionUseCaseImpl) GetCompetitionRegistration(id uint) (interface{}, error) {
 
 	competition, err := cuc.ur.GetCompetitionRegistration(id)
 
@@ -172,7 +189,7 @@ func (cuc *CompetitionUseCase) GetCompetitionRegistration(id uint) (interface{},
 	return competitionRegistrationsResponse, nil
 }
 
-func (cuc *CompetitionUseCase) GetAcceptedCompetitionParticipants(id uint) (interface{}, error) {
+func (cuc *CompetitionUseCaseImpl) GetAcceptedCompetitionParticipants(id uint) (interface{}, error) {
 
 	competition, err := cuc.ur.GetAcceptedCompetitionParticipants(id)
 
@@ -212,7 +229,7 @@ func (cuc *CompetitionUseCase) GetAcceptedCompetitionParticipants(id uint) (inte
 	return competitionRegistrationsResponse, nil
 }
 
-func (cuc *CompetitionUseCase) SearchCompetition(limit int, offset int, keyword string) ([]dto.CompetitionResponse, error) {
+func (cuc *CompetitionUseCaseImpl) SearchCompetition(limit int, offset int, keyword string) ([]dto.CompetitionResponse, error) {
 	var competitionsResponse []dto.CompetitionResponse
 	competitions, err := cuc.ur.SearchCompetition(limit, offset, keyword)
 	if err != nil {

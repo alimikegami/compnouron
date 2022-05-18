@@ -15,10 +15,10 @@ import (
 
 type CompetitionController struct {
 	router        *echo.Echo
-	CompetitionUC *usecase.CompetitionUseCase
+	CompetitionUC usecase.CompetitionUseCase
 }
 
-func CreateNewCompetitionController(e *echo.Echo, CompetitionUC *usecase.CompetitionUseCase) *CompetitionController {
+func CreateNewCompetitionController(e *echo.Echo, CompetitionUC usecase.CompetitionUseCase) *CompetitionController {
 	return &CompetitionController{router: e, CompetitionUC: CompetitionUC}
 }
 
@@ -45,6 +45,7 @@ func (cc *CompetitionController) InitializeCompetitionRoute(config middleware.JW
 // @Tags         Competitions
 // @Accept       json
 // @Produce      json
+// @Param data body dto.CompetitionRequest true "Request Body"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
@@ -253,7 +254,7 @@ func (cc *CompetitionController) Register(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, response.Response{
+	return c.JSON(http.StatusCreated, response.Response{
 		Status:  "success",
 		Message: nil,
 		Data:    nil,

@@ -12,6 +12,7 @@ type Competition struct {
 	Description              string
 	ContactPerson            string
 	IsTeam                   int8
+	IsTheSameInstitution     int8
 	RegistrationPeriodStatus int8
 	TeamCapacity             int8
 	Level                    string
