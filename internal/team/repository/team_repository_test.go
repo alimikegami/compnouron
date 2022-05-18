@@ -208,7 +208,7 @@ func TestGetTeamByID(t *testing.T) {
 
 	entity, err := teamRepo.GetTeamByID(1)
 	assert.NoError(t, err)
-	assert.NotNil(t, entity)
+	assert.NotEmpty(t, entity)
 }
 
 func TestGetTeamByIDNoRows(t *testing.T) {

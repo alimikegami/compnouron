@@ -58,7 +58,7 @@ func (us *UserUseCaseImpl) CreateUser(user *dto.UserRegistrationRequest) error {
 func (us *UserUseCaseImpl) Login(credential *dto.Credential) (string, error) {
 	user := us.ur.GetUserByEmail(credential.Email)
 	if user == nil {
-		return "", fmt.Errorf("user not found")
+		return "", fmt.Errorf("credentials dont match")
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(credential.Password))
 	if err != nil {
@@ -67,6 +67,7 @@ func (us *UserUseCaseImpl) Login(credential *dto.Credential) (string, error) {
 	token, err := utils.CreateSignedJWTToken(user.ID, user.Email)
 	if err != nil {
 		fmt.Println(err)
+		return "", nil
 	}
 
 	return token, nil

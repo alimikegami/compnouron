@@ -79,8 +79,14 @@ func (uc *UserController) Login(c echo.Context) error {
 	}
 	token, err := uc.userUC.Login(credential)
 	if err != nil {
+		var statusCode int
 		fmt.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Response{
+		if err.Error() == "credentials dont match" {
+			statusCode = 403
+		} else {
+			statusCode = 500
+		}
+		return c.JSON(statusCode, response.Response{
 			Status:  "error",
 			Message: err.Error(),
 			Data:    nil,
