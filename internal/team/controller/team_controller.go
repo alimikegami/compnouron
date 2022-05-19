@@ -35,7 +35,10 @@ func (tc *TeamController) InitializeTeamRoute(config middleware.JWTConfig) {
 // @Tags         Teams
 // @Accept       json
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
 // @Param id path int true "Team ID"
+// @Param data body dto.TeamRequest true "Request Body"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
@@ -65,6 +68,13 @@ func (tc *TeamController) UpdateTeam(c echo.Context) error {
 	err = tc.teamUC.UpdateTeam(userID, *team, uint(teamIDUint))
 	if err != nil {
 		fmt.Println(err)
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
@@ -85,6 +95,9 @@ func (tc *TeamController) UpdateTeam(c echo.Context) error {
 // @Tags         Teams
 // @Accept       json
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param data body dto.TeamRequest true "Request Body"
+// @Param Authorization header string true "Bearer"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
@@ -123,12 +136,15 @@ func (tc *TeamController) CreateTeam(c echo.Context) error {
 // @Description  Given the ID path parameters, this endpoint will delete the existing team's data
 // @Tags         Teams
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
 // @Param id path int true "Team ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /teams/{id} [delete]
 func (tc *TeamController) DeleteTeam(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
 	teamID := c.Param("id")
 	// userID, _ := utils.GetUserDetails(c)
 	teamIDUint, err := strconv.ParseUint(teamID, 10, 32)
@@ -141,10 +157,17 @@ func (tc *TeamController) DeleteTeam(c echo.Context) error {
 		})
 	}
 
-	err = tc.teamUC.DeleteTeam(uint(teamIDUint))
+	err = tc.teamUC.DeleteTeam(uint(teamIDUint), userID)
 
 	if err != nil {
 		fmt.Println(err)
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),

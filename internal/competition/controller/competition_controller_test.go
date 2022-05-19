@@ -227,7 +227,7 @@ func TestRegister(t *testing.T) {
 
 	// setup the endpoint
 	t.Run("success-individual-competition", func(t *testing.T) {
-		mockUseCase.On("Register", reqBodyIndividual).Return(nil).Once()
+		mockUseCase.On("Register", reqBodyIndividual, uint(1)).Return(nil).Once()
 		req, err := http.NewRequest(http.MethodPost, "/competitions/registrations", bytes.NewBuffer(jsonReqBodyIndividual))
 		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
@@ -251,7 +251,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("internal-server-error-individual", func(t *testing.T) {
-		mockUseCase.On("Register", reqBodyIndividual).Return(errors.New("unexpected DB error")).Once()
+		mockUseCase.On("Register", reqBodyIndividual, uint(1)).Return(errors.New("unexpected DB error")).Once()
 		req, err := http.NewRequest(http.MethodPost, "/competitions/registrations", bytes.NewBuffer(jsonReqBodyIndividual))
 		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
@@ -275,7 +275,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("success-team-competition", func(t *testing.T) {
-		mockUseCase.On("Register", reqBodyTeam).Return(nil).Once()
+		mockUseCase.On("Register", reqBodyTeam, uint(1)).Return(nil).Once()
 		req, err := http.NewRequest(http.MethodPost, "/competitions/registrations", bytes.NewBuffer(jsonReqBodyTeam))
 		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
@@ -299,7 +299,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("internal-server-error-team", func(t *testing.T) {
-		mockUseCase.On("Register", reqBodyTeam).Return(errors.New("unexpected DB error")).Once()
+		mockUseCase.On("Register", reqBodyTeam, uint(1)).Return(errors.New("unexpected DB error")).Once()
 		req, err := http.NewRequest(http.MethodPost, "/competitions/registrations", bytes.NewBuffer(jsonReqBodyTeam))
 		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
@@ -328,7 +328,7 @@ func TestAcceptCompetitionRegistration(t *testing.T) {
 
 	// setup the endpoint
 	t.Run("success", func(t *testing.T) {
-		mockUseCase.On("AcceptCompetitionRegistration", uint(1)).Return(nil).Once()
+		mockUseCase.On("AcceptCompetitionRegistration", uint(1), uint(1)).Return(nil).Once()
 		req, err := http.NewRequest(http.MethodPut, "/competitions/registrations", nil)
 		assert.NoError(t, err, "No request error")
 		e := echo.New()
@@ -353,7 +353,7 @@ func TestAcceptCompetitionRegistration(t *testing.T) {
 	})
 
 	t.Run("internal-server-error", func(t *testing.T) {
-		mockUseCase.On("AcceptCompetitionRegistration", uint(1)).Return(errors.New("no affected rows")).Once()
+		mockUseCase.On("AcceptCompetitionRegistration", uint(1), uint(1)).Return(errors.New("no affected rows")).Once()
 		req, err := http.NewRequest(http.MethodPut, "/competitions/registrations", nil)
 		assert.NoError(t, err, "No request error")
 		e := echo.New()
@@ -383,7 +383,7 @@ func TestRejectCompetitionRegistration(t *testing.T) {
 
 	// setup the endpoint
 	t.Run("success", func(t *testing.T) {
-		mockUseCase.On("RejectCompetitionRegistration", uint(1)).Return(nil).Once()
+		mockUseCase.On("RejectCompetitionRegistration", uint(1), uint(1)).Return(nil).Once()
 		req, err := http.NewRequest(http.MethodPut, "/competitions/registrations", nil)
 		assert.NoError(t, err, "No request error")
 		e := echo.New()
@@ -408,7 +408,7 @@ func TestRejectCompetitionRegistration(t *testing.T) {
 	})
 
 	t.Run("internal-server-error", func(t *testing.T) {
-		mockUseCase.On("RejectCompetitionRegistration", uint(1)).Return(errors.New("no affected rows")).Once()
+		mockUseCase.On("RejectCompetitionRegistration", uint(1), uint(1)).Return(errors.New("no affected rows")).Once()
 		req, err := http.NewRequest(http.MethodPut, "/competitions/registrations", nil)
 		assert.NoError(t, err, "No request error")
 		e := echo.New()

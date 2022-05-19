@@ -34,7 +34,7 @@ func (cc *CompetitionController) InitializeCompetitionRoute(config middleware.JW
 		r.PUT("/registrations/:id/reject", cc.RejectCompetitionRegistration, middleware.JWTWithConfig(config))
 		r.PUT("/:id/open", cc.OpenCompetitionRegistrationPeriod, middleware.JWTWithConfig(config))
 		r.PUT("/:id/close", cc.CloseCompetitionRegistrationPeriod, middleware.JWTWithConfig(config))
-		r.GET("/:id", cc.GetCompetitionRegistration, middleware.JWTWithConfig(config))
+		r.GET("/:id", cc.GetCompetitionByID)
 		r.GET("/:id/registrations", cc.GetCompetitionRegistration, middleware.JWTWithConfig(config))
 	}
 }
@@ -45,6 +45,8 @@ func (cc *CompetitionController) InitializeCompetitionRoute(config middleware.JW
 // @Tags         Competitions
 // @Accept       json
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
 // @Param data body dto.CompetitionRequest true "Request Body"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
@@ -77,11 +79,52 @@ func (cc *CompetitionController) CreateCompetition(c echo.Context) error {
 	})
 }
 
+// GetCompetitionByID godoc
+// @Summary      get the details of one particular competition
+// @Description  Given the competition ID on the path parameter, get the details of that particular competition
+// @Tags         Competitions
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}   response.Response{data=dto.DetailedCompetitionResponse,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions/{id} [get]
+func (cc *CompetitionController) GetCompetitionByID(c echo.Context) error {
+	competitionID := c.Param("id")
+	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	competition, err := cc.CompetitionUC.GetCompetitionByID(uint(competitionIDUint))
+
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    competition,
+	})
+}
+
 // DeleteCompetition godoc
 // @Summary      Delete competition's data
 // @Description  Given the ID path parameters, this endpoint will delete the existing competition's data
 // @Tags         Competitions
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
 // @Param id path int true "Competition ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
@@ -102,6 +145,13 @@ func (cc *CompetitionController) DeleteCompetition(c echo.Context) error {
 	err = cc.CompetitionUC.DeleteCompetition(uint(competitionIDUint), userID)
 
 	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		fmt.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
@@ -123,7 +173,10 @@ func (cc *CompetitionController) DeleteCompetition(c echo.Context) error {
 // @Tags         Competitions
 // @Accept       json
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
 // @Param id path int true "Competition ID"
+// @Param data body dto.CompetitionRequest true "Request Body"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
@@ -152,6 +205,13 @@ func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 	err = cc.CompetitionUC.UpdateCompetition(*competition, uint(competitionIDUint), userID)
 	if err != nil {
 		fmt.Println(err)
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
@@ -170,6 +230,8 @@ func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 // @Description  This endpoint will return the competitions data with pagination implemented and also with keyword searching capability
 // @Tags         Competitions
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
 // @Param        limit     query      int     true  "rows retrieved limit"
 // @Param        offset    query      int     true  "skipped rows"
 // @Param        keyword   query      string  false  "competition name keyword"
@@ -229,11 +291,15 @@ func (cc *CompetitionController) GetCompetitions(c echo.Context) error {
 // @Tags         Competitions
 // @Accept       json
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
+// @Param data body dto.CompetitionRegistrationRequest true "Request Body"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /competitions/registrations [post]
 func (cc *CompetitionController) Register(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
 	competitionRegistration := new(dto.CompetitionRegistrationRequest)
 	if err := c.Bind(competitionRegistration); err != nil {
 		fmt.Println(err)
@@ -243,7 +309,7 @@ func (cc *CompetitionController) Register(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-	err := cc.CompetitionUC.Register(*competitionRegistration)
+	err := cc.CompetitionUC.Register(*competitionRegistration, userID)
 
 	if err != nil {
 		fmt.Println(err)
@@ -266,12 +332,15 @@ func (cc *CompetitionController) Register(c echo.Context) error {
 // @Description  Given the competition registration ID path parameters, this endpoint will reject the competition registration
 // @Tags         Competitions
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
 // @Param id path int true "Competition ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /competitions/registrations/{id}/reject [put]
 func (cc *CompetitionController) RejectCompetitionRegistration(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
 	competitionRegistrationID := c.Param("id")
 	competitionRegistrationIDUint, err := strconv.ParseUint(competitionRegistrationID, 10, 32)
 	if err != nil {
@@ -282,8 +351,15 @@ func (cc *CompetitionController) RejectCompetitionRegistration(c echo.Context) e
 		})
 	}
 
-	err = cc.CompetitionUC.RejectCompetitionRegistration(uint(competitionRegistrationIDUint))
+	err = cc.CompetitionUC.RejectCompetitionRegistration(uint(competitionRegistrationIDUint), userID)
 	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
@@ -303,12 +379,15 @@ func (cc *CompetitionController) RejectCompetitionRegistration(c echo.Context) e
 // @Description  Given the competition registration ID path parameters, this endpoint will accept the competition registration
 // @Tags         Competitions
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
 // @Param id path int true "Competition ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /competitions/registrations/{id}/accept [put]
 func (cc *CompetitionController) AcceptCompetitionRegistration(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
 	competitionRegistrationID := c.Param("id")
 	competitionRegistrationIDUint, err := strconv.ParseUint(competitionRegistrationID, 10, 32)
 	if err != nil {
@@ -319,8 +398,15 @@ func (cc *CompetitionController) AcceptCompetitionRegistration(c echo.Context) e
 		})
 	}
 
-	err = cc.CompetitionUC.AcceptCompetitionRegistration(uint(competitionRegistrationIDUint))
+	err = cc.CompetitionUC.AcceptCompetitionRegistration(uint(competitionRegistrationIDUint), userID)
 	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
@@ -340,12 +426,15 @@ func (cc *CompetitionController) AcceptCompetitionRegistration(c echo.Context) e
 // @Description  Given the competition ID path parameters, this endpoint will close the competition registration period
 // @Tags         Competitions
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
 // @Param id path int true "Competition ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /competitions/{id}/close [put]
 func (cc *CompetitionController) CloseCompetitionRegistrationPeriod(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
 	competition := c.Param("id")
 	competitionUint, err := strconv.ParseUint(competition, 10, 32)
 	if err != nil {
@@ -356,8 +445,15 @@ func (cc *CompetitionController) CloseCompetitionRegistrationPeriod(c echo.Conte
 		})
 	}
 
-	err = cc.CompetitionUC.CloseCompetitionRegistrationPeriod(uint(competitionUint))
+	err = cc.CompetitionUC.CloseCompetitionRegistrationPeriod(uint(competitionUint), userID)
 	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
@@ -377,12 +473,15 @@ func (cc *CompetitionController) CloseCompetitionRegistrationPeriod(c echo.Conte
 // @Description  Given the competition ID path parameters, this endpoint will open the competition registration period
 // @Tags         Competitions
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
 // @Param id path int true "Competition ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /competitions/{id}/open [put]
 func (cc *CompetitionController) OpenCompetitionRegistrationPeriod(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
 	competition := c.Param("id")
 	competitionUint, err := strconv.ParseUint(competition, 10, 32)
 	if err != nil {
@@ -393,8 +492,15 @@ func (cc *CompetitionController) OpenCompetitionRegistrationPeriod(c echo.Contex
 		})
 	}
 
-	err = cc.CompetitionUC.OpenCompetitionRegistrationPeriod(uint(competitionUint))
+	err = cc.CompetitionUC.OpenCompetitionRegistrationPeriod(uint(competitionUint), userID)
 	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
@@ -414,6 +520,8 @@ func (cc *CompetitionController) OpenCompetitionRegistrationPeriod(c echo.Contex
 // @Description  Given the ID path parameters and the status query parameteres, this endpoint will retrieve the competition registration data of a particular ID and accepted status if the query parameters are given
 // @Tags         Competitions
 // @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
 // @Param        status    query      int     true  "filter to get accepted registrations record"
 // @Param id path int true "Competition ID"
 // @Success      200  {object}   response.Response{data=interface{},status=string,message=string}
@@ -421,6 +529,7 @@ func (cc *CompetitionController) OpenCompetitionRegistrationPeriod(c echo.Contex
 // @Failure      500  {object}  response.Response
 // @Router       /competitions/{id}/registrations [get]
 func (cc *CompetitionController) GetCompetitionRegistration(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
 	status := c.QueryParam("status")
 	competitionID := c.Param("id")
 	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
@@ -434,11 +543,19 @@ func (cc *CompetitionController) GetCompetitionRegistration(c echo.Context) erro
 	}
 	var res interface{}
 	if status == "accepted" {
-		res, err = cc.CompetitionUC.GetAcceptedCompetitionParticipants(uint(competitionIDUint))
+		res, err = cc.CompetitionUC.GetAcceptedCompetitionParticipants(uint(competitionIDUint), userID)
 	} else {
-		res, err = cc.CompetitionUC.GetCompetitionRegistration(uint(competitionIDUint))
+		res, err = cc.CompetitionUC.GetCompetitionRegistration(uint(competitionIDUint), userID)
 	}
 	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
+
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),

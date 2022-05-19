@@ -28,6 +28,52 @@ func (_m *UserUseCase) CreateUser(user *dto.UserRegistrationRequest) error {
 	return r0
 }
 
+// GetCompetitionRegistrationHistory provides a mock function with given fields: userID
+func (_m *UserUseCase) GetCompetitionRegistrationHistory(userID uint) ([]dto.UserCompetitionHistory, error) {
+	ret := _m.Called(userID)
+
+	var r0 []dto.UserCompetitionHistory
+	if rf, ok := ret.Get(0).(func(uint) []dto.UserCompetitionHistory); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]dto.UserCompetitionHistory)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRecruitmentApplicationHistory provides a mock function with given fields: userID
+func (_m *UserUseCase) GetRecruitmentApplicationHistory(userID uint) ([]dto.UserRecruitmentApplicationHistory, error) {
+	ret := _m.Called(userID)
+
+	var r0 []dto.UserRecruitmentApplicationHistory
+	if rf, ok := ret.Get(0).(func(uint) []dto.UserRecruitmentApplicationHistory); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]dto.UserRecruitmentApplicationHistory)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Login provides a mock function with given fields: credential
 func (_m *UserUseCase) Login(credential *dto.Credential) (string, error) {
 	ret := _m.Called(credential)

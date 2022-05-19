@@ -53,8 +53,6 @@ func initializeDatabaseConnection() (*gorm.DB, error) {
 
 // @host      localhost:1323
 
-// @securityDefinitions.basic  BasicAuth
-
 func main() {
 	e := echo.New()
 
@@ -79,11 +77,6 @@ func main() {
 	cc := competitionController.CreateNewCompetitionController(e, cuc)
 	cc.InitializeCompetitionRoute(config)
 
-	userRepository := repository.CreateNewUserRepository(db)
-	userUseCase := usecase.CreateNewUserUseCase(userRepository)
-	userController := controller.CreateNewUserController(e, userUseCase)
-	userController.InitializeUserRoute(config)
-
 	tr := teamRepository.CreateNewTeamRepository(db)
 	tuc := teamUseCase.CreateNewTeamUseCase(tr)
 	tc := teamController.CreateNewTeamController(e, tuc)
@@ -92,6 +85,11 @@ func main() {
 	rr := recruitmentRepository.CreateNewRecruitmentRepository(db)
 	ruc := recruitmentUseCase.CreateNewRecruitmentUseCase(rr, tr)
 	rc := recruitmentController.CreateNewRecruitmentController(e, ruc)
+
+	userRepository := repository.CreateNewUserRepository(db)
+	userUseCase := usecase.CreateNewUserUseCase(userRepository, cr, rr)
+	userController := controller.CreateNewUserController(e, userUseCase)
+	userController.InitializeUserRoute(config)
 	rc.InitializeRecruitmentRoute(config)
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	e.Logger.Fatal(e.Start(":1323"))

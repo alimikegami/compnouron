@@ -16,8 +16,8 @@ type Competition struct {
 	RegistrationPeriodStatus int8
 	TeamCapacity             int8
 	Level                    string
-	CreatedAt                time.Time `json:"createdAt"`
-	UpdatedAt                time.Time `json:"updatedAt"`
+	CreatedAt                time.Time
+	UpdatedAt                time.Time
 	UserID                   uint
 	User                     userEntity.User
 	CompetitionRegistrations []CompetitionRegistration

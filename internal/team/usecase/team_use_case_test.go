@@ -41,56 +41,80 @@ func TestCreateTeam(t *testing.T) {
 
 func TestDeleteTeam(t *testing.T) {
 	mockRepo := teamMocks.NewTeamRepository(t)
-	mockRepo.On("DeleteTeam", uint(1)).Return(nil)
 	testUseCase := CreateNewTeamUseCase(mockRepo)
-	err := testUseCase.DeleteTeam(uint(1))
-	assert.NoError(t, err)
-	mockRepo.AssertExpectations(t)
-}
+	t.Run("success", func(t *testing.T) {
+		mockRepo.On("GetTeamLeader", uint(1)).Return(uint(1), nil).Once()
+		mockRepo.On("DeleteTeam", uint(1)).Return(nil).Once()
+		err := testUseCase.DeleteTeam(uint(1), uint(1))
+		assert.NoError(t, err)
+		mockRepo.AssertExpectations(t)
+	})
 
-func TestDeleteTeamErrorOccured(t *testing.T) {
-	mockRepo := teamMocks.NewTeamRepository(t)
-	mockRepo.On("DeleteTeam", uint(111)).Return(errors.New("no rows affected"))
-	testUseCase := CreateNewTeamUseCase(mockRepo)
-	err := testUseCase.DeleteTeam(uint(111))
-	assert.Error(t, err)
-	mockRepo.AssertExpectations(t)
+	t.Run("action-unauthorized", func(t *testing.T) {
+		mockRepo.On("GetTeamLeader", uint(1)).Return(uint(2), nil).Once()
+		err := testUseCase.DeleteTeam(uint(1), uint(1))
+		assert.Error(t, err)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("repo-error", func(t *testing.T) {
+		mockRepo.On("GetTeamLeader", uint(111)).Return(uint(111), nil).Once()
+		mockRepo.On("DeleteTeam", uint(111)).Return(errors.New("no rows affected")).Once()
+		err := testUseCase.DeleteTeam(uint(111), uint(111))
+		assert.Error(t, err)
+		mockRepo.AssertExpectations(t)
+	})
 }
 
 func TestUpdateTeam(t *testing.T) {
 	mockRepo := teamMocks.NewTeamRepository(t)
-	mockRepo.On("UpdateTeam", entity.Team{
-		ID:          1,
-		Name:        "Team 1",
-		Description: "Team Technoscape Hackathon 2022",
-		Capacity:    4,
-	}).Return(nil)
-	testUseCase := CreateNewTeamUseCase(mockRepo)
-	err := testUseCase.UpdateTeam(1, dto.TeamRequest{
-		Name:        "Team 1",
-		Description: "Team Technoscape Hackathon 2022",
-		Capacity:    4,
-	}, 1)
-	assert.NoError(t, err)
-	mockRepo.AssertExpectations(t)
-}
+	t.Run("success", func(t *testing.T) {
+		mockRepo.On("GetTeamLeader", uint(1)).Return(uint(1), nil).Once()
+		mockRepo.On("UpdateTeam", entity.Team{
+			ID:          1,
+			Name:        "Team 1",
+			Description: "Team Technoscape Hackathon 2022",
+			Capacity:    4,
+		}).Return(nil).Once()
+		testUseCase := CreateNewTeamUseCase(mockRepo)
+		err := testUseCase.UpdateTeam(1, dto.TeamRequest{
+			Name:        "Team 1",
+			Description: "Team Technoscape Hackathon 2022",
+			Capacity:    4,
+		}, 1)
+		assert.NoError(t, err)
+		mockRepo.AssertExpectations(t)
+	})
 
-func TestUpdateTeamErrorOccured(t *testing.T) {
-	mockRepo := teamMocks.NewTeamRepository(t)
-	mockRepo.On("UpdateTeam", entity.Team{
-		ID:          9999,
-		Name:        "Team 1",
-		Description: "Team Technoscape Hackathon 2022",
-		Capacity:    4,
-	}).Return(errors.New("no affected rows"))
-	testUseCase := CreateNewTeamUseCase(mockRepo)
-	err := testUseCase.UpdateTeam(1, dto.TeamRequest{
-		Name:        "Team 1",
-		Description: "Team Technoscape Hackathon 2022",
-		Capacity:    4,
-	}, 9999)
-	assert.Error(t, err)
-	mockRepo.AssertExpectations(t)
+	t.Run("action-unauthorized", func(t *testing.T) {
+		mockRepo.On("GetTeamLeader", uint(1)).Return(uint(2), nil).Once()
+		testUseCase := CreateNewTeamUseCase(mockRepo)
+		err := testUseCase.UpdateTeam(1, dto.TeamRequest{
+			Name:        "Team 1",
+			Description: "Team Technoscape Hackathon 2022",
+			Capacity:    4,
+		}, 1)
+		assert.Error(t, err)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("unexpected-error", func(t *testing.T) {
+		mockRepo.On("GetTeamLeader", uint(1)).Return(uint(1), nil).Once()
+		mockRepo.On("UpdateTeam", entity.Team{
+			ID:          1,
+			Name:        "Team 1",
+			Description: "Team Technoscape Hackathon 2022",
+			Capacity:    4,
+		}).Return(errors.New("no affected rows"))
+		testUseCase := CreateNewTeamUseCase(mockRepo)
+		err := testUseCase.UpdateTeam(1, dto.TeamRequest{
+			Name:        "Team 1",
+			Description: "Team Technoscape Hackathon 2022",
+			Capacity:    4,
+		}, 1)
+		assert.Error(t, err)
+		mockRepo.AssertExpectations(t)
+	})
 }
 
 func TestGetTeamsByUserID(t *testing.T) {
@@ -137,56 +161,25 @@ func TestGetTeamDetailsByID(t *testing.T) {
 		Name:        "Team 1",
 		Description: "Team Technoscape Hackathon 2022",
 		Capacity:    4,
-	}, nil)
-	mockRepo.On("GetTeamMembersByID", uint(1)).Return([]entity.TeamMember{
-		{
-			ID:        1,
-			TeamID:    1,
-			UserID:    1,
-			IsLeader:  1,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		},
-		{
-			ID:        2,
-			TeamID:    1,
-			UserID:    2,
-			IsLeader:  0,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		},
-	}, nil)
-	testUseCase := CreateNewTeamUseCase(mockRepo)
-	res, err := testUseCase.GetTeamDetailsByID(uint(1))
-	assert.NoError(t, err)
-	assert.NotEmpty(t, res)
-	mockRepo.AssertExpectations(t)
-}
+		TeamMembers: []entity.TeamMember{
+			{
+				ID:        1,
+				TeamID:    1,
+				UserID:    1,
+				IsLeader:  1,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
+			{
+				ID:        2,
+				TeamID:    1,
+				UserID:    2,
+				IsLeader:  0,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
+		}}, nil)
 
-func TestGetTeamDetailsByIDErrorInGetTeamID(t *testing.T) {
-	mockRepo := teamMocks.NewTeamRepository(t)
-	mockRepo.On("GetTeamByID", uint(1)).Return(entity.Team{
-		ID:          1,
-		Name:        "Team 1",
-		Description: "Team Technoscape Hackathon 2022",
-		Capacity:    4,
-	}, errors.New("no rows found"))
-	testUseCase := CreateNewTeamUseCase(mockRepo)
-	res, err := testUseCase.GetTeamDetailsByID(uint(1))
-	assert.Error(t, err)
-	assert.Empty(t, res)
-	mockRepo.AssertExpectations(t)
-}
-
-func TestGetTeamDetailsByIDTeamMembersNotFound(t *testing.T) {
-	mockRepo := teamMocks.NewTeamRepository(t)
-	mockRepo.On("GetTeamByID", uint(1)).Return(entity.Team{
-		ID:          1,
-		Name:        "Team 1",
-		Description: "Team Technoscape Hackathon 2022",
-		Capacity:    4,
-	}, nil)
-	mockRepo.On("GetTeamMembersByID", uint(1)).Return([]entity.TeamMember{}, nil)
 	testUseCase := CreateNewTeamUseCase(mockRepo)
 	res, err := testUseCase.GetTeamDetailsByID(uint(1))
 	assert.NoError(t, err)

@@ -5,7 +5,6 @@ import (
 
 	"github.com/alimikegami/compnouron/internal/team/entity"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type TeamRepository interface {
@@ -15,7 +14,7 @@ type TeamRepository interface {
 	DeleteTeam(id uint) error
 	GetTeamsByUserID(ID uint) ([]entity.Team, error)
 	GetTeamByID(teamID uint) (entity.Team, error)
-	GetTeamMembersByID(teamID uint) ([]entity.TeamMember, error)
+	GetTeamLeader(teamID uint) (uint, error)
 }
 
 type TeamRepositoryImpl struct {
@@ -33,6 +32,17 @@ func (cr *TeamRepositoryImpl) CreateTeam(team entity.Team) (entity.Team, error) 
 	}
 
 	return team, nil
+}
+
+func (cr *TeamRepositoryImpl) GetTeamLeader(teamID uint) (uint, error) {
+	var leader entity.TeamMember
+	result := cr.db.First(&leader, "team_id = ? AND is_leader = 1", teamID)
+
+	if result.Error != nil {
+		return 0, result.Error
+	}
+
+	return leader.UserID, nil
 }
 
 func (cr *TeamRepositoryImpl) AddTeamMember(userID uint, teamID uint, isLeader uint) error {
@@ -88,21 +98,11 @@ func (tr *TeamRepositoryImpl) GetTeamsByUserID(ID uint) ([]entity.Team, error) {
 
 func (tr *TeamRepositoryImpl) GetTeamByID(teamID uint) (entity.Team, error) {
 	var team entity.Team
-	result := tr.db.First(&team, teamID)
+
+	result := tr.db.Debug().Preload("TeamMembers.User").Preload("TeamMembers").Find(&team, teamID)
 	if result.Error != nil {
 		return entity.Team{}, result.Error
 	}
 
 	return team, nil
-}
-
-func (tr *TeamRepositoryImpl) GetTeamMembersByID(teamID uint) ([]entity.TeamMember, error) {
-	var teamMembers []entity.TeamMember
-
-	result := tr.db.Debug().Preload(clause.Associations).Where("team_id = ?", teamID).Find(&teamMembers)
-	if result.Error != nil {
-		return []entity.TeamMember{}, result.Error
-	}
-
-	return teamMembers, nil
 }

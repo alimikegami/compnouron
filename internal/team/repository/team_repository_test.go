@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"regexp"
 	"testing"
 	"time"
@@ -110,28 +111,28 @@ func TestDeleteTeamNoRowsAffected(t *testing.T) {
 	assert.Error(t, err)
 }
 
-// func TestDeleteTeamUnexpectedDatabaseError(t *testing.T) {
-// 	mockedDB, mockObj, err := sqlmock.New()
-// 	db, err := gorm.Open(mysql.Dialector{
-// 		&mysql.Config{
-// 			Conn:                      mockedDB,
-// 			SkipInitializeWithVersion: true,
-// 		},
-// 	}, &gorm.Config{})
-// 	if err != nil {
-// 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-// 	}
-// 	teamRepo := CreateNewTeamRepository(db)
+func TestDeleteTeamUnexpectedDatabaseError(t *testing.T) {
+	mockedDB, mockObj, err := sqlmock.New()
+	db, err := gorm.Open(mysql.Dialector{
+		&mysql.Config{
+			Conn:                      mockedDB,
+			SkipInitializeWithVersion: true,
+		},
+	}, &gorm.Config{})
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	teamRepo := CreateNewTeamRepository(db)
 
-// 	defer mockedDB.Close()
+	defer mockedDB.Close()
 
-// 	mockObj.ExpectBegin()
-// 	mockObj.ExpectExec(regexp.QuoteMeta("DELETE")).WithArgs(99).WillReturnResult(sqlmock.NewErrorResult(driver.ErrBadConn))
-// 	mockObj.ExpectCommit()
+	mockObj.ExpectBegin()
+	mockObj.ExpectExec(regexp.QuoteMeta("DELETE")).WithArgs(99).WillReturnError(errors.New("unexpected error"))
+	mockObj.ExpectCommit()
 
-// 	err = teamRepo.DeleteTeam(99)
-// 	assert.NoError(t, err)
-// }
+	err = teamRepo.DeleteTeam(99)
+	assert.Error(t, err)
+}
 
 func TestUpdateTeam(t *testing.T) {
 	mockedDB, mockObj, err := sqlmock.New()
@@ -187,50 +188,6 @@ func TestUpdateTeamNoRowsAffected(t *testing.T) {
 		Capacity:    5,
 	})
 	assert.Error(t, err)
-}
-
-func TestGetTeamByID(t *testing.T) {
-	mockedDB, mockObj, err := sqlmock.New()
-	db, err := gorm.Open(mysql.Dialector{
-		&mysql.Config{
-			Conn:                      mockedDB,
-			SkipInitializeWithVersion: true,
-		},
-	}, &gorm.Config{})
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-	teamRepo := CreateNewTeamRepository(db)
-
-	defer mockedDB.Close()
-
-	mockObj.ExpectQuery("SELECT \\* FROM `teams` WHERE `teams`.`id` = \\? ORDER BY `teams`\\.`id` LIMIT 1").WithArgs(1).WillReturnRows(sqlmock.NewRows([]string{"id", "name", "description", "capacity", "created_at", "updated_at"}).AddRow(1, "Team 1", "Team Hackathon Technoscape 2023", 4, time.Now(), time.Now()))
-
-	entity, err := teamRepo.GetTeamByID(1)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, entity)
-}
-
-func TestGetTeamByIDNoRows(t *testing.T) {
-	mockedDB, mockObj, err := sqlmock.New()
-	db, err := gorm.Open(mysql.Dialector{
-		&mysql.Config{
-			Conn:                      mockedDB,
-			SkipInitializeWithVersion: true,
-		},
-	}, &gorm.Config{})
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-	teamRepo := CreateNewTeamRepository(db)
-
-	defer mockedDB.Close()
-
-	mockObj.ExpectQuery("SELECT \\* FROM `teams` WHERE `teams`.`id` = \\? ORDER BY `teams`\\.`id` LIMIT 1").WithArgs(1).WillReturnRows(sqlmock.NewRows(nil))
-
-	entity, err := teamRepo.GetTeamByID(1)
-	assert.Error(t, err)
-	assert.Empty(t, entity)
 }
 
 func TestGetTeamsByUserID(t *testing.T) {

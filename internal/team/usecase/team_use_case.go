@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"errors"
+
 	"github.com/alimikegami/compnouron/internal/team/dto"
 	"github.com/alimikegami/compnouron/internal/team/entity"
 	"github.com/alimikegami/compnouron/internal/team/repository"
@@ -8,7 +10,7 @@ import (
 
 type TeamUseCase interface {
 	CreateTeam(userID uint, team dto.TeamRequest) error
-	DeleteTeam(id uint) error
+	DeleteTeam(id uint, userID uint) error
 	UpdateTeam(userID uint, team dto.TeamRequest, teamID uint) error
 	GetTeamsByUserID(userID uint) ([]dto.BriefTeamResponse, error)
 	GetTeamDetailsByID(teamID uint) (dto.TeamDetailsResponse, error)
@@ -39,13 +41,31 @@ func (tuc *TeamUseCaseImpl) CreateTeam(userID uint, team dto.TeamRequest) error 
 	return err
 }
 
-func (tuc *TeamUseCaseImpl) DeleteTeam(id uint) error {
-	err := tuc.tr.DeleteTeam(id)
+func (tuc *TeamUseCaseImpl) DeleteTeam(id uint, userID uint) error {
+	teamOwner, err := tuc.tr.GetTeamLeader(id)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if teamOwner != userID {
+		return errors.New("action unauthorized")
+	}
+
+	err = tuc.tr.DeleteTeam(id)
 
 	return err
 }
 
 func (tuc *TeamUseCaseImpl) UpdateTeam(userID uint, team dto.TeamRequest, teamID uint) error {
+	teamOwner, err := tuc.tr.GetTeamLeader(teamID)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if teamOwner != userID {
+		return errors.New("action unauthorized")
+	}
+
 	teamEntity := entity.Team{
 		ID:          teamID,
 		Name:        team.Name,
@@ -53,7 +73,7 @@ func (tuc *TeamUseCaseImpl) UpdateTeam(userID uint, team dto.TeamRequest, teamID
 		Capacity:    team.Capacity,
 	}
 
-	err := tuc.tr.UpdateTeam(teamEntity)
+	err = tuc.tr.UpdateTeam(teamEntity)
 	return err
 }
 
@@ -87,11 +107,7 @@ func (tuc *TeamUseCaseImpl) GetTeamDetailsByID(teamID uint) (dto.TeamDetailsResp
 		Capacity:    team.Capacity,
 	}
 
-	members, err := tuc.tr.GetTeamMembersByID(teamID)
-	if err != nil {
-		return dto.TeamDetailsResponse{}, err
-	}
-	for _, member := range members {
+	for _, member := range team.TeamMembers {
 		teamDetails.TeamMembers = append(teamDetails.TeamMembers, dto.TeamMemberResponse{
 			UserID:   member.ID,
 			Name:     member.User.Name,

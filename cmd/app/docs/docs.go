@@ -27,6 +27,11 @@ const docTemplate = `{
     "paths": {
         "/competitions": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "This endpoint will return the competitions data with pagination implemented and also with keyword searching capability",
                 "produces": [
                     "application/json"
@@ -36,6 +41,13 @@ const docTemplate = `{
                 ],
                 "summary": "Get competitions data",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "rows retrieved limit",
@@ -100,6 +112,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the request body, create a competition record in the database",
                 "consumes": [
                     "application/json"
@@ -111,6 +128,24 @@ const docTemplate = `{
                     "Competitions"
                 ],
                 "summary": "Create new competition",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CompetitionRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -153,6 +188,11 @@ const docTemplate = `{
         },
         "/competitions/registrations": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the request body, create a competition registration record in the database",
                 "consumes": [
                     "application/json"
@@ -164,6 +204,24 @@ const docTemplate = `{
                     "Competitions"
                 ],
                 "summary": "Create new competition registrations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CompetitionRegistrationRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -206,6 +264,11 @@ const docTemplate = `{
         },
         "/competitions/registrations/{id}/accept": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the competition registration ID path parameters, this endpoint will accept the competition registration",
                 "produces": [
                     "application/json"
@@ -215,6 +278,13 @@ const docTemplate = `{
                 ],
                 "summary": "Accept competition application",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Competition ID",
@@ -265,6 +335,11 @@ const docTemplate = `{
         },
         "/competitions/registrations/{id}/reject": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the competition registration ID path parameters, this endpoint will reject the competition registration",
                 "produces": [
                     "application/json"
@@ -274,6 +349,13 @@ const docTemplate = `{
                 ],
                 "summary": "Reject competition application",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Competition ID",
@@ -323,7 +405,63 @@ const docTemplate = `{
             }
         },
         "/competitions/{id}": {
+            "get": {
+                "description": "Given the competition ID on the path parameter, get the details of that particular competition",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Competitions"
+                ],
+                "summary": "get the details of one particular competition",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.DetailedCompetitionResponse"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the request body and the ID path parameters, this endpoint will update the existing competition's data",
                 "consumes": [
                     "application/json"
@@ -337,11 +475,27 @@ const docTemplate = `{
                 "summary": "Update competition's data",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "Competition ID",
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CompetitionRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -384,6 +538,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the ID path parameters, this endpoint will delete the existing competition's data",
                 "produces": [
                     "application/json"
@@ -393,6 +552,13 @@ const docTemplate = `{
                 ],
                 "summary": "Delete competition's data",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Competition ID",
@@ -443,6 +609,11 @@ const docTemplate = `{
         },
         "/competitions/{id}/close": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the competition ID path parameters, this endpoint will close the competition registration period",
                 "produces": [
                     "application/json"
@@ -452,6 +623,13 @@ const docTemplate = `{
                 ],
                 "summary": "Close competition registration period",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Competition ID",
@@ -502,6 +680,11 @@ const docTemplate = `{
         },
         "/competitions/{id}/open": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the competition ID path parameters, this endpoint will open the competition registration period",
                 "produces": [
                     "application/json"
@@ -511,6 +694,13 @@ const docTemplate = `{
                 ],
                 "summary": "Open competition registration period",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Competition ID",
@@ -561,6 +751,11 @@ const docTemplate = `{
         },
         "/competitions/{id}/registrations": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the ID path parameters and the status query parameteres, this endpoint will retrieve the competition registration data of a particular ID and accepted status if the query parameters are given",
                 "produces": [
                     "application/json"
@@ -570,6 +765,13 @@ const docTemplate = `{
                 ],
                 "summary": "Get competition registration data",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "filter to get accepted registrations record",
@@ -700,6 +902,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the request body, create a recruiment record in the database",
                 "consumes": [
                     "application/json"
@@ -711,6 +918,24 @@ const docTemplate = `{
                     "Recruitments"
                 ],
                 "summary": "Create new recruitment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RecruitmentRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -753,6 +978,11 @@ const docTemplate = `{
         },
         "/recruitments/applications": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the request body, create a recruiment application record in the database",
                 "consumes": [
                     "application/json"
@@ -764,6 +994,24 @@ const docTemplate = `{
                     "Recruitments"
                 ],
                 "summary": "Create new recruitment appliation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RecruitmentApplicationRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -806,6 +1054,11 @@ const docTemplate = `{
         },
         "/recruitments/applications/{id}/accept": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the recruitment application ID path parameters, this endpoint will accept the recruitment application",
                 "produces": [
                     "application/json"
@@ -815,6 +1068,13 @@ const docTemplate = `{
                 ],
                 "summary": "Accept recruitment application",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Recruitment ID",
@@ -865,6 +1125,11 @@ const docTemplate = `{
         },
         "/recruitments/applications/{id}/reject": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the recruitment application ID path parameters, this endpoint will reject the recruitment application",
                 "produces": [
                     "application/json"
@@ -874,6 +1139,13 @@ const docTemplate = `{
                 ],
                 "summary": "Reject recruitment application",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Recruitment ID",
@@ -924,6 +1196,11 @@ const docTemplate = `{
         },
         "/recruitments/teams/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the team ID on path parameter, this endpoint will return the recruitment data associated with that team",
                 "produces": [
                     "application/json"
@@ -933,6 +1210,13 @@ const docTemplate = `{
                 ],
                 "summary": "Get recruitment's data of a particular team",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Team ID",
@@ -986,6 +1270,11 @@ const docTemplate = `{
         },
         "/recruitments/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the recruitment ID on path parameter, this endpoint will return the detailed data associated with that particular recruitment",
                 "produces": [
                     "application/json"
@@ -995,6 +1284,13 @@ const docTemplate = `{
                 ],
                 "summary": "Get detailed recruitment's data",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Recruitment ID",
@@ -1043,6 +1339,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the request body and the ID path parameters, this endpoint will update the existing recruitment's data",
                 "consumes": [
                     "application/json"
@@ -1056,11 +1357,27 @@ const docTemplate = `{
                 "summary": "Update recruitment's data",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "Recruitment ID",
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RecruitmentRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -1103,6 +1420,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the ID path parameters, this endpoint will delete the existing recruitment's data",
                 "produces": [
                     "application/json"
@@ -1112,6 +1434,13 @@ const docTemplate = `{
                 ],
                 "summary": "Delete recruitment's data",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Recruitment ID",
@@ -1162,6 +1491,11 @@ const docTemplate = `{
         },
         "/recruitments/{id}/close": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the recruitment ID path parameters, this endpoint will close the recruitment application period",
                 "produces": [
                     "application/json"
@@ -1171,6 +1505,13 @@ const docTemplate = `{
                 ],
                 "summary": "Close recruitment application period",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Recruitment ID",
@@ -1221,6 +1562,11 @@ const docTemplate = `{
         },
         "/recruitments/{id}/open": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the recruitment ID path parameters, this endpoint will open the recruitment application period",
                 "produces": [
                     "application/json"
@@ -1230,6 +1576,13 @@ const docTemplate = `{
                 ],
                 "summary": "Open recruitment application period",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Recruitment ID",
@@ -1280,6 +1633,11 @@ const docTemplate = `{
         },
         "/teams": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the request body, the API will create a new team data",
                 "consumes": [
                     "application/json"
@@ -1291,6 +1649,24 @@ const docTemplate = `{
                     "Teams"
                 ],
                 "summary": "Create new team",
+                "parameters": [
+                    {
+                        "description": "Request Body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.TeamRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1395,6 +1771,11 @@ const docTemplate = `{
         },
         "/teams/{id}": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the request body and the ID path parameters, this endpoint will update the existing team's data",
                 "consumes": [
                     "application/json"
@@ -1408,11 +1789,27 @@ const docTemplate = `{
                 "summary": "Update team's data",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "Team ID",
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.TeamRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -1455,6 +1852,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Given the ID path parameters, this endpoint will delete the existing team's data",
                 "produces": [
                     "application/json"
@@ -1464,6 +1866,13 @@ const docTemplate = `{
                 ],
                 "summary": "Delete team's data",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Team ID",
@@ -1525,6 +1934,17 @@ const docTemplate = `{
                     "Users"
                 ],
                 "summary": "Create new user account",
+                "parameters": [
+                    {
+                        "description": "Request Body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserRegistrationRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1578,6 +1998,17 @@ const docTemplate = `{
                     "Users"
                 ],
                 "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "Request Body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.Credential"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1693,6 +2124,46 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CompetitionRegistrationRequest": {
+            "type": "object",
+            "properties": {
+                "competitionID": {
+                    "type": "integer"
+                },
+                "teamID": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CompetitionRequest": {
+            "type": "object",
+            "properties": {
+                "contactPerson": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "isTeam": {
+                    "type": "integer"
+                },
+                "isTheSameInstitution": {
+                    "type": "integer"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "teamCapacity": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.CompetitionResponse": {
             "type": "object",
             "properties": {
@@ -1710,6 +2181,63 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.Credential": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.DetailedCompetitionResponse": {
+            "type": "object",
+            "properties": {
+                "contactPerson": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isTeam": {
+                    "type": "integer"
+                },
+                "isTheSameInstitution": {
+                    "type": "integer"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "registrationPeriodStatus": {
+                    "type": "integer"
+                },
+                "teamCapacity": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "integer"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RecruitmentApplicationRequest": {
+            "type": "object",
+            "properties": {
+                "recruitmentID": {
+                    "type": "integer"
                 }
             }
         },
@@ -1747,6 +2275,20 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.RecruitmentRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "teamID": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.RecruitmentResponse": {
             "type": "object",
             "properties": {
@@ -1763,6 +2305,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "teamName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SkillRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
                     "type": "string"
                 }
             }
@@ -1801,6 +2351,20 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.TeamRequest": {
+            "type": "object",
+            "properties": {
+                "capacity": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.TokenResponse": {
             "type": "object",
             "properties": {
@@ -1809,6 +2373,32 @@ const docTemplate = `{
                 },
                 "tokenType": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.UserRegistrationRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "schoolInstitution": {
+                    "type": "string"
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.SkillRequest"
+                    }
                 }
             }
         },
@@ -1821,11 +2411,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "BasicAuth": {
-            "type": "basic"
         }
     }
 }`

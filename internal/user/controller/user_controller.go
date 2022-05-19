@@ -7,6 +7,7 @@ import (
 	"github.com/alimikegami/compnouron/internal/user/dto"
 	"github.com/alimikegami/compnouron/internal/user/usecase"
 	"github.com/alimikegami/compnouron/pkg/response"
+	"github.com/alimikegami/compnouron/pkg/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -19,6 +20,8 @@ type UserController struct {
 func (uc *UserController) InitializeUserRoute(config middleware.JWTConfig) {
 	uc.router.POST("/users", uc.CreateUser)
 	uc.router.POST("/users/login", uc.Login)
+	uc.router.GET("/users/competitions/registrations", uc.GetCompetitionRegistrationHistory, middleware.JWTWithConfig(config))
+	uc.router.GET("/users/recruitments/applications", uc.GetRecruitmentApplicationHistory, middleware.JWTWithConfig(config))
 }
 
 // CreateUser godoc
@@ -27,6 +30,7 @@ func (uc *UserController) InitializeUserRoute(config middleware.JWTConfig) {
 // @Tags         Users
 // @Accept       json
 // @Produce      json
+// @Param data body dto.UserRegistrationRequest true "Request Body"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
@@ -63,6 +67,7 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 // @Tags         Users
 // @Accept       json
 // @Produce      json
+// @Param data body dto.Credential true "Request Body"
 // @Success      200  {object}   response.Response{data=dto.TokenResponse,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
@@ -99,6 +104,42 @@ func (uc *UserController) Login(c echo.Context) error {
 			Token:     token,
 			TokenType: "JWT",
 		},
+	})
+}
+
+func (uc *UserController) GetCompetitionRegistrationHistory(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
+	result, err := uc.userUC.GetCompetitionRegistrationHistory(userID)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    result,
+	})
+}
+
+func (uc *UserController) GetRecruitmentApplicationHistory(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
+	result, err := uc.userUC.GetRecruitmentApplicationHistory(userID)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    result,
 	})
 }
 

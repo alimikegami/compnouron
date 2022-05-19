@@ -17,13 +17,14 @@ type CompetitionUseCase interface {
 	DeleteCompetition(competitionID uint, userID uint) error
 	UpdateCompetition(competition dto.CompetitionRequest, id uint, userID uint) error
 	GetCompetitions(limit int, offset int) ([]dto.CompetitionResponse, error)
-	Register(competitionRegistration dto.CompetitionRegistrationRequest) error
-	RejectCompetitionRegistration(id uint) error
-	AcceptCompetitionRegistration(id uint) error
-	OpenCompetitionRegistrationPeriod(id uint) error
-	CloseCompetitionRegistrationPeriod(id uint) error
-	GetCompetitionRegistration(id uint) (interface{}, error)
-	GetAcceptedCompetitionParticipants(id uint) (interface{}, error)
+	GetCompetitionByID(competitionID uint) (dto.DetailedCompetitionResponse, error)
+	Register(competitionRegistration dto.CompetitionRegistrationRequest, userID uint) error
+	RejectCompetitionRegistration(id uint, userID uint) error
+	AcceptCompetitionRegistration(id uint, userID uint) error
+	OpenCompetitionRegistrationPeriod(id uint, userID uint) error
+	CloseCompetitionRegistrationPeriod(id uint, userID uint) error
+	GetCompetitionRegistration(id uint, userID uint) (interface{}, error)
+	GetAcceptedCompetitionParticipants(id uint, userID uint) (interface{}, error)
 	SearchCompetition(limit int, offset int, keyword string) ([]dto.CompetitionResponse, error)
 }
 
@@ -44,6 +45,25 @@ func (cuc *CompetitionUseCaseImpl) CreateCompetition(competition dto.Competition
 	}
 	err := cuc.ur.CreateCompetition(competitionEntity)
 	return err
+}
+
+func (cuc *CompetitionUseCaseImpl) GetCompetitionByID(competitionID uint) (dto.DetailedCompetitionResponse, error) {
+	competitionEntity, err := cuc.ur.GetCompetitionByID(competitionID)
+	if err != nil {
+		return dto.DetailedCompetitionResponse{}, errors.New("internal server error")
+	}
+
+	return dto.DetailedCompetitionResponse{
+		ID:                   competitionEntity.ID,
+		Name:                 competitionEntity.Name,
+		Description:          competitionEntity.Description,
+		ContactPerson:        competitionEntity.ContactPerson,
+		IsTeam:               competitionEntity.IsTeam,
+		IsTheSameInstitution: competitionEntity.IsTheSameInstitution,
+		TeamCapacity:         competitionEntity.TeamCapacity,
+		Level:                competitionEntity.Level,
+		UserID:               competitionEntity.UserID,
+	}, nil
 }
 
 func (cuc *CompetitionUseCaseImpl) DeleteCompetition(competitionID uint, userID uint) error {
@@ -107,16 +127,35 @@ func (cuc *CompetitionUseCaseImpl) GetCompetitions(limit int, offset int) ([]dto
 	return competitionsResponse, nil
 }
 
-func (cuc *CompetitionUseCaseImpl) Register(competitionRegistration dto.CompetitionRegistrationRequest) error {
+func (cuc *CompetitionUseCaseImpl) Register(competitionRegistration dto.CompetitionRegistrationRequest, userID uint) error {
 	comp, err := cuc.ur.GetCompetitionByID(competitionRegistration.CompetitionID)
 	if err != nil {
 		return err
 	}
+
 	if comp.RegistrationPeriodStatus == 0 {
 		return errors.New("registration period is over")
 	}
+
+	if userID == comp.UserID {
+		return errors.New("can't register to your own competition")
+	}
+
+	compReg, err := cuc.ur.GetCompetitionRegistrationByUserID(userID)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+	for _, comp := range compReg {
+		if comp.CompetitionID == competitionRegistration.CompetitionID && comp.UserID == competitionRegistration.UserID {
+			return errors.New("you have registered")
+		}
+		if comp.CompetitionID == competitionRegistration.CompetitionID && comp.TeamID == competitionRegistration.TeamID {
+			return errors.New("you have registered")
+		}
+	}
+
 	competitionRegistrationEntity := entity.CompetitionRegistration{
-		UserID:        competitionRegistration.UserID,
+		UserID:        userID,
 		CompetitionID: competitionRegistration.CompetitionID,
 		TeamID:        competitionRegistration.TeamID,
 	}
@@ -125,32 +164,74 @@ func (cuc *CompetitionUseCaseImpl) Register(competitionRegistration dto.Competit
 	return err
 }
 
-func (cuc *CompetitionUseCaseImpl) RejectCompetitionRegistration(id uint) error {
-	err := cuc.ur.RejectCompetitionRegistration(id)
+func (cuc *CompetitionUseCaseImpl) RejectCompetitionRegistration(id uint, userID uint) error {
+	competition, err := cuc.ur.GetCompetitionByID(id)
+	if err != nil {
+		return err
+	}
+
+	if competition.UserID != userID {
+		return errors.New("action unauthorized")
+	}
+	err = cuc.ur.RejectCompetitionRegistration(id)
 
 	return err
 }
 
-func (cuc *CompetitionUseCaseImpl) AcceptCompetitionRegistration(id uint) error {
-	err := cuc.ur.AcceptCompetitionRegistration(id)
+func (cuc *CompetitionUseCaseImpl) AcceptCompetitionRegistration(id uint, userID uint) error {
+	competition, err := cuc.ur.GetCompetitionByID(id)
+	if err != nil {
+		return err
+	}
+
+	if competition.UserID != userID {
+		return errors.New("action unauthorized")
+	}
+
+	err = cuc.ur.AcceptCompetitionRegistration(id)
 
 	return err
 }
 
-func (cuc *CompetitionUseCaseImpl) OpenCompetitionRegistrationPeriod(id uint) error {
-	err := cuc.ur.OpenCompetitionRegistrationPeriod(id)
+func (cuc *CompetitionUseCaseImpl) OpenCompetitionRegistrationPeriod(id uint, userID uint) error {
+	competition, err := cuc.ur.GetCompetitionByID(id)
+	if err != nil {
+		return err
+	}
+
+	if competition.UserID != userID {
+		return errors.New("action unauthorized")
+	}
+
+	err = cuc.ur.OpenCompetitionRegistrationPeriod(id)
 
 	return err
 }
 
-func (cuc *CompetitionUseCaseImpl) CloseCompetitionRegistrationPeriod(id uint) error {
-	err := cuc.ur.CloseCompetitionRegistrationPeriod(id)
+func (cuc *CompetitionUseCaseImpl) CloseCompetitionRegistrationPeriod(id uint, userID uint) error {
+	competition, err := cuc.ur.GetCompetitionByID(id)
+	if err != nil {
+		return err
+	}
+
+	if competition.UserID != userID {
+		return errors.New("action unauthorized")
+	}
+
+	err = cuc.ur.CloseCompetitionRegistrationPeriod(id)
 
 	return err
 }
 
-func (cuc *CompetitionUseCaseImpl) GetCompetitionRegistration(id uint) (interface{}, error) {
+func (cuc *CompetitionUseCaseImpl) GetCompetitionRegistration(id uint, userID uint) (interface{}, error) {
+	comp, err := cuc.ur.GetCompetitionByID(id)
+	if err != nil {
+		return nil, err
+	}
 
+	if comp.UserID != userID {
+		return nil, errors.New("action unauthorized")
+	}
 	competition, err := cuc.ur.GetCompetitionRegistration(id)
 
 	if err != nil {
@@ -189,8 +270,15 @@ func (cuc *CompetitionUseCaseImpl) GetCompetitionRegistration(id uint) (interfac
 	return competitionRegistrationsResponse, nil
 }
 
-func (cuc *CompetitionUseCaseImpl) GetAcceptedCompetitionParticipants(id uint) (interface{}, error) {
+func (cuc *CompetitionUseCaseImpl) GetAcceptedCompetitionParticipants(id uint, userID uint) (interface{}, error) {
+	comp, err := cuc.ur.GetCompetitionByID(id)
+	if err != nil {
+		return nil, err
+	}
 
+	if comp.UserID != userID {
+		return nil, errors.New("action unauthorized")
+	}
 	competition, err := cuc.ur.GetAcceptedCompetitionParticipants(id)
 
 	if err != nil {

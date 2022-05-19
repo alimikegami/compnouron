@@ -13,6 +13,7 @@ type DetailedCompetitionResponse struct {
 	Name                     string
 	Description              string
 	ContactPerson            string
+	IsTheSameInstitution     int8
 	IsTeam                   int8
 	RegistrationPeriodStatus int8
 	TeamCapacity             int8

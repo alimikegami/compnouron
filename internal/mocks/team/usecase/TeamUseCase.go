@@ -28,13 +28,13 @@ func (_m *TeamUseCase) CreateTeam(userID uint, team dto.TeamRequest) error {
 	return r0
 }
 
-// DeleteTeam provides a mock function with given fields: id
-func (_m *TeamUseCase) DeleteTeam(id uint) error {
-	ret := _m.Called(id)
+// DeleteTeam provides a mock function with given fields: id, userID
+func (_m *TeamUseCase) DeleteTeam(id uint, userID uint) error {
+	ret := _m.Called(id, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uint) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uint, uint) error); ok {
+		r0 = rf(id, userID)
 	} else {
 		r0 = ret.Error(0)
 	}

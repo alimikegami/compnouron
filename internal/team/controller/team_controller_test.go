@@ -18,11 +18,6 @@ import (
 
 func TestCreateTeam(t *testing.T) {
 	mockUseCase := mocks.NewTeamUseCase(t)
-	mockUseCase.On("CreateTeam", uint(1), dto.TeamRequest{
-		Name:        "Team 1",
-		Description: "Team Technoscape Hackathon 2022",
-		Capacity:    4,
-	}).Return(nil)
 
 	// construct request body
 	reqBody := dto.TeamRequest{
@@ -34,85 +29,149 @@ func TestCreateTeam(t *testing.T) {
 	jsonReqBody, err := json.Marshal(&reqBody)
 	assert.NoError(t, err, "No marshaling error")
 
-	// setup the endpoint
-	req, err := http.NewRequest(http.MethodPost, "/teams", bytes.NewBuffer(jsonReqBody))
-	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	t.Run("success", func(t *testing.T) {
+		mockUseCase.On("CreateTeam", uint(1), dto.TeamRequest{
+			Name:        "Team 1",
+			Description: "Team Technoscape Hackathon 2022",
+			Capacity:    4,
+		}).Return(nil).Once()
+		req, err := http.NewRequest(http.MethodPost, "/teams", bytes.NewBuffer(jsonReqBody))
+		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
-	assert.NoError(t, err, "No request error")
-	e := echo.New()
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
 
-	token := utils.CreateJWTToken(1, "gmail@gmail.com")
-	c.Set("user", token)
-	// setup controller/handler
-	testTeamController := TeamController{
-		router: e,
-		teamUC: mockUseCase,
-	}
+		token := utils.CreateJWTToken(1, "gmail@gmail.com")
+		c.Set("user", token)
+		// setup controller/handler
+		testTeamController := TeamController{
+			router: e,
+			teamUC: mockUseCase,
+		}
 
-	// get the response
-	testTeamController.CreateTeam(c)
-	assert.Equal(t, http.StatusCreated, rec.Code)
-	mockUseCase.AssertExpectations(t)
+		// get the response
+		testTeamController.CreateTeam(c)
+		assert.Equal(t, http.StatusCreated, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("internal-server-error", func(t *testing.T) {
+		mockUseCase.On("CreateTeam", uint(1), dto.TeamRequest{
+			Name:        "Team 1",
+			Description: "Team Technoscape Hackathon 2022",
+			Capacity:    4,
+		}).Return(errors.New("internal server error")).Once()
+		req, err := http.NewRequest(http.MethodPost, "/teams", bytes.NewBuffer(jsonReqBody))
+		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		token := utils.CreateJWTToken(1, "gmail@gmail.com")
+		c.Set("user", token)
+		// setup controller/handler
+		testTeamController := TeamController{
+			router: e,
+			teamUC: mockUseCase,
+		}
+
+		// get the response
+		testTeamController.CreateTeam(c)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
 }
 
 func TestDeleteTeam(t *testing.T) {
 	mockUseCase := mocks.NewTeamUseCase(t)
-	mockUseCase.On("DeleteTeam", uint(1)).Return(nil)
 
-	// setup the endpoint
-	req, err := http.NewRequest(http.MethodDelete, "/teams", nil)
+	t.Run("success", func(t *testing.T) {
+		mockUseCase.On("DeleteTeam", uint(1), uint(1)).Return(nil).Once()
 
-	assert.NoError(t, err, "No request error")
-	e := echo.New()
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+		// setup the endpoint
+		req, err := http.NewRequest(http.MethodDelete, "/teams", nil)
 
-	token := utils.CreateJWTToken(1, "gmail@gmail.com")
-	c.Set("user", token)
-	c.SetPath("/:id")
-	c.SetParamNames("id")
-	c.SetParamValues("1")
-	// setup controller/handler
-	testTeamController := TeamController{
-		router: e,
-		teamUC: mockUseCase,
-	}
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
 
-	// get the response
-	testTeamController.DeleteTeam(c)
-	assert.Equal(t, http.StatusOK, rec.Code)
-	mockUseCase.AssertExpectations(t)
-}
+		token := utils.CreateJWTToken(1, "gmail@gmail.com")
+		c.Set("user", token)
+		c.SetPath("/:id")
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		// setup controller/handler
+		testTeamController := TeamController{
+			router: e,
+			teamUC: mockUseCase,
+		}
 
-func TestDeleteTeamError(t *testing.T) {
-	mockUseCase := mocks.NewTeamUseCase(t)
-	mockUseCase.On("DeleteTeam", uint(1111)).Return(errors.New("no affected rows"))
+		// get the response
+		testTeamController.DeleteTeam(c)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
 
-	// setup the endpoint
-	req, err := http.NewRequest(http.MethodDelete, "/teams", nil)
+	t.Run("error", func(t *testing.T) {
+		mockUseCase.On("DeleteTeam", uint(1111), uint(1)).Return(errors.New("no affected rows")).Once()
 
-	assert.NoError(t, err, "No request error")
-	e := echo.New()
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+		// setup the endpoint
+		req, err := http.NewRequest(http.MethodDelete, "/teams", nil)
 
-	token := utils.CreateJWTToken(1, "gmail@gmail.com")
-	c.Set("user", token)
-	c.SetPath("/:id")
-	c.SetParamNames("id")
-	c.SetParamValues("1111")
-	// setup controller/handler
-	testTeamController := TeamController{
-		router: e,
-		teamUC: mockUseCase,
-	}
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
 
-	// get the response
-	testTeamController.DeleteTeam(c)
-	assert.Equal(t, http.StatusInternalServerError, rec.Code)
-	mockUseCase.AssertExpectations(t)
+		token := utils.CreateJWTToken(1, "gmail@gmail.com")
+		c.Set("user", token)
+		c.SetPath("/:id")
+		c.SetParamNames("id")
+		c.SetParamValues("1111")
+		// setup controller/handler
+		testTeamController := TeamController{
+			router: e,
+			teamUC: mockUseCase,
+		}
+
+		// get the response
+		testTeamController.DeleteTeam(c)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("action-unauthorized", func(t *testing.T) {
+		mockUseCase.On("DeleteTeam", uint(1111), uint(2)).Return(errors.New("action unauthorized")).Once()
+
+		// setup the endpoint
+		req, err := http.NewRequest(http.MethodDelete, "/teams", nil)
+
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		token := utils.CreateJWTToken(2, "gmail@gmail.com")
+		c.Set("user", token)
+		c.SetPath("/:id")
+		c.SetParamNames("id")
+		c.SetParamValues("1111")
+		// setup controller/handler
+		testTeamController := TeamController{
+			router: e,
+			teamUC: mockUseCase,
+		}
+
+		// get the response
+		testTeamController.DeleteTeam(c)
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
 }
 
 func TestUpdateTeam(t *testing.T) {
