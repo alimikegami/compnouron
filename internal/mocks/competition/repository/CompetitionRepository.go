@@ -112,6 +112,29 @@ func (_m *CompetitionRepository) GetCompetitionByID(ID uint) (entity.Competition
 	return r0, r1
 }
 
+// GetCompetitionByUserID provides a mock function with given fields: userID
+func (_m *CompetitionRepository) GetCompetitionByUserID(userID uint) ([]entity.Competition, error) {
+	ret := _m.Called(userID)
+
+	var r0 []entity.Competition
+	if rf, ok := ret.Get(0).(func(uint) []entity.Competition); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.Competition)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetCompetitionRegistration provides a mock function with given fields: competitionID
 func (_m *CompetitionRepository) GetCompetitionRegistration(competitionID uint) (entity.Competition, error) {
 	ret := _m.Called(competitionID)

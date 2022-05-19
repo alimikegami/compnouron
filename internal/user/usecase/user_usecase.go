@@ -6,6 +6,7 @@ import (
 	compRepo "github.com/alimikegami/compnouron/internal/competition/repository"
 	recRepo "github.com/alimikegami/compnouron/internal/recruitment/repository"
 
+	dtoComp "github.com/alimikegami/compnouron/internal/competition/dto"
 	"github.com/alimikegami/compnouron/internal/user/dto"
 	"github.com/alimikegami/compnouron/internal/user/entity"
 	"github.com/alimikegami/compnouron/internal/user/repository"
@@ -19,6 +20,7 @@ type UserUseCase interface {
 	Login(credential *dto.Credential) (string, error)
 	GetCompetitionRegistrationHistory(userID uint) ([]dto.UserCompetitionHistory, error)
 	GetRecruitmentApplicationHistory(userID uint) ([]dto.UserRecruitmentApplicationHistory, error)
+	GetCompetitionsData(userID uint) ([]dtoComp.CompetitionResponse, error)
 }
 
 type UserUseCaseImpl struct {
@@ -79,6 +81,21 @@ func (us *UserUseCaseImpl) Login(credential *dto.Credential) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (us *UserUseCaseImpl) GetCompetitionsData(userID uint) ([]dtoComp.CompetitionResponse, error) {
+	var createdComps []dtoComp.CompetitionResponse
+	comps, err := us.cr.GetCompetitionByUserID(userID)
+	for _, comp := range comps {
+		createdComps = append(createdComps, dtoComp.CompetitionResponse{
+			ID:            comp.ID,
+			Name:          comp.Name,
+			ContactPerson: comp.ContactPerson,
+			IsTeam:        comp.IsTeam,
+			Level:         comp.Level,
+		})
+	}
+	return createdComps, err
 }
 
 func (us *UserUseCaseImpl) GetCompetitionRegistrationHistory(userID uint) ([]dto.UserCompetitionHistory, error) {

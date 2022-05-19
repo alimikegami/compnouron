@@ -41,6 +41,7 @@ func (tc *TeamController) InitializeTeamRoute(config middleware.JWTConfig) {
 // @Param data body dto.TeamRequest true "Request Body"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /teams/{id} [put]
 func (tc *TeamController) UpdateTeam(c echo.Context) error {
@@ -98,7 +99,7 @@ func (tc *TeamController) UpdateTeam(c echo.Context) error {
 // @Security ApiKeyAuth
 // @Param data body dto.TeamRequest true "Request Body"
 // @Param Authorization header string true "Bearer"
-// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Success      201  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /teams [post]
@@ -141,6 +142,7 @@ func (tc *TeamController) CreateTeam(c echo.Context) error {
 // @Param id path int true "Team ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /teams/{id} [delete]
 func (tc *TeamController) DeleteTeam(c echo.Context) error {
@@ -228,7 +230,7 @@ func (tc *TeamController) GetTeamsByUserID(c echo.Context) error {
 // @Success      200  {object}   response.Response{data=[]dto.TeamDetailsResponse,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
-// @Router       /{id} [get]
+// @Router       /teams/{id} [get]
 func (tc *TeamController) GetTeamDetailsByID(c echo.Context) error {
 	teamID := c.Param("id")
 	teamIDUint, err := strconv.ParseUint(teamID, 10, 32)
