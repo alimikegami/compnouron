@@ -128,6 +128,29 @@ func (_m *RecruitmentRepository) GetRecruitmentApplicationByRecruitmentID(id uin
 	return r0, r1
 }
 
+// GetRecruitmentApplicationByUserID provides a mock function with given fields: userID
+func (_m *RecruitmentRepository) GetRecruitmentApplicationByUserID(userID uint) ([]entity.RecruitmentApplication, error) {
+	ret := _m.Called(userID)
+
+	var r0 []entity.RecruitmentApplication
+	if rf, ok := ret.Get(0).(func(uint) []entity.RecruitmentApplication); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.RecruitmentApplication)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRecruitmentByID provides a mock function with given fields: id
 func (_m *RecruitmentRepository) GetRecruitmentByID(id uint) (entity.Recruitment, error) {
 	ret := _m.Called(id)

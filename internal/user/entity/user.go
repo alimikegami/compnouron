@@ -1,6 +1,8 @@
 package entity
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
 	ID                uint `gorm:"primaryKey"`
@@ -9,6 +11,7 @@ type User struct {
 	PhoneNumber       string
 	Password          string
 	SchoolInstitution string
+	Skills            []Skill
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }

@@ -6,6 +6,32 @@ definitions:
       name:
         type: string
     type: object
+  dto.CompetitionRegistrationRequest:
+    properties:
+      competitionID:
+        type: integer
+      teamID:
+        type: integer
+      userID:
+        type: integer
+    type: object
+  dto.CompetitionRequest:
+    properties:
+      contactPerson:
+        type: string
+      description:
+        type: string
+      isTeam:
+        type: integer
+      isTheSameInstitution:
+        type: integer
+      level:
+        type: string
+      name:
+        type: string
+      teamCapacity:
+        type: integer
+    type: object
   dto.CompetitionResponse:
     properties:
       ID:
@@ -18,6 +44,43 @@ definitions:
         type: string
       name:
         type: string
+    type: object
+  dto.Credential:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.DetailedCompetitionResponse:
+    properties:
+      contactPerson:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      isTeam:
+        type: integer
+      isTheSameInstitution:
+        type: integer
+      level:
+        type: string
+      name:
+        type: string
+      registrationPeriodStatus:
+        type: integer
+      teamCapacity:
+        type: integer
+      userID:
+        type: integer
+      userName:
+        type: string
+    type: object
+  dto.RecruitmentApplicationRequest:
+    properties:
+      recruitmentID:
+        type: integer
     type: object
   dto.RecruitmentApplicationResponse:
     properties:
@@ -41,6 +104,15 @@ definitions:
           $ref: '#/definitions/dto.RecruitmentApplicationResponse'
         type: array
     type: object
+  dto.RecruitmentRequest:
+    properties:
+      description:
+        type: string
+      role:
+        type: string
+      teamID:
+        type: integer
+    type: object
   dto.RecruitmentResponse:
     properties:
       ID:
@@ -52,6 +124,11 @@ definitions:
       teamID:
         type: integer
       teamName:
+        type: string
+    type: object
+  dto.SkillRequest:
+    properties:
+      name:
         type: string
     type: object
   dto.TeamDetailsResponse:
@@ -76,12 +153,38 @@ definitions:
       name:
         type: string
     type: object
+  dto.TeamRequest:
+    properties:
+      capacity:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+    type: object
   dto.TokenResponse:
     properties:
       token:
         type: string
       tokenType:
         type: string
+    type: object
+  dto.UserRegistrationRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phoneNumber:
+        type: string
+      schoolInstitution:
+        type: string
+      skills:
+        items:
+          $ref: '#/definitions/dto.SkillRequest'
+        type: array
     type: object
   response.Response:
     properties:
@@ -148,6 +251,11 @@ paths:
       description: This endpoint will return the competitions data with pagination
         implemented and also with keyword searching capability
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: rows retrieved limit
         in: query
         name: limit
@@ -188,6 +296,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get competitions data
       tags:
       - Competitions
@@ -195,6 +305,18 @@ paths:
       consumes:
       - application/json
       description: Given the request body, create a competition record in the database
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CompetitionRequest'
       produces:
       - application/json
       responses:
@@ -219,6 +341,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Create new competition
       tags:
       - Competitions
@@ -227,6 +351,11 @@ paths:
       description: Given the ID path parameters, this endpoint will delete the existing
         competition's data
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Competition ID
         in: path
         name: id
@@ -256,7 +385,41 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Delete competition's data
+      tags:
+      - Competitions
+    get:
+      consumes:
+      - application/json
+      description: Given the competition ID on the path parameter, get the details
+        of that particular competition
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DetailedCompetitionResponse'
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get the details of one particular competition
       tags:
       - Competitions
     put:
@@ -265,11 +428,22 @@ paths:
       description: Given the request body and the ID path parameters, this endpoint
         will update the existing competition's data
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Competition ID
         in: path
         name: id
         required: true
         type: integer
+      - description: Request Body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CompetitionRequest'
       produces:
       - application/json
       responses:
@@ -294,6 +468,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Update competition's data
       tags:
       - Competitions
@@ -302,6 +478,11 @@ paths:
       description: Given the competition ID path parameters, this endpoint will close
         the competition registration period
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Competition ID
         in: path
         name: id
@@ -331,6 +512,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Close competition registration period
       tags:
       - Competitions
@@ -339,6 +522,11 @@ paths:
       description: Given the competition ID path parameters, this endpoint will open
         the competition registration period
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Competition ID
         in: path
         name: id
@@ -368,6 +556,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Open competition registration period
       tags:
       - Competitions
@@ -377,6 +567,11 @@ paths:
         this endpoint will retrieve the competition registration data of a particular
         ID and accepted status if the query parameters are given
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: filter to get accepted registrations record
         in: query
         name: status
@@ -411,6 +606,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get competition registration data
       tags:
       - Competitions
@@ -420,6 +617,18 @@ paths:
       - application/json
       description: Given the request body, create a competition registration record
         in the database
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CompetitionRegistrationRequest'
       produces:
       - application/json
       responses:
@@ -444,6 +653,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Create new competition registrations
       tags:
       - Competitions
@@ -452,6 +663,11 @@ paths:
       description: Given the competition registration ID path parameters, this endpoint
         will accept the competition registration
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Competition ID
         in: path
         name: id
@@ -481,6 +697,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Accept competition application
       tags:
       - Competitions
@@ -489,6 +707,11 @@ paths:
       description: Given the competition registration ID path parameters, this endpoint
         will reject the competition registration
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Competition ID
         in: path
         name: id
@@ -518,6 +741,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Reject competition application
       tags:
       - Competitions
@@ -573,6 +798,18 @@ paths:
       consumes:
       - application/json
       description: Given the request body, create a recruiment record in the database
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RecruitmentRequest'
       produces:
       - application/json
       responses:
@@ -597,6 +834,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Create new recruitment
       tags:
       - Recruitments
@@ -605,6 +844,11 @@ paths:
       description: Given the ID path parameters, this endpoint will delete the existing
         recruitment's data
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Recruitment ID
         in: path
         name: id
@@ -634,6 +878,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Delete recruitment's data
       tags:
       - Recruitments
@@ -641,6 +887,11 @@ paths:
       description: Given the recruitment ID on path parameter, this endpoint will
         return the detailed data associated with that particular recruitment
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Recruitment ID
         in: path
         name: id
@@ -670,6 +921,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get detailed recruitment's data
       tags:
       - Recruitments
@@ -679,11 +932,22 @@ paths:
       description: Given the request body and the ID path parameters, this endpoint
         will update the existing recruitment's data
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Recruitment ID
         in: path
         name: id
         required: true
         type: integer
+      - description: Request Body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RecruitmentRequest'
       produces:
       - application/json
       responses:
@@ -708,6 +972,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Update recruitment's data
       tags:
       - Recruitments
@@ -716,6 +982,11 @@ paths:
       description: Given the recruitment ID path parameters, this endpoint will close
         the recruitment application period
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Recruitment ID
         in: path
         name: id
@@ -745,6 +1016,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Close recruitment application period
       tags:
       - Recruitments
@@ -753,6 +1026,11 @@ paths:
       description: Given the recruitment ID path parameters, this endpoint will open
         the recruitment application period
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Recruitment ID
         in: path
         name: id
@@ -782,6 +1060,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Open recruitment application period
       tags:
       - Recruitments
@@ -791,6 +1071,18 @@ paths:
       - application/json
       description: Given the request body, create a recruiment application record
         in the database
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RecruitmentApplicationRequest'
       produces:
       - application/json
       responses:
@@ -815,6 +1107,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Create new recruitment appliation
       tags:
       - Recruitments
@@ -823,6 +1117,11 @@ paths:
       description: Given the recruitment application ID path parameters, this endpoint
         will accept the recruitment application
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Recruitment ID
         in: path
         name: id
@@ -852,6 +1151,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Accept recruitment application
       tags:
       - Recruitments
@@ -860,6 +1161,11 @@ paths:
       description: Given the recruitment application ID path parameters, this endpoint
         will reject the recruitment application
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Recruitment ID
         in: path
         name: id
@@ -889,6 +1195,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Reject recruitment application
       tags:
       - Recruitments
@@ -897,6 +1205,11 @@ paths:
       description: Given the team ID on path parameter, this endpoint will return
         the recruitment data associated with that team
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Team ID
         in: path
         name: id
@@ -928,6 +1241,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get recruitment's data of a particular team
       tags:
       - Recruitments
@@ -936,6 +1251,18 @@ paths:
       consumes:
       - application/json
       description: Given the request body, the API will create a new team data
+      parameters:
+      - description: Request Body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TeamRequest'
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -960,6 +1287,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Create new team
       tags:
       - Teams
@@ -968,6 +1297,11 @@ paths:
       description: Given the ID path parameters, this endpoint will delete the existing
         team's data
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Team ID
         in: path
         name: id
@@ -997,6 +1331,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Delete team's data
       tags:
       - Teams
@@ -1006,11 +1342,22 @@ paths:
       description: Given the request body and the ID path parameters, this endpoint
         will update the existing team's data
       parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Team ID
         in: path
         name: id
         required: true
         type: integer
+      - description: Request Body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TeamRequest'
       produces:
       - application/json
       responses:
@@ -1035,6 +1382,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Update team's data
       tags:
       - Teams
@@ -1082,6 +1431,13 @@ paths:
       consumes:
       - application/json
       description: Given the request body, create a new user record in the database
+      parameters:
+      - description: Request Body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserRegistrationRequest'
       produces:
       - application/json
       responses:
@@ -1115,6 +1471,13 @@ paths:
       - application/json
       description: Given the credentials, authenticate the credentials and returns
         the JWT token if the credentials matched the record in the database
+      parameters:
+      - description: Request Body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Credential'
       produces:
       - application/json
       responses:
@@ -1142,7 +1505,4 @@ paths:
       summary: Login
       tags:
       - Users
-securityDefinitions:
-  BasicAuth:
-    type: basic
 swagger: "2.0"

@@ -7,6 +7,7 @@ type Team struct {
 	Name        string
 	Description string
 	Capacity    uint
+	TeamMembers []TeamMember
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

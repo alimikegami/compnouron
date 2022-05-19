@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	competitionRepo "github.com/alimikegami/compnouron/internal/mocks/competition/repository"
+	recruitmentRepo "github.com/alimikegami/compnouron/internal/mocks/recruitment/repository"
 	userRepo "github.com/alimikegami/compnouron/internal/mocks/user/repository"
 	"github.com/alimikegami/compnouron/internal/user/dto"
 	"github.com/alimikegami/compnouron/internal/user/entity"
@@ -12,6 +14,8 @@ import (
 
 func TestLogin(t *testing.T) {
 	mockRepo := userRepo.NewUserRepository(t)
+	mockCompetition := competitionRepo.NewCompetitionRepository(t)
+	mockRecruitment := recruitmentRepo.NewRecruitmentRepository(t)
 	t.Run("success", func(t *testing.T) {
 		mockRepo.On("GetUserByEmail", "asdfa@gmail.com").Return(&entity.User{
 			ID:                1,
@@ -23,7 +27,7 @@ func TestLogin(t *testing.T) {
 			CreatedAt:         time.Now(),
 			UpdatedAt:         time.Now(),
 		}).Once()
-		testUseCase := CreateNewUserUseCase(mockRepo)
+		testUseCase := CreateNewUserUseCase(mockRepo, mockCompetition, mockRecruitment)
 		token, err := testUseCase.Login(&dto.Credential{
 			Email:    "asdfa@gmail.com",
 			Password: "asdfasfas",
@@ -35,7 +39,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("user-not-found", func(t *testing.T) {
 		mockRepo.On("GetUserByEmail", "asdfa@gmail.com").Return(nil).Once()
-		testUseCase := CreateNewUserUseCase(mockRepo)
+		testUseCase := CreateNewUserUseCase(mockRepo, mockCompetition, mockRecruitment)
 		token, err := testUseCase.Login(&dto.Credential{
 			Email:    "asdfa@gmail.com",
 			Password: "asdfasfas",

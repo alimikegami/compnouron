@@ -84,17 +84,15 @@ func (_m *TeamRepository) GetTeamByID(teamID uint) (entity.Team, error) {
 	return r0, r1
 }
 
-// GetTeamMembersByID provides a mock function with given fields: teamID
-func (_m *TeamRepository) GetTeamMembersByID(teamID uint) ([]entity.TeamMember, error) {
+// GetTeamLeader provides a mock function with given fields: teamID
+func (_m *TeamRepository) GetTeamLeader(teamID uint) (uint, error) {
 	ret := _m.Called(teamID)
 
-	var r0 []entity.TeamMember
-	if rf, ok := ret.Get(0).(func(uint) []entity.TeamMember); ok {
+	var r0 uint
+	if rf, ok := ret.Get(0).(func(uint) uint); ok {
 		r0 = rf(teamID)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]entity.TeamMember)
-		}
+		r0 = ret.Get(0).(uint)
 	}
 
 	var r1 error

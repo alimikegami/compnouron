@@ -14,13 +14,13 @@ type CompetitionUseCase struct {
 	mock.Mock
 }
 
-// AcceptCompetitionRegistration provides a mock function with given fields: id
-func (_m *CompetitionUseCase) AcceptCompetitionRegistration(id uint) error {
-	ret := _m.Called(id)
+// AcceptCompetitionRegistration provides a mock function with given fields: id, userID
+func (_m *CompetitionUseCase) AcceptCompetitionRegistration(id uint, userID uint) error {
+	ret := _m.Called(id, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uint) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uint, uint) error); ok {
+		r0 = rf(id, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -28,13 +28,13 @@ func (_m *CompetitionUseCase) AcceptCompetitionRegistration(id uint) error {
 	return r0
 }
 
-// CloseCompetitionRegistrationPeriod provides a mock function with given fields: id
-func (_m *CompetitionUseCase) CloseCompetitionRegistrationPeriod(id uint) error {
-	ret := _m.Called(id)
+// CloseCompetitionRegistrationPeriod provides a mock function with given fields: id, userID
+func (_m *CompetitionUseCase) CloseCompetitionRegistrationPeriod(id uint, userID uint) error {
+	ret := _m.Called(id, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uint) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uint, uint) error); ok {
+		r0 = rf(id, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -70,13 +70,13 @@ func (_m *CompetitionUseCase) DeleteCompetition(competitionID uint, userID uint)
 	return r0
 }
 
-// GetAcceptedCompetitionParticipants provides a mock function with given fields: id
-func (_m *CompetitionUseCase) GetAcceptedCompetitionParticipants(id uint) (interface{}, error) {
-	ret := _m.Called(id)
+// GetAcceptedCompetitionParticipants provides a mock function with given fields: id, userID
+func (_m *CompetitionUseCase) GetAcceptedCompetitionParticipants(id uint, userID uint) (interface{}, error) {
+	ret := _m.Called(id, userID)
 
 	var r0 interface{}
-	if rf, ok := ret.Get(0).(func(uint) interface{}); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uint, uint) interface{}); ok {
+		r0 = rf(id, userID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(interface{})
@@ -84,8 +84,8 @@ func (_m *CompetitionUseCase) GetAcceptedCompetitionParticipants(id uint) (inter
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(uint, uint) error); ok {
+		r1 = rf(id, userID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -93,13 +93,34 @@ func (_m *CompetitionUseCase) GetAcceptedCompetitionParticipants(id uint) (inter
 	return r0, r1
 }
 
-// GetCompetitionRegistration provides a mock function with given fields: id
-func (_m *CompetitionUseCase) GetCompetitionRegistration(id uint) (interface{}, error) {
-	ret := _m.Called(id)
+// GetCompetitionByID provides a mock function with given fields: competitionID
+func (_m *CompetitionUseCase) GetCompetitionByID(competitionID uint) (dto.DetailedCompetitionResponse, error) {
+	ret := _m.Called(competitionID)
+
+	var r0 dto.DetailedCompetitionResponse
+	if rf, ok := ret.Get(0).(func(uint) dto.DetailedCompetitionResponse); ok {
+		r0 = rf(competitionID)
+	} else {
+		r0 = ret.Get(0).(dto.DetailedCompetitionResponse)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(competitionID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetCompetitionRegistration provides a mock function with given fields: id, userID
+func (_m *CompetitionUseCase) GetCompetitionRegistration(id uint, userID uint) (interface{}, error) {
+	ret := _m.Called(id, userID)
 
 	var r0 interface{}
-	if rf, ok := ret.Get(0).(func(uint) interface{}); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uint, uint) interface{}); ok {
+		r0 = rf(id, userID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(interface{})
@@ -107,8 +128,8 @@ func (_m *CompetitionUseCase) GetCompetitionRegistration(id uint) (interface{}, 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(uint, uint) error); ok {
+		r1 = rf(id, userID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -139,13 +160,13 @@ func (_m *CompetitionUseCase) GetCompetitions(limit int, offset int) ([]dto.Comp
 	return r0, r1
 }
 
-// OpenCompetitionRegistrationPeriod provides a mock function with given fields: id
-func (_m *CompetitionUseCase) OpenCompetitionRegistrationPeriod(id uint) error {
-	ret := _m.Called(id)
+// OpenCompetitionRegistrationPeriod provides a mock function with given fields: id, userID
+func (_m *CompetitionUseCase) OpenCompetitionRegistrationPeriod(id uint, userID uint) error {
+	ret := _m.Called(id, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uint) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uint, uint) error); ok {
+		r0 = rf(id, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -153,13 +174,13 @@ func (_m *CompetitionUseCase) OpenCompetitionRegistrationPeriod(id uint) error {
 	return r0
 }
 
-// Register provides a mock function with given fields: competitionRegistration
-func (_m *CompetitionUseCase) Register(competitionRegistration dto.CompetitionRegistrationRequest) error {
-	ret := _m.Called(competitionRegistration)
+// Register provides a mock function with given fields: competitionRegistration, userID
+func (_m *CompetitionUseCase) Register(competitionRegistration dto.CompetitionRegistrationRequest, userID uint) error {
+	ret := _m.Called(competitionRegistration, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(dto.CompetitionRegistrationRequest) error); ok {
-		r0 = rf(competitionRegistration)
+	if rf, ok := ret.Get(0).(func(dto.CompetitionRegistrationRequest, uint) error); ok {
+		r0 = rf(competitionRegistration, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -167,13 +188,13 @@ func (_m *CompetitionUseCase) Register(competitionRegistration dto.CompetitionRe
 	return r0
 }
 
-// RejectCompetitionRegistration provides a mock function with given fields: id
-func (_m *CompetitionUseCase) RejectCompetitionRegistration(id uint) error {
-	ret := _m.Called(id)
+// RejectCompetitionRegistration provides a mock function with given fields: id, userID
+func (_m *CompetitionUseCase) RejectCompetitionRegistration(id uint, userID uint) error {
+	ret := _m.Called(id, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uint) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uint, uint) error); ok {
+		r0 = rf(id, userID)
 	} else {
 		r0 = ret.Error(0)
 	}

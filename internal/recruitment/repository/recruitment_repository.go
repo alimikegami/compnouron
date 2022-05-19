@@ -20,6 +20,7 @@ type RecruitmentRepository interface {
 	GetRecruitmentByTeamID(id uint) ([]entity.Recruitment, error)
 	RejectRecruitmentApplication(id uint) error
 	GetRecruitmentApplicationByID(id uint) (entity.RecruitmentApplication, error)
+	GetRecruitmentApplicationByUserID(userID uint) ([]entity.RecruitmentApplication, error)
 	AcceptRecruitmentApplication(id uint) error
 	DeleteRecruitmentByID(id uint) error
 	OpenRecruitmentApplicationPeriod(id uint) error
@@ -77,6 +78,16 @@ func (rr *RecruitmentRepositoryImpl) CreateRecruitmentApplication(recruitmentApp
 	return nil
 }
 
+func (rr *RecruitmentRepositoryImpl) GetRecruitmentApplicationByUserID(userID uint) ([]entity.RecruitmentApplication, error) {
+	var recruitment []entity.RecruitmentApplication
+	result := rr.db.Joins("Recruitment").Find(&recruitment, "recruitment_applications.user_id = ?", userID)
+	if result.Error != nil {
+		return []entity.RecruitmentApplication{}, result.Error
+	}
+
+	return recruitment, nil
+}
+
 func (rr *RecruitmentRepositoryImpl) GetRecruitmentByID(id uint) (entity.Recruitment, error) {
 	var recruitment entity.Recruitment
 	result := rr.db.Joins("Team").First(&recruitment, "recruitments.id = ?", id)
@@ -88,13 +99,13 @@ func (rr *RecruitmentRepositoryImpl) GetRecruitmentByID(id uint) (entity.Recruit
 }
 
 func (rr *RecruitmentRepositoryImpl) GetRecruitmentApplicationByRecruitmentID(id uint) ([]entity.RecruitmentApplication, error) {
-	var recruitmentApplications []entity.RecruitmentApplication
-	result := rr.db.Joins("User").Find(&recruitmentApplications, "recruitment_id = ?", id)
+	var recruitment entity.Recruitment
+	result := rr.db.Preload("RecruitmentApplications.User").Preload("RecruitmentApplications").Find(&recruitment, id)
 	if result.Error != nil {
-		return recruitmentApplications, result.Error
+		return []entity.RecruitmentApplication{}, result.Error
 	}
 
-	return recruitmentApplications, nil
+	return recruitment.RecruitmentApplications, nil
 }
 
 func (rr *RecruitmentRepositoryImpl) GetRecruitmentByTeamID(id uint) ([]entity.Recruitment, error) {

@@ -21,6 +21,7 @@ type CompetitionRepository interface {
 	GetCompetitions(limit int, offset int) ([]entity.Competition, error)
 	Register(competitionRegistration entity.CompetitionRegistration) error
 	GetCompetitionRegistration(competitionID uint) (entity.Competition, error)
+	GetCompetitionRegistrationByUserID(userID uint) ([]entity.CompetitionRegistration, error)
 	GetAcceptedCompetitionParticipants(competitionID uint) (entity.Competition, error)
 	RejectCompetitionRegistration(id uint) error
 	AcceptCompetitionRegistration(id uint) error
@@ -40,6 +41,15 @@ func (cr *CompetitionRepositoryImpl) CreateCompetition(competition *entity.Compe
 	}
 
 	return nil
+}
+
+func (cr *CompetitionRepositoryImpl) GetCompetitionRegistrationByUserID(userID uint) ([]entity.CompetitionRegistration, error) {
+	var compRegistration []entity.CompetitionRegistration
+	result := cr.db.Joins("Competition").Find(&compRegistration, "competition_registrations.user_id = ?", userID)
+	if result.Error != nil {
+		return []entity.CompetitionRegistration{}, result.Error
+	}
+	return compRegistration, nil
 }
 
 func (cr *CompetitionRepositoryImpl) DeleteCompetition(ID uint) error {

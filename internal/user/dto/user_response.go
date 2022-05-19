@@ -14,3 +14,17 @@ type UserDetailsResponse struct {
 	SchoolInstitution string          `json:"schoolInstitution"`
 	Skills            []SkillResponse `json:"skills"`
 }
+
+type UserCompetitionHistory struct {
+	CompetitionRegistrationID uint   `json:"id"`
+	CompetitionID             uint   `json:"competitionID"`
+	CompetitionName           string `json:"competitionName"`
+	AcceptanceStatus          uint   `json:"acceptanceStatus"`
+}
+
+type UserRecruitmentApplicationHistory struct {
+	RecruitmentApplicationID uint   `json:"id"`
+	RecruitmentID            uint   `json:"recruitmentID"`
+	RecruitmentRole          string `json:"recruitmentRole"`
+	AcceptanceStatus         uint   `json:"acceptanceStatus"`
+}

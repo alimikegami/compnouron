@@ -12,9 +12,10 @@ type CompetitionRegistration struct {
 	UserID           uint `gorm:"default:null"`
 	TeamID           uint `gorm:"default:null"`
 	CompetitionID    uint
-	AcceptanceStatus uint      `gorm:"default:null"`
-	CreatedAt        time.Time `json:"createdAt"`
-	UpdatedAt        time.Time `json:"updatedAt"`
+	AcceptanceStatus uint `gorm:"default:null"`
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 	Team             entity.Team
 	User             userEntity.User
+	Competition      Competition
 }
