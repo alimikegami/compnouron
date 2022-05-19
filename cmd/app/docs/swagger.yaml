@@ -169,6 +169,17 @@ definitions:
       tokenType:
         type: string
     type: object
+  dto.UserRecruitmentApplicationHistory:
+    properties:
+      acceptanceStatus:
+        type: integer
+      id:
+        type: integer
+      recruitmentID:
+        type: integer
+      recruitmentRole:
+        type: string
+    type: object
   dto.UserRegistrationRequest:
     properties:
       email:
@@ -207,45 +218,6 @@ info:
   title: Compnouron API
   version: "1.0"
 paths:
-  /{id}:
-    get:
-      description: Given the team ID, retrieve the detailed team's data that are associated
-        with that particular ID
-      parameters:
-      - description: Team ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/dto.TeamDetailsResponse'
-                  type: array
-                message:
-                  type: string
-                status:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Get detailed team's data by team ID
-      tags:
-      - Teams
   /competitions:
     get:
       description: This endpoint will return the competitions data with pagination
@@ -830,6 +802,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -874,6 +850,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -885,7 +865,7 @@ paths:
       - Recruitments
     get:
       description: Given the recruitment ID on path parameter, this endpoint will
-        return the detailed data associated with that particular recruitment
+        return the data associated with that particular recruitment (briefly)
       parameters:
       - description: Bearer
         in: header
@@ -917,13 +897,17 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: Get detailed recruitment's data
+      summary: Get recruitment data
       tags:
       - Recruitments
     put:
@@ -966,6 +950,10 @@ paths:
               type: object
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/response.Response'
         "500":
@@ -1012,6 +1000,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -1019,6 +1011,54 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Close recruitment application period
+      tags:
+      - Recruitments
+  /recruitments/{id}/details:
+    get:
+      description: Given the recruitment ID on path parameter, this endpoint will
+        return the detailed data associated with that particular recruitment
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Recruitment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.RecruitmentDetailsResponse'
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get detailed recruitment's data
       tags:
       - Recruitments
   /recruitments/{id}/open:
@@ -1054,6 +1094,10 @@ paths:
               type: object
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/response.Response'
         "500":
@@ -1147,6 +1191,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -1189,6 +1237,10 @@ paths:
               type: object
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/response.Response'
         "500":
@@ -1266,8 +1318,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             allOf:
             - $ref: '#/definitions/response.Response'
@@ -1327,6 +1379,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -1334,6 +1390,44 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete team's data
+      tags:
+      - Teams
+    get:
+      description: Given the team ID, retrieve the detailed team's data that are associated
+        with that particular ID
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.TeamDetailsResponse'
+                  type: array
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get detailed team's data by team ID
       tags:
       - Teams
     put:
@@ -1376,6 +1470,10 @@ paths:
               type: object
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/response.Response'
         "500":
@@ -1441,8 +1539,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             allOf:
             - $ref: '#/definitions/response.Response'
@@ -1463,6 +1561,39 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: Create new user account
+      tags:
+      - Users
+  /users/{id}/competitions:
+    get:
+      description: Given the user ID on the path parameter, returns the competitions
+        that has been created by that particular user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.CompetitionResponse'
+                  type: array
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get the competitions that has been created by a particular user
       tags:
       - Users
   /users/login:
@@ -1503,6 +1634,39 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: Login
+      tags:
+      - Users
+  /users/recruitments/applications:
+    get:
+      description: Given the user ID on the JWT Token, returns the recruitment application
+        histories of that user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.UserRecruitmentApplicationHistory'
+                  type: array
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get the history recruitment application histories of a user
       tags:
       - Users
 swagger: "2.0"
