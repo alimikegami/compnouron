@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/alimikegami/compnouron/internal/user/dto"
 	"github.com/alimikegami/compnouron/internal/user/usecase"
@@ -20,6 +21,7 @@ type UserController struct {
 func (uc *UserController) InitializeUserRoute(config middleware.JWTConfig) {
 	uc.router.POST("/users", uc.CreateUser)
 	uc.router.POST("/users/login", uc.Login)
+	uc.router.GET("/users/:id/competitions", uc.GetRecruitmentApplicationHistory, middleware.JWTWithConfig(config))
 	uc.router.GET("/users/competitions/registrations", uc.GetCompetitionRegistrationHistory, middleware.JWTWithConfig(config))
 	uc.router.GET("/users/recruitments/applications", uc.GetRecruitmentApplicationHistory, middleware.JWTWithConfig(config))
 }
@@ -31,7 +33,7 @@ func (uc *UserController) InitializeUserRoute(config middleware.JWTConfig) {
 // @Accept       json
 // @Produce      json
 // @Param data body dto.UserRegistrationRequest true "Request Body"
-// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Success      201  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /users [post]
@@ -107,6 +109,15 @@ func (uc *UserController) Login(c echo.Context) error {
 	})
 }
 
+// GetCompetitionRegistrationHistory godoc
+// @Summary      Get the competition registration histories of a particular user
+// @Description  Given the user ID on the JWT Token, returns the competition registration histories of that user
+// @Tags         Users
+// @Produce      json
+// @Success      200  {object}   response.Response{data=[]dto.UserRecruitmentApplicationHistory,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /users/recruitments/applications [get]
 func (uc *UserController) GetCompetitionRegistrationHistory(c echo.Context) error {
 	userID, _ := utils.GetUserDetails(c)
 	result, err := uc.userUC.GetCompetitionRegistrationHistory(userID)
@@ -125,6 +136,51 @@ func (uc *UserController) GetCompetitionRegistrationHistory(c echo.Context) erro
 	})
 }
 
+// GetCompetitionsData godoc
+// @Summary      Get the competitions that has been created by a particular user
+// @Description  Given the user ID on the path parameter, returns the competitions that has been created by that particular user
+// @Tags         Users
+// @Produce      json
+// @Success      200  {object}   response.Response{data=[]dto.CompetitionResponse,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /users/{id}/competitions [get]
+func (uc *UserController) GetCompetitionsData(c echo.Context) error {
+	userID := c.Param("id")
+	userIDUint, err := strconv.ParseUint(userID, 10, 32)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	result, err := uc.userUC.GetCompetitionsData(uint(userIDUint))
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    result,
+	})
+}
+
+// GetRecruitmentApplicationHistory godoc
+// @Summary      Get the history recruitment application histories of a user
+// @Description  Given the user ID on the JWT Token, returns the recruitment application histories of that user
+// @Tags         Users
+// @Produce      json
+// @Success      200  {object}   response.Response{data=[]dto.UserRecruitmentApplicationHistory,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /users/recruitments/applications [get]
 func (uc *UserController) GetRecruitmentApplicationHistory(c echo.Context) error {
 	userID, _ := utils.GetUserDetails(c)
 	result, err := uc.userUC.GetRecruitmentApplicationHistory(userID)

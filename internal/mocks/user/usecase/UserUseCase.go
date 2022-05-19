@@ -3,7 +3,9 @@
 package mocks
 
 import (
+	competitiondto "github.com/alimikegami/compnouron/internal/competition/dto"
 	dto "github.com/alimikegami/compnouron/internal/user/dto"
+
 	mock "github.com/stretchr/testify/mock"
 
 	testing "testing"
@@ -38,6 +40,29 @@ func (_m *UserUseCase) GetCompetitionRegistrationHistory(userID uint) ([]dto.Use
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]dto.UserCompetitionHistory)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetCompetitionsData provides a mock function with given fields: userID
+func (_m *UserUseCase) GetCompetitionsData(userID uint) ([]competitiondto.CompetitionResponse, error) {
+	ret := _m.Called(userID)
+
+	var r0 []competitiondto.CompetitionResponse
+	if rf, ok := ret.Get(0).(func(uint) []competitiondto.CompetitionResponse); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]competitiondto.CompetitionResponse)
 		}
 	}
 
