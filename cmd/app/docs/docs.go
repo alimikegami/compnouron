@@ -967,6 +967,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.Response"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1114,6 +1120,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.Response"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1181,6 +1193,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1275,14 +1293,14 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Given the recruitment ID on path parameter, this endpoint will return the detailed data associated with that particular recruitment",
+                "description": "Given the recruitment ID on path parameter, this endpoint will return the data associated with that particular recruitment (briefly)",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Recruitments"
                 ],
-                "summary": "Get detailed recruitment's data",
+                "summary": "Get recruitment data",
                 "parameters": [
                     {
                         "type": "string",
@@ -1326,6 +1344,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1411,6 +1435,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.Response"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1476,6 +1506,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1551,6 +1587,89 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.Response"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/recruitments/{id}/details": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Given the recruitment ID on path parameter, this endpoint will return the detailed data associated with that particular recruitment",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Recruitments"
+                ],
+                "summary": "Get detailed recruitment's data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Recruitment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.RecruitmentDetailsResponse"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1622,6 +1741,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.Response"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1668,8 +1793,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "allOf": [
                                 {
@@ -1770,6 +1895,66 @@ const docTemplate = `{
             }
         },
         "/teams/{id}": {
+            "get": {
+                "description": "Given the team ID, retrieve the detailed team's data that are associated with that particular ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Teams"
+                ],
+                "summary": "Get detailed team's data by team ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.TeamDetailsResponse"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
             "put": {
                 "security": [
                     {
@@ -1843,6 +2028,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.Response"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1912,6 +2103,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.Response"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1946,8 +2143,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "allOf": [
                                 {
@@ -2049,25 +2246,16 @@ const docTemplate = `{
                 }
             }
         },
-        "/{id}": {
+        "/users/recruitments/applications": {
             "get": {
-                "description": "Given the team ID, retrieve the detailed team's data that are associated with that particular ID",
+                "description": "Given the user ID on the JWT Token, returns the recruitment application histories of that user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Teams"
+                    "Users"
                 ],
-                "summary": "Get detailed team's data by team ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Team ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Get the history recruitment application histories of a user",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2082,7 +2270,60 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/dto.TeamDetailsResponse"
+                                                "$ref": "#/definitions/dto.UserRecruitmentApplicationHistory"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}/competitions": {
+            "get": {
+                "description": "Given the user ID on the path parameter, returns the competitions that has been created by that particular user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get the competitions that has been created by a particular user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.CompetitionResponse"
                                             }
                                         },
                                         "message": {
@@ -2372,6 +2613,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "tokenType": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserRecruitmentApplicationHistory": {
+            "type": "object",
+            "properties": {
+                "acceptanceStatus": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "recruitmentID": {
+                    "type": "integer"
+                },
+                "recruitmentRole": {
                     "type": "string"
                 }
             }

@@ -45,8 +45,9 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 // @Security ApiKeyAuth
 // @Param Authorization header string true "Bearer"
 // @Param data body dto.RecruitmentRequest true "Request Body"
-// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Success      200  {object}  response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /recruitments [post]
 func (rc *RecruitmentController) CreateRecruitment(c echo.Context) error {
@@ -95,6 +96,7 @@ func (rc *RecruitmentController) CreateRecruitment(c echo.Context) error {
 // @Param data body dto.RecruitmentRequest true "Request Body"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /recruitments/{id} [put]
 func (rc *RecruitmentController) UpdateRecruitment(c echo.Context) error {
@@ -241,16 +243,17 @@ func (rc *RecruitmentController) GetRecruitments(c echo.Context) error {
 	})
 }
 
-// GetRecruitmentDetailsByID godoc
-// @Summary      Get detailed recruitment's data
-// @Description  Given the recruitment ID on path parameter, this endpoint will return the detailed data associated with that particular recruitment
+// GetRecruitmentByID godoc
+// @Summary      Get recruitment data
+// @Description  Given the recruitment ID on path parameter, this endpoint will return the data associated with that particular recruitment (briefly)
 // @Tags         Recruitments
 // @Produce      json
 // @Security ApiKeyAuth
 // @Param Authorization header string true "Bearer"
 // @Param id path int true "Recruitment ID"
-// @Success      200  {object}   response.Response{data=dto.RecruitmentDetailsResponse,status=string,message=string}
+// @Success      200  {object}  response.Response{data=dto.RecruitmentDetailsResponse,status=string,message=string}
 // @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /recruitments/{id} [get]
 func (rc *RecruitmentController) GetRecruitmentByID(c echo.Context) error {
@@ -297,6 +300,7 @@ func (rc *RecruitmentController) GetRecruitmentByID(c echo.Context) error {
 // @Param id path int true "Recruitment ID"
 // @Success      200  {object}   response.Response{data=dto.RecruitmentDetailsResponse,status=string,message=string}
 // @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /recruitments/{id}/details [get]
 func (rc *RecruitmentController) GetRecruitmentDetailsByID(c echo.Context) error {
@@ -383,6 +387,7 @@ func (rc *RecruitmentController) GetRecruitmentByTeamID(c echo.Context) error {
 // @Param id path int true "Recruitment ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /recruitments/applications/{id}/reject [put]
 func (rc *RecruitmentController) RejectRecruitmentApplication(c echo.Context) error {
@@ -431,6 +436,7 @@ func (rc *RecruitmentController) RejectRecruitmentApplication(c echo.Context) er
 // @Param id path int true "Recruitment ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /recruitments/applications/{id}/accept [put]
 func (rc *RecruitmentController) AcceptRecruitmentApplication(c echo.Context) error {
@@ -479,6 +485,7 @@ func (rc *RecruitmentController) AcceptRecruitmentApplication(c echo.Context) er
 // @Param id path int true "Recruitment ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /recruitments/{id} [delete]
 func (rc *RecruitmentController) DeleteRecruitmentByID(c echo.Context) error {
@@ -527,6 +534,7 @@ func (rc *RecruitmentController) DeleteRecruitmentByID(c echo.Context) error {
 // @Param id path int true "Recruitment ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /recruitments/{id}/open [put]
 func (rc *RecruitmentController) OpenRecruitmentApplicationPeriod(c echo.Context) error {
@@ -575,6 +583,7 @@ func (rc *RecruitmentController) OpenRecruitmentApplicationPeriod(c echo.Context
 // @Param id path int true "Recruitment ID"
 // @Success      200  {object}   response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /recruitments/{id}/close [put]
 func (rc *RecruitmentController) CloseRecruitmentApplicationPeriod(c echo.Context) error {
