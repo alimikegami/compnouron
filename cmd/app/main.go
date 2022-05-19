@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	_ "github.com/alimikegami/compnouron/cmd/app/docs"
@@ -20,7 +19,6 @@ import (
 	"github.com/alimikegami/compnouron/internal/user/repository"
 	"github.com/alimikegami/compnouron/internal/user/usecase"
 	"github.com/alimikegami/compnouron/pkg/utils"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -56,10 +54,10 @@ func initializeDatabaseConnection() (*gorm.DB, error) {
 func main() {
 	e := echo.New()
 
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// err := godotenv.Load("../../.env")
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
 	db, err := initializeDatabaseConnection()
 	if err != nil {
 		fmt.Println("Connection to the database has not been established")
