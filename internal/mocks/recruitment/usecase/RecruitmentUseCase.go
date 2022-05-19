@@ -14,13 +14,13 @@ type RecruitmentUseCase struct {
 	mock.Mock
 }
 
-// AcceptRecruitmentApplication provides a mock function with given fields: id
-func (_m *RecruitmentUseCase) AcceptRecruitmentApplication(id uint) error {
-	ret := _m.Called(id)
+// AcceptRecruitmentApplication provides a mock function with given fields: id, userID
+func (_m *RecruitmentUseCase) AcceptRecruitmentApplication(id uint, userID uint) error {
+	ret := _m.Called(id, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uint) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uint, uint) error); ok {
+		r0 = rf(id, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -28,13 +28,27 @@ func (_m *RecruitmentUseCase) AcceptRecruitmentApplication(id uint) error {
 	return r0
 }
 
-// CreateRecruitment provides a mock function with given fields: recruitmentRequest
-func (_m *RecruitmentUseCase) CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error {
-	ret := _m.Called(recruitmentRequest)
+// CloseRecruitmentApplicationPeriod provides a mock function with given fields: id, userID
+func (_m *RecruitmentUseCase) CloseRecruitmentApplicationPeriod(id uint, userID uint) error {
+	ret := _m.Called(id, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(dto.RecruitmentRequest) error); ok {
-		r0 = rf(recruitmentRequest)
+	if rf, ok := ret.Get(0).(func(uint, uint) error); ok {
+		r0 = rf(id, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// CreateRecruitment provides a mock function with given fields: recruitmentRequest, userID
+func (_m *RecruitmentUseCase) CreateRecruitment(recruitmentRequest dto.RecruitmentRequest, userID uint) error {
+	ret := _m.Called(recruitmentRequest, userID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(dto.RecruitmentRequest, uint) error); ok {
+		r0 = rf(recruitmentRequest, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -56,13 +70,13 @@ func (_m *RecruitmentUseCase) CreateRecruitmentApplication(recruitmentApplicatio
 	return r0
 }
 
-// DeleteRecruitmentByID provides a mock function with given fields: id
-func (_m *RecruitmentUseCase) DeleteRecruitmentByID(id uint) error {
-	ret := _m.Called(id)
+// DeleteRecruitmentByID provides a mock function with given fields: id, userID
+func (_m *RecruitmentUseCase) DeleteRecruitmentByID(id uint, userID uint) error {
+	ret := _m.Called(id, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uint) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uint, uint) error); ok {
+		r0 = rf(id, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -91,8 +105,8 @@ func (_m *RecruitmentUseCase) GetRecruitmentByID(id uint) (dto.RecruitmentRespon
 	return r0, r1
 }
 
-// GetRecruitmentByUserID provides a mock function with given fields: id
-func (_m *RecruitmentUseCase) GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error) {
+// GetRecruitmentByTeamID provides a mock function with given fields: id
+func (_m *RecruitmentUseCase) GetRecruitmentByTeamID(id uint) (dto.RecruitmentsResponse, error) {
 	ret := _m.Called(id)
 
 	var r0 dto.RecruitmentsResponse
@@ -114,20 +128,20 @@ func (_m *RecruitmentUseCase) GetRecruitmentByUserID(id uint) (dto.RecruitmentsR
 	return r0, r1
 }
 
-// GetRecruitmentDetailsByID provides a mock function with given fields: id
-func (_m *RecruitmentUseCase) GetRecruitmentDetailsByID(id uint) (dto.RecruitmentDetailsResponse, error) {
-	ret := _m.Called(id)
+// GetRecruitmentDetailsByID provides a mock function with given fields: id, userID
+func (_m *RecruitmentUseCase) GetRecruitmentDetailsByID(id uint, userID uint) (dto.RecruitmentDetailsResponse, error) {
+	ret := _m.Called(id, userID)
 
 	var r0 dto.RecruitmentDetailsResponse
-	if rf, ok := ret.Get(0).(func(uint) dto.RecruitmentDetailsResponse); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uint, uint) dto.RecruitmentDetailsResponse); ok {
+		r0 = rf(id, userID)
 	} else {
 		r0 = ret.Get(0).(dto.RecruitmentDetailsResponse)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(uint, uint) error); ok {
+		r1 = rf(id, userID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -135,13 +149,36 @@ func (_m *RecruitmentUseCase) GetRecruitmentDetailsByID(id uint) (dto.Recruitmen
 	return r0, r1
 }
 
-// RejectRecruitmentApplication provides a mock function with given fields: id
-func (_m *RecruitmentUseCase) RejectRecruitmentApplication(id uint) error {
-	ret := _m.Called(id)
+// GetRecruitments provides a mock function with given fields: limit, offset
+func (_m *RecruitmentUseCase) GetRecruitments(limit int, offset int) ([]dto.BriefRecruitmentResponse, error) {
+	ret := _m.Called(limit, offset)
+
+	var r0 []dto.BriefRecruitmentResponse
+	if rf, ok := ret.Get(0).(func(int, int) []dto.BriefRecruitmentResponse); ok {
+		r0 = rf(limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]dto.BriefRecruitmentResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+		r1 = rf(limit, offset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OpenRecruitmentApplicationPeriod provides a mock function with given fields: id, userID
+func (_m *RecruitmentUseCase) OpenRecruitmentApplicationPeriod(id uint, userID uint) error {
+	ret := _m.Called(id, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uint) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uint, uint) error); ok {
+		r0 = rf(id, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -149,13 +186,50 @@ func (_m *RecruitmentUseCase) RejectRecruitmentApplication(id uint) error {
 	return r0
 }
 
-// UpdateRecruitment provides a mock function with given fields: recruitmentRequest, id
-func (_m *RecruitmentUseCase) UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error {
-	ret := _m.Called(recruitmentRequest, id)
+// RejectRecruitmentApplication provides a mock function with given fields: id, userID
+func (_m *RecruitmentUseCase) RejectRecruitmentApplication(id uint, userID uint) error {
+	ret := _m.Called(id, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(dto.RecruitmentRequest, uint) error); ok {
-		r0 = rf(recruitmentRequest, id)
+	if rf, ok := ret.Get(0).(func(uint, uint) error); ok {
+		r0 = rf(id, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SearchRecruitment provides a mock function with given fields: limit, offset, keyword
+func (_m *RecruitmentUseCase) SearchRecruitment(limit int, offset int, keyword string) ([]dto.BriefRecruitmentResponse, error) {
+	ret := _m.Called(limit, offset, keyword)
+
+	var r0 []dto.BriefRecruitmentResponse
+	if rf, ok := ret.Get(0).(func(int, int, string) []dto.BriefRecruitmentResponse); ok {
+		r0 = rf(limit, offset, keyword)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]dto.BriefRecruitmentResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int, int, string) error); ok {
+		r1 = rf(limit, offset, keyword)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateRecruitment provides a mock function with given fields: recruitmentRequest, id, userID
+func (_m *RecruitmentUseCase) UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint, userID uint) error {
+	ret := _m.Called(recruitmentRequest, id, userID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(dto.RecruitmentRequest, uint, uint) error); ok {
+		r0 = rf(recruitmentRequest, id, userID)
 	} else {
 		r0 = ret.Error(0)
 	}

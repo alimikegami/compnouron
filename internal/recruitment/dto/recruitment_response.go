@@ -8,4 +8,10 @@ type RecruitmentResponse struct {
 	TeamName    string `json:"teamName"`
 }
 
+type BriefRecruitmentResponse struct {
+	ID       uint   `json:"ID"`
+	Role     string `json:"role"`
+	TeamName string `json:"teamName"`
+}
+
 type RecruitmentsResponse []RecruitmentResponse

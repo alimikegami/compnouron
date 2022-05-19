@@ -3,9 +3,13 @@ package usecase
 import (
 	"fmt"
 
+	compRepo "github.com/alimikegami/compnouron/internal/competition/repository"
+	recRepo "github.com/alimikegami/compnouron/internal/recruitment/repository"
+
 	"github.com/alimikegami/compnouron/internal/user/dto"
 	"github.com/alimikegami/compnouron/internal/user/entity"
 	"github.com/alimikegami/compnouron/internal/user/repository"
+
 	"github.com/alimikegami/compnouron/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -13,14 +17,18 @@ import (
 type UserUseCase interface {
 	CreateUser(user *dto.UserRegistrationRequest) error
 	Login(credential *dto.Credential) (string, error)
+	GetCompetitionRegistrationHistory(userID uint) ([]dto.UserCompetitionHistory, error)
+	GetRecruitmentApplicationHistory(userID uint) ([]dto.UserRecruitmentApplicationHistory, error)
 }
 
 type UserUseCaseImpl struct {
 	ur repository.UserRepository
+	cr compRepo.CompetitionRepository
+	rr recRepo.RecruitmentRepository
 }
 
-func CreateNewUserUseCase(ur repository.UserRepository) UserUseCase {
-	return &UserUseCaseImpl{ur: ur}
+func CreateNewUserUseCase(ur repository.UserRepository, cr compRepo.CompetitionRepository, rr recRepo.RecruitmentRepository) UserUseCase {
+	return &UserUseCaseImpl{ur: ur, cr: cr, rr: rr}
 }
 
 func (us *UserUseCaseImpl) CreateUser(user *dto.UserRegistrationRequest) error {
@@ -58,7 +66,7 @@ func (us *UserUseCaseImpl) CreateUser(user *dto.UserRegistrationRequest) error {
 func (us *UserUseCaseImpl) Login(credential *dto.Credential) (string, error) {
 	user := us.ur.GetUserByEmail(credential.Email)
 	if user == nil {
-		return "", fmt.Errorf("user not found")
+		return "", fmt.Errorf("credentials dont match")
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(credential.Password))
 	if err != nil {
@@ -67,7 +75,36 @@ func (us *UserUseCaseImpl) Login(credential *dto.Credential) (string, error) {
 	token, err := utils.CreateSignedJWTToken(user.ID, user.Email)
 	if err != nil {
 		fmt.Println(err)
+		return "", nil
 	}
 
 	return token, nil
+}
+
+func (us *UserUseCaseImpl) GetCompetitionRegistrationHistory(userID uint) ([]dto.UserCompetitionHistory, error) {
+	var history []dto.UserCompetitionHistory
+	comps, err := us.cr.GetCompetitionRegistrationByUserID(userID)
+	for _, comp := range comps {
+		history = append(history, dto.UserCompetitionHistory{
+			CompetitionRegistrationID: comp.ID,
+			AcceptanceStatus:          comp.AcceptanceStatus,
+			CompetitionName:           comp.Competition.Name,
+			CompetitionID:             comp.CompetitionID,
+		})
+	}
+	return history, err
+}
+
+func (us *UserUseCaseImpl) GetRecruitmentApplicationHistory(userID uint) ([]dto.UserRecruitmentApplicationHistory, error) {
+	var history []dto.UserRecruitmentApplicationHistory
+	recs, err := us.rr.GetRecruitmentApplicationByUserID(userID)
+	for _, rec := range recs {
+		history = append(history, dto.UserRecruitmentApplicationHistory{
+			RecruitmentApplicationID: rec.ID,
+			RecruitmentID:            rec.RecruitmentID,
+			RecruitmentRole:          rec.Recruitment.Role,
+			AcceptanceStatus:         uint(rec.AcceptanceStatus),
+		})
+	}
+	return history, err
 }

@@ -1,20 +1,30 @@
 package usecase
 
 import (
+	"errors"
+
 	"github.com/alimikegami/compnouron/internal/team/dto"
 	"github.com/alimikegami/compnouron/internal/team/entity"
 	"github.com/alimikegami/compnouron/internal/team/repository"
 )
 
-type TeamUseCase struct {
-	tr *repository.TeamRepository
+type TeamUseCase interface {
+	CreateTeam(userID uint, team dto.TeamRequest) error
+	DeleteTeam(id uint, userID uint) error
+	UpdateTeam(userID uint, team dto.TeamRequest, teamID uint) error
+	GetTeamsByUserID(userID uint) ([]dto.BriefTeamResponse, error)
+	GetTeamDetailsByID(teamID uint) (dto.TeamDetailsResponse, error)
 }
 
-func CreateNewTeamUseCase(tr *repository.TeamRepository) *TeamUseCase {
-	return &TeamUseCase{tr: tr}
+type TeamUseCaseImpl struct {
+	tr repository.TeamRepository
 }
 
-func (tuc *TeamUseCase) CreateTeam(userID uint, team dto.TeamRequest) error {
+func CreateNewTeamUseCase(tr repository.TeamRepository) TeamUseCase {
+	return &TeamUseCaseImpl{tr: tr}
+}
+
+func (tuc *TeamUseCaseImpl) CreateTeam(userID uint, team dto.TeamRequest) error {
 	teamEntity := entity.Team{
 		Name:        team.Name,
 		Description: team.Description,
@@ -31,13 +41,31 @@ func (tuc *TeamUseCase) CreateTeam(userID uint, team dto.TeamRequest) error {
 	return err
 }
 
-func (tuc *TeamUseCase) DeleteTeam(id uint) error {
-	err := tuc.tr.DeleteTeam(id)
+func (tuc *TeamUseCaseImpl) DeleteTeam(id uint, userID uint) error {
+	teamOwner, err := tuc.tr.GetTeamLeader(id)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if teamOwner != userID {
+		return errors.New("action unauthorized")
+	}
+
+	err = tuc.tr.DeleteTeam(id)
 
 	return err
 }
 
-func (tuc *TeamUseCase) UpdateTeam(userID uint, team dto.TeamRequest, teamID uint) error {
+func (tuc *TeamUseCaseImpl) UpdateTeam(userID uint, team dto.TeamRequest, teamID uint) error {
+	teamOwner, err := tuc.tr.GetTeamLeader(teamID)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if teamOwner != userID {
+		return errors.New("action unauthorized")
+	}
+
 	teamEntity := entity.Team{
 		ID:          teamID,
 		Name:        team.Name,
@@ -45,11 +73,11 @@ func (tuc *TeamUseCase) UpdateTeam(userID uint, team dto.TeamRequest, teamID uin
 		Capacity:    team.Capacity,
 	}
 
-	err := tuc.tr.UpdateTeam(teamEntity)
+	err = tuc.tr.UpdateTeam(teamEntity)
 	return err
 }
 
-func (tuc *TeamUseCase) GetTeamsByUserID(userID uint) ([]dto.BriefTeamResponse, error) {
+func (tuc *TeamUseCaseImpl) GetTeamsByUserID(userID uint) ([]dto.BriefTeamResponse, error) {
 	var teamsResponse []dto.BriefTeamResponse
 	result, err := tuc.tr.GetTeamsByUserID(userID)
 	if err != nil {
@@ -66,7 +94,7 @@ func (tuc *TeamUseCase) GetTeamsByUserID(userID uint) ([]dto.BriefTeamResponse, 
 	return teamsResponse, nil
 }
 
-func (tuc *TeamUseCase) GetTeamDetailsByID(teamID uint) (dto.TeamDetailsResponse, error) {
+func (tuc *TeamUseCaseImpl) GetTeamDetailsByID(teamID uint) (dto.TeamDetailsResponse, error) {
 	team, err := tuc.tr.GetTeamByID(teamID)
 
 	if err != nil {
@@ -79,11 +107,7 @@ func (tuc *TeamUseCase) GetTeamDetailsByID(teamID uint) (dto.TeamDetailsResponse
 		Capacity:    team.Capacity,
 	}
 
-	members, err := tuc.tr.GetTeamMembersByID(teamID)
-	if err != nil {
-		return dto.TeamDetailsResponse{}, err
-	}
-	for _, member := range members {
+	for _, member := range team.TeamMembers {
 		teamDetails.TeamMembers = append(teamDetails.TeamMembers, dto.TeamMemberResponse{
 			UserID:   member.ID,
 			Name:     member.User.Name,

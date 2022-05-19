@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/alimikegami/compnouron/db/pagination"
 	"github.com/alimikegami/compnouron/internal/recruitment/entity"
 
 	"gorm.io/gorm"
@@ -16,11 +17,16 @@ type RecruitmentRepository interface {
 	CreateRecruitmentApplication(recruitmentApplication entity.RecruitmentApplication) error
 	GetRecruitmentByID(id uint) (entity.Recruitment, error)
 	GetRecruitmentApplicationByRecruitmentID(id uint) ([]entity.RecruitmentApplication, error)
-	GetRecruitmentByUserID(id uint) ([]entity.Recruitment, error)
+	GetRecruitmentByTeamID(id uint) ([]entity.Recruitment, error)
 	RejectRecruitmentApplication(id uint) error
 	GetRecruitmentApplicationByID(id uint) (entity.RecruitmentApplication, error)
+	GetRecruitmentApplicationByUserID(userID uint) ([]entity.RecruitmentApplication, error)
 	AcceptRecruitmentApplication(id uint) error
 	DeleteRecruitmentByID(id uint) error
+	OpenRecruitmentApplicationPeriod(id uint) error
+	CloseRecruitmentApplicationPeriod(id uint) error
+	GetRecruitments(limit int, offset int) ([]entity.Recruitment, error)
+	SearchRecruitment(limit int, offset int, keyword string) ([]entity.Recruitment, error)
 }
 
 type RecruitmentRepositoryImpl struct {
@@ -41,8 +47,19 @@ func (rr *RecruitmentRepositoryImpl) CreateRecruitment(recruitment entity.Recrui
 	return result.Error
 }
 
+func (rr *RecruitmentRepositoryImpl) GetRecruitments(limit int, offset int) ([]entity.Recruitment, error) {
+	var recruitments []entity.Recruitment
+	result := rr.db.Scopes(pagination.Paginate(limit, offset)).Preload(clause.Associations).Find(&recruitments)
+
+	if result.Error != nil {
+		return []entity.Recruitment{}, result.Error
+	}
+
+	return recruitments, nil
+}
+
 func (rr *RecruitmentRepositoryImpl) UpdateRecruitment(recruitment entity.Recruitment) error {
-	result := rr.db.Model(&recruitment).Where("id = ?", recruitment.ID).Updates(recruitment)
+	result := rr.db.Debug().Model(&recruitment).Where("id = ?", recruitment.ID).Updates(recruitment)
 
 	if result.Error != nil {
 		return result.Error
@@ -61,6 +78,16 @@ func (rr *RecruitmentRepositoryImpl) CreateRecruitmentApplication(recruitmentApp
 	return nil
 }
 
+func (rr *RecruitmentRepositoryImpl) GetRecruitmentApplicationByUserID(userID uint) ([]entity.RecruitmentApplication, error) {
+	var recruitment []entity.RecruitmentApplication
+	result := rr.db.Joins("Recruitment").Find(&recruitment, "recruitment_applications.user_id = ?", userID)
+	if result.Error != nil {
+		return []entity.RecruitmentApplication{}, result.Error
+	}
+
+	return recruitment, nil
+}
+
 func (rr *RecruitmentRepositoryImpl) GetRecruitmentByID(id uint) (entity.Recruitment, error) {
 	var recruitment entity.Recruitment
 	result := rr.db.Joins("Team").First(&recruitment, "recruitments.id = ?", id)
@@ -72,18 +99,19 @@ func (rr *RecruitmentRepositoryImpl) GetRecruitmentByID(id uint) (entity.Recruit
 }
 
 func (rr *RecruitmentRepositoryImpl) GetRecruitmentApplicationByRecruitmentID(id uint) ([]entity.RecruitmentApplication, error) {
-	var recruitmentApplications []entity.RecruitmentApplication
-	result := rr.db.Joins("User").Find(&recruitmentApplications, "recruitment_id = ?", id)
+	var recruitment entity.Recruitment
+	result := rr.db.Preload("RecruitmentApplications.User").Preload("RecruitmentApplications").Find(&recruitment, id)
 	if result.Error != nil {
-		return recruitmentApplications, result.Error
+		return []entity.RecruitmentApplication{}, result.Error
 	}
 
-	return recruitmentApplications, nil
+	return recruitment.RecruitmentApplications, nil
 }
 
-func (rr *RecruitmentRepositoryImpl) GetRecruitmentByUserID(id uint) ([]entity.Recruitment, error) {
+func (rr *RecruitmentRepositoryImpl) GetRecruitmentByTeamID(id uint) ([]entity.Recruitment, error) {
 	var recruitments []entity.Recruitment
-	result := rr.db.Preload(clause.Associations).Find(&recruitments)
+	result := rr.db.Debug().Preload(clause.Associations).Where("team_id = ?", id).Find(&recruitments)
+	fmt.Println(recruitments)
 	if result.Error != nil {
 		return recruitments, result.Error
 	}
@@ -91,16 +119,23 @@ func (rr *RecruitmentRepositoryImpl) GetRecruitmentByUserID(id uint) ([]entity.R
 	return recruitments, nil
 }
 
+func (rr *RecruitmentRepositoryImpl) GetAcceptedRecruitmentsApplications(id uint) (entity.Recruitment, error) {
+	var recruitments entity.Recruitment
+
+	result := rr.db.Preload("RecruitmentApplications", "is_accepted = 0 AND is_rejected = 0").Where("id = ?", id).Find(&recruitments)
+
+	if result.Error != nil {
+		return entity.Recruitment{}, result.Error
+	}
+
+	return recruitments, nil
+}
+
 func (rr *RecruitmentRepositoryImpl) RejectRecruitmentApplication(id uint) error {
-	var recruitmentApplication entity.RecruitmentApplication
-	result := rr.db.First(&recruitmentApplication, id)
+	result := rr.db.Model(&entity.RecruitmentApplication{}).Where("id = ?", id).Update("acceptance_status", 2)
 	if result.Error != nil {
 		return result.Error
 	}
-
-	recruitmentApplication.IsAccepted = 0
-	recruitmentApplication.IsRejected = 1
-	result = rr.db.Save(recruitmentApplication)
 
 	if result.RowsAffected != 1 {
 		return errors.New("no rows affected")
@@ -110,15 +145,10 @@ func (rr *RecruitmentRepositoryImpl) RejectRecruitmentApplication(id uint) error
 }
 
 func (rr *RecruitmentRepositoryImpl) AcceptRecruitmentApplication(id uint) error {
-	var recruitmentApplication entity.RecruitmentApplication
-	result := rr.db.First(&recruitmentApplication, id)
+	result := rr.db.Debug().Model(&entity.RecruitmentApplication{}).Where("id = ?", id).Update("acceptance_status", 1)
 	if result.Error != nil {
 		return result.Error
 	}
-
-	recruitmentApplication.IsAccepted = 1
-	recruitmentApplication.IsRejected = 0
-	result = rr.db.Save(recruitmentApplication)
 
 	if result.RowsAffected != 1 {
 		return errors.New("no rows affected")
@@ -149,4 +179,40 @@ func (rr *RecruitmentRepositoryImpl) DeleteRecruitmentByID(id uint) error {
 	}
 
 	return nil
+}
+
+func (rr *RecruitmentRepositoryImpl) OpenRecruitmentApplicationPeriod(id uint) error {
+	result := rr.db.Model(&entity.Recruitment{}).Where("id = ?", id).Update("application_acceptance_status", 1)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected != 1 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func (rr *RecruitmentRepositoryImpl) CloseRecruitmentApplicationPeriod(id uint) error {
+	result := rr.db.Model(&entity.Recruitment{}).Where("id = ?", id).Update("application_acceptance_status", 2)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected != 1 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func (rr *RecruitmentRepositoryImpl) SearchRecruitment(limit int, offset int, keyword string) ([]entity.Recruitment, error) {
+	var recruitments []entity.Recruitment
+	result := rr.db.Scopes(pagination.Paginate(limit, offset)).Preload("Team").Where("role LIKE ?", "%"+keyword+"%").Find(&recruitments)
+	if result.Error != nil {
+		return []entity.Recruitment{}, result.Error
+	}
+
+	return recruitments, nil
 }

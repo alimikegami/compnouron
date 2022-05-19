@@ -28,6 +28,20 @@ func (_m *RecruitmentRepository) AcceptRecruitmentApplication(id uint) error {
 	return r0
 }
 
+// CloseRecruitmentApplicationPeriod provides a mock function with given fields: id
+func (_m *RecruitmentRepository) CloseRecruitmentApplicationPeriod(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateRecruitment provides a mock function with given fields: recruitment
 func (_m *RecruitmentRepository) CreateRecruitment(recruitment entity.Recruitment) error {
 	ret := _m.Called(recruitment)
@@ -114,6 +128,29 @@ func (_m *RecruitmentRepository) GetRecruitmentApplicationByRecruitmentID(id uin
 	return r0, r1
 }
 
+// GetRecruitmentApplicationByUserID provides a mock function with given fields: userID
+func (_m *RecruitmentRepository) GetRecruitmentApplicationByUserID(userID uint) ([]entity.RecruitmentApplication, error) {
+	ret := _m.Called(userID)
+
+	var r0 []entity.RecruitmentApplication
+	if rf, ok := ret.Get(0).(func(uint) []entity.RecruitmentApplication); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.RecruitmentApplication)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRecruitmentByID provides a mock function with given fields: id
 func (_m *RecruitmentRepository) GetRecruitmentByID(id uint) (entity.Recruitment, error) {
 	ret := _m.Called(id)
@@ -135,8 +172,8 @@ func (_m *RecruitmentRepository) GetRecruitmentByID(id uint) (entity.Recruitment
 	return r0, r1
 }
 
-// GetRecruitmentByUserID provides a mock function with given fields: id
-func (_m *RecruitmentRepository) GetRecruitmentByUserID(id uint) ([]entity.Recruitment, error) {
+// GetRecruitmentByTeamID provides a mock function with given fields: id
+func (_m *RecruitmentRepository) GetRecruitmentByTeamID(id uint) ([]entity.Recruitment, error) {
 	ret := _m.Called(id)
 
 	var r0 []entity.Recruitment
@@ -158,6 +195,43 @@ func (_m *RecruitmentRepository) GetRecruitmentByUserID(id uint) ([]entity.Recru
 	return r0, r1
 }
 
+// GetRecruitments provides a mock function with given fields: limit, offset
+func (_m *RecruitmentRepository) GetRecruitments(limit int, offset int) ([]entity.Recruitment, error) {
+	ret := _m.Called(limit, offset)
+
+	var r0 []entity.Recruitment
+	if rf, ok := ret.Get(0).(func(int, int) []entity.Recruitment); ok {
+		r0 = rf(limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.Recruitment)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+		r1 = rf(limit, offset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OpenRecruitmentApplicationPeriod provides a mock function with given fields: id
+func (_m *RecruitmentRepository) OpenRecruitmentApplicationPeriod(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // RejectRecruitmentApplication provides a mock function with given fields: id
 func (_m *RecruitmentRepository) RejectRecruitmentApplication(id uint) error {
 	ret := _m.Called(id)
@@ -170,6 +244,29 @@ func (_m *RecruitmentRepository) RejectRecruitmentApplication(id uint) error {
 	}
 
 	return r0
+}
+
+// SearchRecruitment provides a mock function with given fields: limit, offset, keyword
+func (_m *RecruitmentRepository) SearchRecruitment(limit int, offset int, keyword string) ([]entity.Recruitment, error) {
+	ret := _m.Called(limit, offset, keyword)
+
+	var r0 []entity.Recruitment
+	if rf, ok := ret.Get(0).(func(int, int, string) []entity.Recruitment); ok {
+		r0 = rf(limit, offset, keyword)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.Recruitment)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int, int, string) error); ok {
+		r1 = rf(limit, offset, keyword)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // UpdateRecruitment provides a mock function with given fields: recruitment

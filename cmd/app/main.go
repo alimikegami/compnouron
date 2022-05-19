@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/alimikegami/compnouron/cmd/app/docs"
 	"github.com/alimikegami/compnouron/db/migration"
 	competitionController "github.com/alimikegami/compnouron/internal/competition/controller"
 	competitionRepository "github.com/alimikegami/compnouron/internal/competition/repository"
@@ -20,6 +21,7 @@ import (
 	"github.com/alimikegami/compnouron/pkg/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -35,6 +37,20 @@ func initializeDatabaseConnection() (*gorm.DB, error) {
 	return db, err
 }
 
+// @title           Compnouron API
+// @version         1.0
+// @description     This is a sample server celler server.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:1323
+
 func main() {
 	e := echo.New()
 
@@ -42,7 +58,6 @@ func main() {
 	// if err != nil {
 	// 	log.Fatal("Error loading .env file")
 	// }
-
 	db, err := initializeDatabaseConnection()
 	if err != nil {
 		fmt.Println("Connection to the database has not been established")
@@ -60,19 +75,20 @@ func main() {
 	cc := competitionController.CreateNewCompetitionController(e, cuc)
 	cc.InitializeCompetitionRoute(config)
 
-	userRepository := repository.CreateNewUserRepository(db)
-	userUseCase := usecase.CreateNewUserUseCase(userRepository)
-	userController := controller.CreateNewUserController(e, userUseCase)
-	userController.InitializeUserRoute(config)
-
 	tr := teamRepository.CreateNewTeamRepository(db)
 	tuc := teamUseCase.CreateNewTeamUseCase(tr)
 	tc := teamController.CreateNewTeamController(e, tuc)
 	tc.InitializeTeamRoute(config)
 
 	rr := recruitmentRepository.CreateNewRecruitmentRepository(db)
-	ruc := recruitmentUseCase.CreateNewRecruitmentUseCase(rr, *tr)
+	ruc := recruitmentUseCase.CreateNewRecruitmentUseCase(rr, tr)
 	rc := recruitmentController.CreateNewRecruitmentController(e, ruc)
+
+	userRepository := repository.CreateNewUserRepository(db)
+	userUseCase := usecase.CreateNewUserUseCase(userRepository, cr, rr)
+	userController := controller.CreateNewUserController(e, userUseCase)
+	userController.InitializeUserRoute(config)
 	rc.InitializeRecruitmentRoute(config)
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	e.Logger.Fatal(e.Start(":1323"))
 }

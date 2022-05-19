@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"errors"
+
 	"github.com/alimikegami/compnouron/internal/recruitment/dto"
 	"github.com/alimikegami/compnouron/internal/recruitment/entity"
 	"github.com/alimikegami/compnouron/internal/recruitment/repository"
@@ -8,15 +10,19 @@ import (
 )
 
 type RecruitmentUseCase interface {
-	CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error
-	UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error
+	CreateRecruitment(recruitmentRequest dto.RecruitmentRequest, userID uint) error
+	UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint, userID uint) error
 	GetRecruitmentByID(id uint) (dto.RecruitmentResponse, error)
 	CreateRecruitmentApplication(recruitmentApplication dto.RecruitmentApplicationRequest, userID uint) error
-	GetRecruitmentDetailsByID(id uint) (dto.RecruitmentDetailsResponse, error)
-	GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error)
-	RejectRecruitmentApplication(id uint) error
-	AcceptRecruitmentApplication(id uint) error
-	DeleteRecruitmentByID(id uint) error
+	GetRecruitmentDetailsByID(id uint, userID uint) (dto.RecruitmentDetailsResponse, error)
+	GetRecruitmentByTeamID(id uint) (dto.RecruitmentsResponse, error)
+	RejectRecruitmentApplication(id uint, userID uint) error
+	AcceptRecruitmentApplication(id uint, userID uint) error
+	DeleteRecruitmentByID(id uint, userID uint) error
+	OpenRecruitmentApplicationPeriod(id uint, userID uint) error
+	CloseRecruitmentApplicationPeriod(id uint, userID uint) error
+	GetRecruitments(limit int, offset int) ([]dto.BriefRecruitmentResponse, error)
+	SearchRecruitment(limit int, offset int, keyword string) ([]dto.BriefRecruitmentResponse, error)
 }
 
 type RecruitmentUseCaseImpl struct {
@@ -28,17 +34,36 @@ func CreateNewRecruitmentUseCase(rr repository.RecruitmentRepository, tr teamRep
 	return &RecruitmentUseCaseImpl{rr: rr, tr: tr}
 }
 
-func (ruc *RecruitmentUseCaseImpl) CreateRecruitment(recruitmentRequest dto.RecruitmentRequest) error {
-	recruitmentEntity := entity.Recruitment{
-		Role:        recruitmentRequest.Role,
-		Description: recruitmentRequest.Description,
-		TeamID:      recruitmentRequest.TeamID,
+func (ruc *RecruitmentUseCaseImpl) CreateRecruitment(recruitmentRequest dto.RecruitmentRequest, userID uint) error {
+	teamOwner, err := ruc.tr.GetTeamLeader(recruitmentRequest.TeamID)
+	if err != nil {
+		return errors.New("internal server error")
 	}
-	err := ruc.rr.CreateRecruitment(recruitmentEntity)
+
+	if teamOwner != userID {
+		return errors.New("action unauthorized")
+	}
+
+	recruitmentEntity := entity.Recruitment{
+		Role:                        recruitmentRequest.Role,
+		Description:                 recruitmentRequest.Description,
+		TeamID:                      recruitmentRequest.TeamID,
+		ApplicationAcceptanceStatus: 0,
+	}
+	err = ruc.rr.CreateRecruitment(recruitmentEntity)
 	return err
 }
 
-func (ruc *RecruitmentUseCaseImpl) UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint) error {
+func (ruc *RecruitmentUseCaseImpl) UpdateRecruitment(recruitmentRequest dto.RecruitmentRequest, id uint, userID uint) error {
+	teamOwner, err := ruc.tr.GetTeamLeader(id)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if teamOwner != userID {
+		return errors.New("action unauthorized")
+	}
+
 	recruitmentEntity := entity.Recruitment{
 		ID:          id,
 		Role:        recruitmentRequest.Role,
@@ -46,24 +71,59 @@ func (ruc *RecruitmentUseCaseImpl) UpdateRecruitment(recruitmentRequest dto.Recr
 		TeamID:      recruitmentRequest.TeamID,
 	}
 
-	err := ruc.rr.UpdateRecruitment(recruitmentEntity)
+	err = ruc.rr.UpdateRecruitment(recruitmentEntity)
 	return err
 }
 
 func (ruc *RecruitmentUseCaseImpl) CreateRecruitmentApplication(recruitmentApplicationRequest dto.RecruitmentApplicationRequest, userID uint) error {
 	recruitmentApplicationEntity := entity.RecruitmentApplication{
-		UserID:        userID,
-		RecruitmentID: recruitmentApplicationRequest.RecruitmentID,
-		IsAccepted:    0,
-		IsRejected:    0,
+		UserID:           userID,
+		RecruitmentID:    recruitmentApplicationRequest.RecruitmentID,
+		AcceptanceStatus: 0,
 	}
 
-	err := ruc.rr.CreateRecruitmentApplication(recruitmentApplicationEntity)
+	recHis, err := ruc.rr.GetRecruitmentApplicationByUserID(userID)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+	for _, rec := range recHis {
+		if rec.RecruitmentID == recruitmentApplicationRequest.RecruitmentID && rec.UserID == userID {
+			return errors.New("you have registered")
+		}
+	}
+	err = ruc.rr.CreateRecruitmentApplication(recruitmentApplicationEntity)
 
 	return err
 }
 
-func (ruc *RecruitmentUseCaseImpl) GetRecruitmentDetailsByID(id uint) (dto.RecruitmentDetailsResponse, error) {
+func (ruc *RecruitmentUseCaseImpl) GetRecruitments(limit int, offset int) ([]dto.BriefRecruitmentResponse, error) {
+	var briefRecruitmentResponse []dto.BriefRecruitmentResponse
+	recruitmentsEntity, err := ruc.rr.GetRecruitments(limit, offset)
+	if err != nil {
+		return []dto.BriefRecruitmentResponse{}, err
+	}
+
+	for _, recruitment := range recruitmentsEntity {
+		briefRecruitmentResponse = append(briefRecruitmentResponse, dto.BriefRecruitmentResponse{
+			ID:       recruitment.ID,
+			Role:     recruitment.Role,
+			TeamName: recruitment.Team.Name,
+		})
+	}
+
+	return briefRecruitmentResponse, nil
+}
+
+func (ruc *RecruitmentUseCaseImpl) GetRecruitmentDetailsByID(id uint, userID uint) (dto.RecruitmentDetailsResponse, error) {
+	teamOwner, err := ruc.tr.GetTeamLeader(id)
+	if err != nil {
+		return dto.RecruitmentDetailsResponse{}, errors.New("internal server error")
+	}
+
+	if teamOwner != userID {
+		return dto.RecruitmentDetailsResponse{}, errors.New("action unauthorized")
+	}
+
 	var recruitmentApplicationsResponse []dto.RecruitmentApplicationResponse
 	recruitment, err := ruc.rr.GetRecruitmentByID(id)
 	if err != nil {
@@ -85,12 +145,11 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentDetailsByID(id uint) (dto.Recru
 
 	for _, recruitmentApplication := range recruitmentApplications {
 		recruitmentApplicationsResponse = append(recruitmentApplicationsResponse, dto.RecruitmentApplicationResponse{
-			ID:            recruitmentApplication.ID,
-			UserID:        recruitmentApplication.UserID,
-			RecruitmentID: recruitmentApplication.RecruitmentID,
-			IsAccepted:    recruitmentApplication.IsAccepted,
-			IsRejected:    recruitmentApplication.IsRejected,
-			UserName:      recruitmentApplication.User.Name,
+			ID:               recruitmentApplication.ID,
+			UserID:           recruitmentApplication.UserID,
+			RecruitmentID:    recruitmentApplication.RecruitmentID,
+			AcceptanceStatus: recruitmentApplication.AcceptanceStatus,
+			UserName:         recruitmentApplication.User.Name,
 		})
 	}
 
@@ -100,9 +159,9 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentDetailsByID(id uint) (dto.Recru
 	}, nil
 }
 
-func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByUserID(id uint) (dto.RecruitmentsResponse, error) {
+func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByTeamID(id uint) (dto.RecruitmentsResponse, error) {
 	var recruitments dto.RecruitmentsResponse
-	result, err := ruc.rr.GetRecruitmentByUserID(id)
+	result, err := ruc.rr.GetRecruitmentByTeamID(id)
 	for _, recruitment := range result {
 		recruitments = append(recruitments, dto.RecruitmentResponse{
 			ID:          recruitment.ID,
@@ -116,14 +175,31 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByUserID(id uint) (dto.Recruitm
 	return recruitments, err
 }
 
-func (ruc *RecruitmentUseCaseImpl) RejectRecruitmentApplication(id uint) error {
-	err := ruc.rr.RejectRecruitmentApplication(id)
+func (ruc *RecruitmentUseCaseImpl) RejectRecruitmentApplication(id uint, userID uint) error {
+	teamOwner, err := ruc.tr.GetTeamLeader(id)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if teamOwner != userID {
+		return errors.New("action unauthorized")
+	}
+	err = ruc.rr.RejectRecruitmentApplication(id)
 
 	return err
 }
 
-func (ruc *RecruitmentUseCaseImpl) AcceptRecruitmentApplication(id uint) error {
-	err := ruc.rr.AcceptRecruitmentApplication(id)
+func (ruc *RecruitmentUseCaseImpl) AcceptRecruitmentApplication(id uint, userID uint) error {
+	teamOwner, err := ruc.tr.GetTeamLeader(id)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if teamOwner != userID {
+		return errors.New("action unauthorized")
+	}
+
+	err = ruc.rr.AcceptRecruitmentApplication(id)
 	if err != nil {
 		return err
 	}
@@ -137,6 +213,24 @@ func (ruc *RecruitmentUseCaseImpl) AcceptRecruitmentApplication(id uint) error {
 		return err
 	}
 	return nil
+}
+
+func (ruc *RecruitmentUseCaseImpl) SearchRecruitment(limit int, offset int, keyword string) ([]dto.BriefRecruitmentResponse, error) {
+	var recruitmentsResponse []dto.BriefRecruitmentResponse
+	recruitments, err := ruc.rr.SearchRecruitment(limit, offset, keyword)
+	if err != nil {
+		return []dto.BriefRecruitmentResponse{}, err
+	}
+
+	for _, recruitment := range recruitments {
+		recruitmentsResponse = append(recruitmentsResponse, dto.BriefRecruitmentResponse{
+			ID:       recruitment.ID,
+			TeamName: recruitment.Team.Name,
+			Role:     recruitment.Role,
+		})
+	}
+
+	return recruitmentsResponse, nil
 }
 
 func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByID(id uint) (dto.RecruitmentResponse, error) {
@@ -156,8 +250,47 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByID(id uint) (dto.RecruitmentR
 	return recruitmentResponse, nil
 }
 
-func (ruc *RecruitmentUseCaseImpl) DeleteRecruitmentByID(id uint) error {
-	err := ruc.rr.DeleteRecruitmentByID(id)
+func (ruc *RecruitmentUseCaseImpl) DeleteRecruitmentByID(id uint, userID uint) error {
+	teamOwner, err := ruc.tr.GetTeamLeader(id)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if teamOwner != userID {
+		return errors.New("action unauthorized")
+	}
+
+	err = ruc.rr.DeleteRecruitmentByID(id)
+
+	return err
+}
+
+func (ruc *RecruitmentUseCaseImpl) OpenRecruitmentApplicationPeriod(id uint, userID uint) error {
+	teamOwner, err := ruc.tr.GetTeamLeader(id)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if teamOwner != userID {
+		return errors.New("action unauthorized")
+	}
+
+	err = ruc.rr.OpenRecruitmentApplicationPeriod(id)
+
+	return err
+}
+
+func (ruc *RecruitmentUseCaseImpl) CloseRecruitmentApplicationPeriod(id uint, userID uint) error {
+	teamOwner, err := ruc.tr.GetTeamLeader(id)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if teamOwner != userID {
+		return errors.New("action unauthorized")
+	}
+
+	err = ruc.rr.CloseRecruitmentApplicationPeriod(id)
 
 	return err
 }

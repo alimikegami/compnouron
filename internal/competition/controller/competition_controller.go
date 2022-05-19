@@ -15,10 +15,10 @@ import (
 
 type CompetitionController struct {
 	router        *echo.Echo
-	CompetitionUC *usecase.CompetitionUseCase
+	CompetitionUC usecase.CompetitionUseCase
 }
 
-func CreateNewCompetitionController(e *echo.Echo, CompetitionUC *usecase.CompetitionUseCase) *CompetitionController {
+func CreateNewCompetitionController(e *echo.Echo, CompetitionUC usecase.CompetitionUseCase) *CompetitionController {
 	return &CompetitionController{router: e, CompetitionUC: CompetitionUC}
 }
 
@@ -27,15 +27,31 @@ func (cc *CompetitionController) InitializeCompetitionRoute(config middleware.JW
 	{
 		r.POST("", cc.CreateCompetition, middleware.JWTWithConfig(config))
 		r.GET("", cc.GetCompetitions)
-		r.POST("/register", cc.Register, middleware.JWTWithConfig(config))
+		r.POST("/registrations", cc.Register, middleware.JWTWithConfig(config))
 		r.DELETE("/:id", cc.DeleteCompetition, middleware.JWTWithConfig(config))
 		r.PUT("/:id", cc.UpdateCompetition, middleware.JWTWithConfig(config))
-		r.PUT("/registrations/:id/accept", cc.AcceptRecruitmentApplication, middleware.JWTWithConfig(config))
-		r.PUT("/registrations/:id/reject", cc.RejectRecruitmentApplication, middleware.JWTWithConfig(config))
+		r.PUT("/registrations/:id/accept", cc.AcceptCompetitionRegistration, middleware.JWTWithConfig(config))
+		r.PUT("/registrations/:id/reject", cc.RejectCompetitionRegistration, middleware.JWTWithConfig(config))
+		r.PUT("/:id/open", cc.OpenCompetitionRegistrationPeriod, middleware.JWTWithConfig(config))
+		r.PUT("/:id/close", cc.CloseCompetitionRegistrationPeriod, middleware.JWTWithConfig(config))
+		r.GET("/:id", cc.GetCompetitionByID)
 		r.GET("/:id/registrations", cc.GetCompetitionRegistration, middleware.JWTWithConfig(config))
 	}
 }
 
+// CreateCompetition godoc
+// @Summary      Create new competition
+// @Description  Given the request body, create a competition record in the database
+// @Tags         Competitions
+// @Accept       json
+// @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
+// @Param data body dto.CompetitionRequest true "Request Body"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions [post]
 func (cc *CompetitionController) CreateCompetition(c echo.Context) error {
 	userID, _ := utils.GetUserDetails(c)
 	competition := new(dto.CompetitionRequest)
@@ -63,6 +79,57 @@ func (cc *CompetitionController) CreateCompetition(c echo.Context) error {
 	})
 }
 
+// GetCompetitionByID godoc
+// @Summary      get the details of one particular competition
+// @Description  Given the competition ID on the path parameter, get the details of that particular competition
+// @Tags         Competitions
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}   response.Response{data=dto.DetailedCompetitionResponse,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions/{id} [get]
+func (cc *CompetitionController) GetCompetitionByID(c echo.Context) error {
+	competitionID := c.Param("id")
+	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	competition, err := cc.CompetitionUC.GetCompetitionByID(uint(competitionIDUint))
+
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    competition,
+	})
+}
+
+// DeleteCompetition godoc
+// @Summary      Delete competition's data
+// @Description  Given the ID path parameters, this endpoint will delete the existing competition's data
+// @Tags         Competitions
+// @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
+// @Param id path int true "Competition ID"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions/{id} [delete]
 func (cc *CompetitionController) DeleteCompetition(c echo.Context) error {
 	competitionID := c.Param("id")
 	userID, _ := utils.GetUserDetails(c)
@@ -78,6 +145,13 @@ func (cc *CompetitionController) DeleteCompetition(c echo.Context) error {
 	err = cc.CompetitionUC.DeleteCompetition(uint(competitionIDUint), userID)
 
 	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		fmt.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
@@ -93,8 +167,23 @@ func (cc *CompetitionController) DeleteCompetition(c echo.Context) error {
 	})
 }
 
+// UpdateCompetition godoc
+// @Summary      Update competition's data
+// @Description  Given the request body and the ID path parameters, this endpoint will update the existing competition's data
+// @Tags         Competitions
+// @Accept       json
+// @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
+// @Param id path int true "Competition ID"
+// @Param data body dto.CompetitionRequest true "Request Body"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions/{id} [put]
 func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 	competitionID := c.Param("id")
+	userID, _ := utils.GetUserDetails(c)
 	competition := new(dto.CompetitionRequest)
 	if err := c.Bind(competition); err != nil {
 		fmt.Println(err)
@@ -113,9 +202,16 @@ func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-	err = cc.CompetitionUC.UpdateCompetition(*competition, uint(competitionIDUint))
+	err = cc.CompetitionUC.UpdateCompetition(*competition, uint(competitionIDUint), userID)
 	if err != nil {
 		fmt.Println(err)
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
@@ -129,20 +225,25 @@ func (cc *CompetitionController) UpdateCompetition(c echo.Context) error {
 	})
 }
 
+// GetCompetitions godoc
+// @Summary      Get competitions data
+// @Description  This endpoint will return the competitions data with pagination implemented and also with keyword searching capability
+// @Tags         Competitions
+// @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
+// @Param        limit     query      int     true  "rows retrieved limit"
+// @Param        offset    query      int     true  "skipped rows"
+// @Param        keyword   query      string  false  "competition name keyword"
+// @Success      200  {object}   response.Response{data=[]dto.CompetitionResponse,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions [get]
 func (cc *CompetitionController) GetCompetitions(c echo.Context) error {
+	keyword := c.QueryParam("keyword")
 	limit := c.QueryParam("limit")
 	offset := c.QueryParam("offset")
 	limitInt, err := strconv.Atoi(limit)
-	if err != nil {
-    fmt.Println(err)
-		return c.JSON(http.StatusBadRequest, response.Response{
-			Status:  "error",
-			Message: err.Error(),
-			Data:    nil,
-		})
-	}
-  
-  offsetInt, err := strconv.Atoi(offset)
 	if err != nil {
 		fmt.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Response{
@@ -151,7 +252,24 @@ func (cc *CompetitionController) GetCompetitions(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-  competitionsResponse, err := cc.CompetitionUC.GetCompetitions(limitInt, offsetInt)
+
+	offsetInt, err := strconv.Atoi(offset)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+	var competitionsResponse []dto.CompetitionResponse
+	if keyword != "" {
+		competitionsResponse, err = cc.CompetitionUC.SearchCompetition(limitInt, offsetInt, keyword)
+
+	} else {
+		competitionsResponse, err = cc.CompetitionUC.GetCompetitions(limitInt, offsetInt)
+
+	}
 	if err != nil {
 		fmt.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Response{
@@ -160,14 +278,28 @@ func (cc *CompetitionController) GetCompetitions(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-  return c.JSON(http.StatusOK, response.Response{
+	return c.JSON(http.StatusOK, response.Response{
 		Status:  "success",
 		Message: nil,
 		Data:    competitionsResponse,
-  })
+	})
 }
-    
+
+// Register godoc
+// @Summary      Create new competition registrations
+// @Description  Given the request body, create a competition registration record in the database
+// @Tags         Competitions
+// @Accept       json
+// @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
+// @Param data body dto.CompetitionRegistrationRequest true "Request Body"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions/registrations [post]
 func (cc *CompetitionController) Register(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
 	competitionRegistration := new(dto.CompetitionRegistrationRequest)
 	if err := c.Bind(competitionRegistration); err != nil {
 		fmt.Println(err)
@@ -177,7 +309,7 @@ func (cc *CompetitionController) Register(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-	err := cc.CompetitionUC.Register(*competitionRegistration)
+	err := cc.CompetitionUC.Register(*competitionRegistration, userID)
 
 	if err != nil {
 		fmt.Println(err)
@@ -188,14 +320,27 @@ func (cc *CompetitionController) Register(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, response.Response{
+	return c.JSON(http.StatusCreated, response.Response{
 		Status:  "success",
 		Message: nil,
 		Data:    nil,
 	})
 }
 
-func (cc *CompetitionController) RejectRecruitmentApplication(c echo.Context) error {
+// RejectCompetitionRegistration godoc
+// @Summary      Reject competition application
+// @Description  Given the competition registration ID path parameters, this endpoint will reject the competition registration
+// @Tags         Competitions
+// @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
+// @Param id path int true "Competition ID"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions/registrations/{id}/reject [put]
+func (cc *CompetitionController) RejectCompetitionRegistration(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
 	competitionRegistrationID := c.Param("id")
 	competitionRegistrationIDUint, err := strconv.ParseUint(competitionRegistrationID, 10, 32)
 	if err != nil {
@@ -206,8 +351,15 @@ func (cc *CompetitionController) RejectRecruitmentApplication(c echo.Context) er
 		})
 	}
 
-	err = cc.CompetitionUC.RejectCompetitionRegistration(uint(competitionRegistrationIDUint))
+	err = cc.CompetitionUC.RejectCompetitionRegistration(uint(competitionRegistrationIDUint), userID)
 	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
@@ -222,7 +374,20 @@ func (cc *CompetitionController) RejectRecruitmentApplication(c echo.Context) er
 	})
 }
 
-func (cc *CompetitionController) AcceptRecruitmentApplication(c echo.Context) error {
+// AcceptCompetitionRegistration godoc
+// @Summary      Accept competition application
+// @Description  Given the competition registration ID path parameters, this endpoint will accept the competition registration
+// @Tags         Competitions
+// @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
+// @Param id path int true "Competition ID"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions/registrations/{id}/accept [put]
+func (cc *CompetitionController) AcceptCompetitionRegistration(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
 	competitionRegistrationID := c.Param("id")
 	competitionRegistrationIDUint, err := strconv.ParseUint(competitionRegistrationID, 10, 32)
 	if err != nil {
@@ -233,8 +398,15 @@ func (cc *CompetitionController) AcceptRecruitmentApplication(c echo.Context) er
 		})
 	}
 
-	err = cc.CompetitionUC.AcceptCompetitionRegistration(uint(competitionRegistrationIDUint))
+	err = cc.CompetitionUC.AcceptCompetitionRegistration(uint(competitionRegistrationIDUint), userID)
 	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
@@ -249,7 +421,116 @@ func (cc *CompetitionController) AcceptRecruitmentApplication(c echo.Context) er
 	})
 }
 
+// CloseCompetitionRegistrationPeriod godoc
+// @Summary      Close competition registration period
+// @Description  Given the competition ID path parameters, this endpoint will close the competition registration period
+// @Tags         Competitions
+// @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
+// @Param id path int true "Competition ID"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions/{id}/close [put]
+func (cc *CompetitionController) CloseCompetitionRegistrationPeriod(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
+	competition := c.Param("id")
+	competitionUint, err := strconv.ParseUint(competition, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	err = cc.CompetitionUC.CloseCompetitionRegistrationPeriod(uint(competitionUint), userID)
+	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    nil,
+	})
+}
+
+// OpenCompetitionRegistrationPeriod godoc
+// @Summary      Open competition registration period
+// @Description  Given the competition ID path parameters, this endpoint will open the competition registration period
+// @Tags         Competitions
+// @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
+// @Param id path int true "Competition ID"
+// @Success      200  {object}   response.Response{data=string,status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions/{id}/open [put]
+func (cc *CompetitionController) OpenCompetitionRegistrationPeriod(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
+	competition := c.Param("id")
+	competitionUint, err := strconv.ParseUint(competition, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	err = cc.CompetitionUC.OpenCompetitionRegistrationPeriod(uint(competitionUint), userID)
+	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, response.Response{
+			Status:  "error",
+			Message: err.Error(),
+			Data:    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.Response{
+		Status:  "success",
+		Message: nil,
+		Data:    nil,
+	})
+}
+
+// GetCompetitionRegistration godoc
+// @Summary      Get competition registration data
+// @Description  Given the ID path parameters and the status query parameteres, this endpoint will retrieve the competition registration data of a particular ID and accepted status if the query parameters are given
+// @Tags         Competitions
+// @Produce      json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer"
+// @Param        status    query      int     true  "filter to get accepted registrations record"
+// @Param id path int true "Competition ID"
+// @Success      200  {object}   response.Response{data=interface{},status=string,message=string}
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /competitions/{id}/registrations [get]
 func (cc *CompetitionController) GetCompetitionRegistration(c echo.Context) error {
+	userID, _ := utils.GetUserDetails(c)
+	status := c.QueryParam("status")
 	competitionID := c.Param("id")
 	competitionIDUint, err := strconv.ParseUint(competitionID, 10, 32)
 
@@ -260,9 +541,21 @@ func (cc *CompetitionController) GetCompetitionRegistration(c echo.Context) erro
 			Data:    nil,
 		})
 	}
-
-	res, err := cc.CompetitionUC.GetCompetitionRegistration(uint(competitionIDUint))
+	var res interface{}
+	if status == "accepted" {
+		res, err = cc.CompetitionUC.GetAcceptedCompetitionParticipants(uint(competitionIDUint), userID)
+	} else {
+		res, err = cc.CompetitionUC.GetCompetitionRegistration(uint(competitionIDUint), userID)
+	}
 	if err != nil {
+		if err.Error() == "action unauthorized" {
+			return c.JSON(http.StatusUnauthorized, response.Response{
+				Status:  "error",
+				Message: err.Error(),
+				Data:    nil,
+			})
+		}
+
 		return c.JSON(http.StatusInternalServerError, response.Response{
 			Status:  "error",
 			Message: err.Error(),
