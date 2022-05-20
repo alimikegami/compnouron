@@ -1,10 +1,13 @@
 package usecase
 
 import (
+	"errors"
 	"testing"
 	"time"
 
+	entityComp "github.com/alimikegami/compnouron/internal/competition/entity"
 	competitionRepo "github.com/alimikegami/compnouron/internal/mocks/competition/repository"
+
 	recruitmentRepo "github.com/alimikegami/compnouron/internal/mocks/recruitment/repository"
 	userRepo "github.com/alimikegami/compnouron/internal/mocks/user/repository"
 	"github.com/alimikegami/compnouron/internal/user/dto"
@@ -49,8 +52,6 @@ func TestLogin(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 }
-<<<<<<< Updated upstream
-=======
 
 func TestGetCompetitionsData(t *testing.T) {
 	mockRepo := userRepo.NewUserRepository(t)
@@ -122,4 +123,3 @@ func TestGetCompetitionRegistrationHistory(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 }
->>>>>>> Stashed changes
