@@ -133,7 +133,15 @@ func (cuc *CompetitionUseCaseImpl) Register(competitionRegistration dto.Competit
 		return err
 	}
 
-	if comp.RegistrationPeriodStatus == 0 {
+	if comp.IsTeam == 1 && competitionRegistration.TeamID == 0 && competitionRegistration.UserID != 0 {
+		return errors.New("this is team competition")
+	}
+
+	if comp.IsTeam == 0 && competitionRegistration.TeamID != 0 && competitionRegistration.UserID == 0 {
+		return errors.New("this is individual competition")
+	}
+
+	if comp.RegistrationPeriodStatus == 0 || comp.RegistrationPeriodStatus == 2 {
 		return errors.New("registration period is over")
 	}
 
@@ -146,10 +154,10 @@ func (cuc *CompetitionUseCaseImpl) Register(competitionRegistration dto.Competit
 		return errors.New("internal server error")
 	}
 	for _, comp := range compReg {
-		if comp.CompetitionID == competitionRegistration.CompetitionID && comp.UserID == competitionRegistration.UserID {
+		if comp.CompetitionID == competitionRegistration.CompetitionID && comp.UserID == competitionRegistration.UserID && (comp.AcceptanceStatus == 0 || comp.AcceptanceStatus == 1) {
 			return errors.New("you have registered")
 		}
-		if comp.CompetitionID == competitionRegistration.CompetitionID && comp.TeamID == competitionRegistration.TeamID {
+		if comp.CompetitionID == competitionRegistration.CompetitionID && comp.TeamID == competitionRegistration.TeamID && (comp.AcceptanceStatus == 0 || comp.AcceptanceStatus == 1) {
 			return errors.New("you have registered")
 		}
 	}

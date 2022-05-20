@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"fmt"
 
 	compRepo "github.com/alimikegami/compnouron/internal/competition/repository"
@@ -35,7 +36,9 @@ func CreateNewUserUseCase(ur repository.UserRepository, cr compRepo.CompetitionR
 
 func (us *UserUseCaseImpl) CreateUser(user *dto.UserRegistrationRequest) error {
 	var skills []entity.Skill
-
+	if len(user.Skills) == 0 {
+		return errors.New("fill your skills")
+	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

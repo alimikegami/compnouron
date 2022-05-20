@@ -7,18 +7,18 @@ import (
 )
 
 type Competition struct {
-	ID                       uint `gorm:"primaryKey"`
-	Name                     string
-	Description              string
-	ContactPerson            string
-	IsTeam                   int8
-	IsTheSameInstitution     int8
-	RegistrationPeriodStatus int8
-	TeamCapacity             int8
-	Level                    string
+	ID                       uint   `gorm:"primaryKey"`
+	Name                     string `gorm:"not null"`
+	Description              string `gorm:"not null"`
+	ContactPerson            string `gorm:"not null"`
+	IsTeam                   int8   `gorm:"not null"`
+	IsTheSameInstitution     int8   `gorm:"not null"`
+	RegistrationPeriodStatus int8   `gorm:"not null"`
+	TeamCapacity             int8   `gorm:"not null"`
+	Level                    string `gorm:"not null"`
 	CreatedAt                time.Time
 	UpdatedAt                time.Time
-	UserID                   uint
+	UserID                   uint `gorm:"not null"`
 	User                     userEntity.User
 	CompetitionRegistrations []CompetitionRegistration
 }

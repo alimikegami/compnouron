@@ -9,6 +9,7 @@ import (
 	teamRepo "github.com/alimikegami/compnouron/internal/mocks/team/repository"
 	"github.com/alimikegami/compnouron/internal/recruitment/dto"
 	"github.com/alimikegami/compnouron/internal/recruitment/entity"
+	teamEntity "github.com/alimikegami/compnouron/internal/team/entity"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -165,6 +166,22 @@ func TestCreateRecruitmentApplication(t *testing.T) {
 	mockRecuitmentRepo := recruitmentRepo.NewRecruitmentRepository(t)
 	mockTeamRepo := teamRepo.NewTeamRepository(t)
 	t.Run("success", func(t *testing.T) {
+		mockRecuitmentRepo.On("GetRecruitmentByID", uint(1)).Return(entity.Recruitment{
+			ID:                          1,
+			Role:                        "Backend Engineer",
+			Description:                 "Need Node.JS Developer",
+			TeamID:                      1,
+			ApplicationAcceptanceStatus: 1,
+			CreatedAt:                   time.Now(),
+			UpdatedAt:                   time.Time{},
+		}, nil).Once()
+		mockTeamRepo.On("GetTeamByID", uint(1)).Return(teamEntity.Team{
+			ID:          1,
+			Name:        "Kuro No Bogyu",
+			Description: "asdfasf",
+			Capacity:    3,
+			TeamMembers: []teamEntity.TeamMember{},
+		}, nil).Once()
 		mockRecuitmentRepo.On("GetRecruitmentApplicationByUserID", uint(1)).Return([]entity.RecruitmentApplication{}, nil).Once()
 		mockRecuitmentRepo.On("CreateRecruitmentApplication", entity.RecruitmentApplication{
 			UserID:           1,
@@ -176,11 +193,27 @@ func TestCreateRecruitmentApplication(t *testing.T) {
 			RecruitmentID: 1,
 		}, uint(1))
 		assert.NoError(t, err)
-		mockRecuitmentRepo.AssertExpectations(t)
+		mockTeamRepo.AssertExpectations(t)
 		mockRecuitmentRepo.AssertExpectations(t)
 	})
 
 	t.Run("unexpected-create-recruitment-application-error", func(t *testing.T) {
+		mockRecuitmentRepo.On("GetRecruitmentByID", uint(1)).Return(entity.Recruitment{
+			ID:                          1,
+			Role:                        "Backend Engineer",
+			Description:                 "Need Node.JS Developer",
+			TeamID:                      1,
+			ApplicationAcceptanceStatus: 1,
+			CreatedAt:                   time.Now(),
+			UpdatedAt:                   time.Time{},
+		}, nil).Once()
+		mockTeamRepo.On("GetTeamByID", uint(1)).Return(teamEntity.Team{
+			ID:          1,
+			Name:        "Kuro No Bogyu",
+			Description: "asdfasf",
+			Capacity:    3,
+			TeamMembers: []teamEntity.TeamMember{},
+		}, nil).Once()
 		mockRecuitmentRepo.On("GetRecruitmentApplicationByUserID", uint(1)).Return([]entity.RecruitmentApplication{}, nil).Once()
 		mockRecuitmentRepo.On("CreateRecruitmentApplication", entity.RecruitmentApplication{
 			UserID:           1,
@@ -192,11 +225,27 @@ func TestCreateRecruitmentApplication(t *testing.T) {
 			RecruitmentID: 1,
 		}, uint(1))
 		assert.Error(t, err)
-		mockRecuitmentRepo.AssertExpectations(t)
+		mockTeamRepo.AssertExpectations(t)
 		mockRecuitmentRepo.AssertExpectations(t)
 	})
 
 	t.Run("recruitment-application-has-been-made", func(t *testing.T) {
+		mockRecuitmentRepo.On("GetRecruitmentByID", uint(1)).Return(entity.Recruitment{
+			ID:                          1,
+			Role:                        "Backend Engineer",
+			Description:                 "Need Node.JS Developer",
+			TeamID:                      1,
+			ApplicationAcceptanceStatus: 1,
+			CreatedAt:                   time.Now(),
+			UpdatedAt:                   time.Time{},
+		}, nil).Once()
+		mockTeamRepo.On("GetTeamByID", uint(1)).Return(teamEntity.Team{
+			ID:          1,
+			Name:        "Kuro No Bogyu",
+			Description: "asdfasf",
+			Capacity:    3,
+			TeamMembers: []teamEntity.TeamMember{},
+		}, nil).Once()
 		mockRecuitmentRepo.On("GetRecruitmentApplicationByUserID", uint(1)).Return([]entity.RecruitmentApplication{
 			{
 				ID:               1,
@@ -210,11 +259,27 @@ func TestCreateRecruitmentApplication(t *testing.T) {
 			RecruitmentID: 1,
 		}, uint(1))
 		assert.Error(t, err)
-		mockRecuitmentRepo.AssertExpectations(t)
+		mockTeamRepo.AssertExpectations(t)
 		mockRecuitmentRepo.AssertExpectations(t)
 	})
 
 	t.Run("success-2", func(t *testing.T) {
+		mockRecuitmentRepo.On("GetRecruitmentByID", uint(1)).Return(entity.Recruitment{
+			ID:                          1,
+			Role:                        "Backend Engineer",
+			Description:                 "Need Node.JS Developer",
+			TeamID:                      1,
+			ApplicationAcceptanceStatus: 1,
+			CreatedAt:                   time.Now(),
+			UpdatedAt:                   time.Time{},
+		}, nil).Once()
+		mockTeamRepo.On("GetTeamByID", uint(1)).Return(teamEntity.Team{
+			ID:          1,
+			Name:        "Kuro No Bogyu",
+			Description: "asdfasf",
+			Capacity:    3,
+			TeamMembers: []teamEntity.TeamMember{},
+		}, nil).Once()
 		mockRecuitmentRepo.On("GetRecruitmentApplicationByUserID", uint(1)).Return([]entity.RecruitmentApplication{
 			{
 				ID:               1,
@@ -233,7 +298,7 @@ func TestCreateRecruitmentApplication(t *testing.T) {
 			RecruitmentID: 1,
 		}, uint(1))
 		assert.NoError(t, err)
-		mockRecuitmentRepo.AssertExpectations(t)
+		mockTeamRepo.AssertExpectations(t)
 		mockRecuitmentRepo.AssertExpectations(t)
 	})
 }
@@ -251,7 +316,7 @@ func TestRejectRecruitmentApplication(t *testing.T) {
 		mockRecuitmentRepo.AssertExpectations(t)
 	})
 
-	t.Run("unexpected-update-error", func(t *testing.T) {
+	t.Run("unexpected-reject-error", func(t *testing.T) {
 		mockTeamRepo.On("GetTeamLeader", uint(1)).Return(uint(1), nil).Once()
 		mockRecuitmentRepo.On("RejectRecruitmentApplication", uint(1)).Return(errors.New("unxpected db error")).Once()
 		testUseCase := CreateNewRecruitmentUseCase(mockRecuitmentRepo, mockTeamRepo)
@@ -291,7 +356,7 @@ func TestOpenRecruitmentApplicationPeriod(t *testing.T) {
 		mockRecuitmentRepo.AssertExpectations(t)
 	})
 
-	t.Run("unexpected-update-error", func(t *testing.T) {
+	t.Run("unexpected-open-recruitment-error", func(t *testing.T) {
 		mockTeamRepo.On("GetTeamLeader", uint(1)).Return(uint(1), nil).Once()
 		mockRecuitmentRepo.On("OpenRecruitmentApplicationPeriod", uint(1)).Return(errors.New("unxpected db error")).Once()
 		testUseCase := CreateNewRecruitmentUseCase(mockRecuitmentRepo, mockTeamRepo)
@@ -331,7 +396,7 @@ func TestCloseRecruitmentApplicationPeriod(t *testing.T) {
 		mockRecuitmentRepo.AssertExpectations(t)
 	})
 
-	t.Run("unexpected-update-error", func(t *testing.T) {
+	t.Run("unexpected-close-recruitment-error", func(t *testing.T) {
 		mockTeamRepo.On("GetTeamLeader", uint(1)).Return(uint(1), nil).Once()
 		mockRecuitmentRepo.On("CloseRecruitmentApplicationPeriod", uint(1)).Return(errors.New("unxpected db error")).Once()
 		testUseCase := CreateNewRecruitmentUseCase(mockRecuitmentRepo, mockTeamRepo)
@@ -371,7 +436,7 @@ func TestDeleteRecruitmentByID(t *testing.T) {
 		mockRecuitmentRepo.AssertExpectations(t)
 	})
 
-	t.Run("unexpected-update-error", func(t *testing.T) {
+	t.Run("unexpected-delete-error", func(t *testing.T) {
 		mockTeamRepo.On("GetTeamLeader", uint(1)).Return(uint(1), nil).Once()
 		mockRecuitmentRepo.On("DeleteRecruitmentByID", uint(1)).Return(errors.New("unxpected db error")).Once()
 		testUseCase := CreateNewRecruitmentUseCase(mockRecuitmentRepo, mockTeamRepo)
@@ -430,7 +495,7 @@ func TestGetRecruitmentByTeamID(t *testing.T) {
 		mockRecuitmentRepo.AssertExpectations(t)
 	})
 
-	t.Run("unexpected-get-recruitment-by-id-error", func(t *testing.T) {
+	t.Run("unexpected-get-recruitment-by-team-id-error", func(t *testing.T) {
 		mockRecuitmentRepo.On("GetRecruitmentByTeamID", uint(1)).Return([]entity.Recruitment{}, errors.New("unexpected db error")).Once()
 		testUseCase := CreateNewRecruitmentUseCase(mockRecuitmentRepo, mockTeamRepo)
 		resp, err := testUseCase.GetRecruitmentByTeamID(uint(1))

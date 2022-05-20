@@ -9,10 +9,10 @@ import (
 
 type CompetitionRegistration struct {
 	ID               uint `gorm:"primaryKey"`
-	UserID           uint `gorm:"default:null"`
-	TeamID           uint `gorm:"default:null"`
-	CompetitionID    uint
-	AcceptanceStatus uint `gorm:"default:null"`
+	UserID           uint
+	TeamID           uint
+	CompetitionID    uint `gorm:"not null"`
+	AcceptanceStatus uint `gorm:"not null"`
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	Team             entity.Team
