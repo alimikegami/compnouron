@@ -21,7 +21,7 @@ type UserController struct {
 func (uc *UserController) InitializeUserRoute(config middleware.JWTConfig) {
 	uc.router.POST("/users", uc.CreateUser)
 	uc.router.POST("/users/login", uc.Login)
-	uc.router.GET("/users/:id/competitions", uc.GetCompetitionsData, middleware.JWTWithConfig(config))
+	uc.router.GET("/users/:id/competitions", uc.GetCompetitionsData)
 	uc.router.GET("/users/competitions/registrations", uc.GetCompetitionRegistrationHistory, middleware.JWTWithConfig(config))
 	uc.router.GET("/users/recruitments/applications", uc.GetRecruitmentApplicationHistory, middleware.JWTWithConfig(config))
 }
