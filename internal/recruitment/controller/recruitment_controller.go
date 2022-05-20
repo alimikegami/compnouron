@@ -45,7 +45,7 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 // @Security ApiKeyAuth
 // @Param Authorization header string true "Bearer"
 // @Param data body dto.RecruitmentRequest true "Request Body"
-// @Success      200  {object}  response.Response{data=string,status=string,message=string}
+// @Success      201  {object}  response.Response{data=string,status=string,message=string}
 // @Failure      400  {object}  response.Response
 // @Failure      401  {object}  response.Response
 // @Failure      500  {object}  response.Response
