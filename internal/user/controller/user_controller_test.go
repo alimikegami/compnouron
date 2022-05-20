@@ -8,8 +8,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	compDto "github.com/alimikegami/compnouron/internal/competition/dto"
 	mocks "github.com/alimikegami/compnouron/internal/mocks/user/usecase"
 	"github.com/alimikegami/compnouron/internal/user/dto"
+	"github.com/alimikegami/compnouron/pkg/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -188,4 +190,166 @@ func TestLoginWrongCredentials(t *testing.T) {
 	testUserController.Login(c)
 	assert.Equal(t, 403, rec.Code)
 	mockUseCase.AssertExpectations(t)
+}
+
+func TestGetRecruitmentApplicationHistory(t *testing.T) {
+	mockUseCase := mocks.NewUserUseCase(t)
+	// setup the endpoint
+	t.Run("success", func(t *testing.T) {
+		mockUseCase.On("GetRecruitmentApplicationHistory", uint(1)).Return([]dto.UserRecruitmentApplicationHistory{
+			{
+				RecruitmentApplicationID: 1,
+				RecruitmentID:            1,
+				RecruitmentRole:          "Backend Engineer",
+				AcceptanceStatus:         1,
+			},
+		}, nil).Once()
+		req, err := http.NewRequest(http.MethodGet, "/users/recruitments/applications", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		token := utils.CreateJWTToken(1, "gmail@gmail.com")
+		c.Set("user", token)
+		// setup controller/handler
+		userController := UserController{
+			router: e,
+			userUC: mockUseCase,
+		}
+
+		// get the response
+		userController.GetRecruitmentApplicationHistory(c)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("internal-server-error", func(t *testing.T) {
+		mockUseCase.On("GetRecruitmentApplicationHistory", uint(1)).Return([]dto.UserRecruitmentApplicationHistory{}, errors.New("unexpected error occured")).Once()
+		req, err := http.NewRequest(http.MethodGet, "/users/recruitments/applications", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		token := utils.CreateJWTToken(1, "gmail@gmail.com")
+		c.Set("user", token)
+		// setup controller/handler
+		userController := UserController{
+			router: e,
+			userUC: mockUseCase,
+		}
+
+		// get the response
+		userController.GetRecruitmentApplicationHistory(c)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+}
+
+func TestGetCompetitionRegistrationHistory(t *testing.T) {
+	mockUseCase := mocks.NewUserUseCase(t)
+	// setup the endpoint
+	t.Run("success", func(t *testing.T) {
+		mockUseCase.On("GetCompetitionRegistrationHistory", uint(1)).Return([]dto.UserCompetitionHistory{
+			{
+				CompetitionRegistrationID: 1,
+				CompetitionID:             1,
+				CompetitionName:           "Technoscape",
+				AcceptanceStatus:          1,
+			},
+		}, nil).Once()
+		req, err := http.NewRequest(http.MethodGet, "/users/competitions/registrations", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		token := utils.CreateJWTToken(1, "gmail@gmail.com")
+		c.Set("user", token)
+		// setup controller/handler
+		userController := UserController{
+			router: e,
+			userUC: mockUseCase,
+		}
+
+		// get the response
+		userController.GetCompetitionRegistrationHistory(c)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("internal-server-error", func(t *testing.T) {
+		mockUseCase.On("GetCompetitionRegistrationHistory", uint(1)).Return([]dto.UserCompetitionHistory{}, errors.New("unexpected error occured")).Once()
+		req, err := http.NewRequest(http.MethodGet, "/users/competitions/registrations", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		token := utils.CreateJWTToken(1, "gmail@gmail.com")
+		c.Set("user", token)
+		// setup controller/handler
+		userController := UserController{
+			router: e,
+			userUC: mockUseCase,
+		}
+
+		// get the response
+		userController.GetCompetitionRegistrationHistory(c)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+}
+
+func TestGetCompetitionsData(t *testing.T) {
+	mockUseCase := mocks.NewUserUseCase(t)
+	// setup the endpoint
+	t.Run("success", func(t *testing.T) {
+		mockUseCase.On("GetCompetitionsData", uint(1)).Return([]compDto.CompetitionResponse{
+			{
+				ID:            1,
+				Name:          "Technoscape",
+				ContactPerson: "081234782",
+				IsTeam:        1,
+				Level:         "University Student",
+			},
+		}, nil).Once()
+		req, err := http.NewRequest(http.MethodGet, "/users", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/:id/competitions")
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		// setup controller/handler
+		userController := UserController{
+			router: e,
+			userUC: mockUseCase,
+		}
+
+		// get the response
+		userController.GetCompetitionsData(c)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("internal-server-error", func(t *testing.T) {
+		mockUseCase.On("GetCompetitionsData", uint(1)).Return([]compDto.CompetitionResponse{}, errors.New("unexpected error occured")).Once()
+		req, err := http.NewRequest(http.MethodGet, "/users", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/:id/competitions")
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		// setup controller/handler
+		userController := UserController{
+			router: e,
+			userUC: mockUseCase,
+		}
+
+		// get the response
+		userController.GetCompetitionsData(c)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
 }

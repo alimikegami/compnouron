@@ -25,7 +25,7 @@ func (rc *RecruitmentController) InitializeRecruitmentRoute(config middleware.JW
 		r.GET("", rc.GetRecruitments)
 		r.PUT("/:id", rc.UpdateRecruitment, middleware.JWTWithConfig(config))
 		r.POST("/applications", rc.CreateRecruitmentApplication, middleware.JWTWithConfig(config))
-		r.GET("/:id/details", rc.GetRecruitmentByID)
+		r.GET("/:id", rc.GetRecruitmentByID)
 		r.GET("/:id/details", rc.GetRecruitmentDetailsByID, middleware.JWTWithConfig(config))
 		r.GET("/teams/:id", rc.GetRecruitmentByTeamID, middleware.JWTWithConfig(config))
 		r.PUT("/applications/:id/accept", rc.AcceptRecruitmentApplication, middleware.JWTWithConfig(config))
