@@ -49,3 +49,77 @@ func TestLogin(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 }
+<<<<<<< Updated upstream
+=======
+
+func TestGetCompetitionsData(t *testing.T) {
+	mockRepo := userRepo.NewUserRepository(t)
+	mockCompetition := competitionRepo.NewCompetitionRepository(t)
+	mockRecruitment := recruitmentRepo.NewRecruitmentRepository(t)
+	t.Run("success", func(t *testing.T) {
+		mockCompetition.On("GetCompetitionByUserID", uint(1)).Return([]entityComp.Competition{
+			{
+				ID:                       1,
+				Name:                     "Techoscape",
+				Description:              "hackathon competition in Indonesia",
+				ContactPerson:            "081239990127",
+				IsTeam:                   1,
+				IsTheSameInstitution:     1,
+				RegistrationPeriodStatus: 1,
+				TeamCapacity:             4,
+				Level:                    "university student",
+				CreatedAt:                time.Now(),
+				UpdatedAt:                time.Now(),
+				UserID:                   1,
+			},
+		}, nil).Once()
+		testUseCase := CreateNewUserUseCase(mockRepo, mockCompetition, mockRecruitment)
+		res, err := testUseCase.GetCompetitionsData(uint(1))
+		assert.NoError(t, err)
+		assert.NotEmpty(t, res)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("unexpected-error", func(t *testing.T) {
+		mockCompetition.On("GetCompetitionByUserID", uint(1)).Return([]entityComp.Competition{}, errors.New("unexpected error")).Once()
+		testUseCase := CreateNewUserUseCase(mockRepo, mockCompetition, mockRecruitment)
+		res, err := testUseCase.GetCompetitionsData(uint(1))
+		assert.Error(t, err)
+		assert.Empty(t, res)
+		mockRepo.AssertExpectations(t)
+	})
+}
+
+func TestGetCompetitionRegistrationHistory(t *testing.T) {
+	mockRepo := userRepo.NewUserRepository(t)
+	mockCompetition := competitionRepo.NewCompetitionRepository(t)
+	mockRecruitment := recruitmentRepo.NewRecruitmentRepository(t)
+	t.Run("success", func(t *testing.T) {
+		mockCompetition.On("GetCompetitionRegistrationByUserID", uint(1)).Return([]entityComp.CompetitionRegistration{
+			{
+				ID:               1,
+				TeamID:           1,
+				CompetitionID:    1,
+				AcceptanceStatus: 1,
+				CreatedAt:        time.Now(),
+				UpdatedAt:        time.Now(),
+				UserID:           1,
+			},
+		}, nil).Once()
+		testUseCase := CreateNewUserUseCase(mockRepo, mockCompetition, mockRecruitment)
+		res, err := testUseCase.GetCompetitionRegistrationHistory(uint(1))
+		assert.NoError(t, err)
+		assert.NotEmpty(t, res)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("unexpected-error", func(t *testing.T) {
+		mockCompetition.On("GetCompetitionRegistrationByUserID", uint(1)).Return([]entityComp.CompetitionRegistration{}, errors.New("unexpected error")).Once()
+		testUseCase := CreateNewUserUseCase(mockRepo, mockCompetition, mockRecruitment)
+		res, err := testUseCase.GetCompetitionRegistrationHistory(uint(1))
+		assert.Error(t, err)
+		assert.Empty(t, res)
+		mockRepo.AssertExpectations(t)
+	})
+}
+>>>>>>> Stashed changes
