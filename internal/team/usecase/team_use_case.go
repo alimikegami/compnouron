@@ -109,9 +109,12 @@ func (tuc *TeamUseCaseImpl) GetTeamDetailsByID(teamID uint) (dto.TeamDetailsResp
 
 	for _, member := range team.TeamMembers {
 		teamDetails.TeamMembers = append(teamDetails.TeamMembers, dto.TeamMemberResponse{
-			UserID:   member.ID,
-			Name:     member.User.Name,
-			IsLeader: member.IsLeader,
+			UserID:            member.ID,
+			Name:              member.User.Name,
+			IsLeader:          member.IsLeader,
+			SchoolInstitution: member.User.SchoolInstitution,
+			Email:             member.User.Email,
+			PhoneNumber:       member.User.PhoneNumber,
 		})
 	}
 

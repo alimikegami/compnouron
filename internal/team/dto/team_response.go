@@ -13,7 +13,10 @@ type TeamDetailsResponse struct {
 }
 
 type TeamMemberResponse struct {
-	UserID   uint   `json:"id"`
-	Name     string `json:"name"`
-	IsLeader uint   `json:"isLeader"`
+	UserID            uint   `json:"id"`
+	Name              string `json:"name"`
+	PhoneNumber       string `json:"phoneNumber"`
+	Email             string `json:"email"`
+	SchoolInstitution string `json:"schoolInstitution"`
+	IsLeader          uint   `json:"isLeader"`
 }

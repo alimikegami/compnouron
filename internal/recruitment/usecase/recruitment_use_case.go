@@ -87,7 +87,7 @@ func (ruc *RecruitmentUseCaseImpl) CreateRecruitmentApplication(recruitmentAppli
 		return errors.New("internal server error")
 	}
 	for _, rec := range recHis {
-		if rec.RecruitmentID == recruitmentApplicationRequest.RecruitmentID && rec.UserID == userID {
+		if rec.RecruitmentID == recruitmentApplicationRequest.RecruitmentID && rec.UserID == userID && (rec.AcceptanceStatus == 1 || rec.AcceptanceStatus == 0) {
 			return errors.New("you have registered")
 		}
 	}
@@ -105,9 +105,10 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitments(limit int, offset int) ([]dto
 
 	for _, recruitment := range recruitmentsEntity {
 		briefRecruitmentResponse = append(briefRecruitmentResponse, dto.BriefRecruitmentResponse{
-			ID:       recruitment.ID,
-			Role:     recruitment.Role,
-			TeamName: recruitment.Team.Name,
+			ID:                          recruitment.ID,
+			Role:                        recruitment.Role,
+			TeamName:                    recruitment.Team.Name,
+			ApplicationAcceptanceStatus: recruitment.ApplicationAcceptanceStatus,
 		})
 	}
 
@@ -136,11 +137,12 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentDetailsByID(id uint, userID uin
 	}
 
 	recruitmentResponse := dto.RecruitmentResponse{
-		ID:          recruitment.ID,
-		Role:        recruitment.Role,
-		Description: recruitment.Description,
-		TeamID:      recruitment.TeamID,
-		TeamName:    recruitment.Team.Name,
+		ID:                          recruitment.ID,
+		Role:                        recruitment.Role,
+		Description:                 recruitment.Description,
+		TeamID:                      recruitment.TeamID,
+		TeamName:                    recruitment.Team.Name,
+		ApplicationAcceptanceStatus: recruitment.ApplicationAcceptanceStatus,
 	}
 
 	for _, recruitmentApplication := range recruitmentApplications {
@@ -164,11 +166,12 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByTeamID(id uint) (dto.Recruitm
 	result, err := ruc.rr.GetRecruitmentByTeamID(id)
 	for _, recruitment := range result {
 		recruitments = append(recruitments, dto.RecruitmentResponse{
-			ID:          recruitment.ID,
-			Role:        recruitment.Role,
-			Description: recruitment.Description,
-			TeamID:      recruitment.TeamID,
-			TeamName:    recruitment.Team.Name,
+			ID:                          recruitment.ID,
+			Role:                        recruitment.Role,
+			Description:                 recruitment.Description,
+			TeamID:                      recruitment.TeamID,
+			TeamName:                    recruitment.Team.Name,
+			ApplicationAcceptanceStatus: recruitment.ApplicationAcceptanceStatus,
 		})
 	}
 
@@ -224,9 +227,10 @@ func (ruc *RecruitmentUseCaseImpl) SearchRecruitment(limit int, offset int, keyw
 
 	for _, recruitment := range recruitments {
 		recruitmentsResponse = append(recruitmentsResponse, dto.BriefRecruitmentResponse{
-			ID:       recruitment.ID,
-			TeamName: recruitment.Team.Name,
-			Role:     recruitment.Role,
+			ID:                          recruitment.ID,
+			TeamName:                    recruitment.Team.Name,
+			Role:                        recruitment.Role,
+			ApplicationAcceptanceStatus: recruitment.ApplicationAcceptanceStatus,
 		})
 	}
 
@@ -240,11 +244,12 @@ func (ruc *RecruitmentUseCaseImpl) GetRecruitmentByID(id uint) (dto.RecruitmentR
 	}
 
 	recruitmentResponse := dto.RecruitmentResponse{
-		ID:          recruitment.ID,
-		Role:        recruitment.Role,
-		Description: recruitment.Description,
-		TeamID:      recruitment.TeamID,
-		TeamName:    recruitment.Team.Name,
+		ID:                          recruitment.ID,
+		Role:                        recruitment.Role,
+		Description:                 recruitment.Description,
+		TeamID:                      recruitment.TeamID,
+		TeamName:                    recruitment.Team.Name,
+		ApplicationAcceptanceStatus: recruitment.ApplicationAcceptanceStatus,
 	}
 
 	return recruitmentResponse, nil
