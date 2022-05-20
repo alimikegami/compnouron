@@ -6,10 +6,12 @@ import (
 	"github.com/alimikegami/compnouron/internal/competition/dto"
 	"github.com/alimikegami/compnouron/internal/competition/entity"
 	"github.com/alimikegami/compnouron/internal/competition/repository"
+	teamRepo "github.com/alimikegami/compnouron/internal/team/repository"
 )
 
 type CompetitionUseCaseImpl struct {
 	ur repository.CompetitionRepository
+	tr teamRepo.TeamRepository
 }
 
 type CompetitionUseCase interface {
@@ -28,20 +30,21 @@ type CompetitionUseCase interface {
 	SearchCompetition(limit int, offset int, keyword string) ([]dto.CompetitionResponse, error)
 }
 
-func CreateNewCompetitionUseCase(ur repository.CompetitionRepository) CompetitionUseCase {
-	return &CompetitionUseCaseImpl{ur: ur}
+func CreateNewCompetitionUseCase(ur repository.CompetitionRepository, tr teamRepo.TeamRepository) CompetitionUseCase {
+	return &CompetitionUseCaseImpl{ur: ur, tr: tr}
 }
 
 func (cuc *CompetitionUseCaseImpl) CreateCompetition(competition dto.CompetitionRequest, userID uint) error {
 	competitionEntity := &entity.Competition{
-		Name:                 competition.Name,
-		Description:          competition.Description,
-		ContactPerson:        competition.ContactPerson,
-		IsTeam:               competition.IsTeam,
-		IsTheSameInstitution: competition.IsTheSameInstitution,
-		TeamCapacity:         competition.TeamCapacity,
-		Level:                competition.Level,
-		UserID:               userID,
+		Name:                     competition.Name,
+		Description:              competition.Description,
+		ContactPerson:            competition.ContactPerson,
+		IsTeam:                   competition.IsTeam,
+		IsTheSameInstitution:     competition.IsTheSameInstitution,
+		TeamCapacity:             competition.TeamCapacity,
+		Level:                    competition.Level,
+		UserID:                   userID,
+		RegistrationPeriodStatus: 0,
 	}
 	err := cuc.ur.CreateCompetition(competitionEntity)
 	return err
@@ -143,6 +146,30 @@ func (cuc *CompetitionUseCaseImpl) Register(competitionRegistration dto.Competit
 
 	if comp.RegistrationPeriodStatus == 0 || comp.RegistrationPeriodStatus == 2 {
 		return errors.New("registration period is over")
+	}
+
+	flag := false
+
+	if comp.IsTeam == 1 {
+		team, err := cuc.tr.GetTeamsByUserID(userID)
+		if err != nil {
+			return errors.New("internal error")
+		}
+
+		for _, t := range team {
+			if t.ID == competitionRegistration.TeamID {
+				for _, member := range t.TeamMembers {
+					if member.UserID == userID && member.IsLeader == 1 {
+						flag = true
+					}
+				}
+			}
+		}
+
+	}
+
+	if flag == false {
+		return errors.New("you are not this team's member")
 	}
 
 	if userID == comp.UserID {

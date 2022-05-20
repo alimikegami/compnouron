@@ -17,5 +17,5 @@ type CompetitionRegistration struct {
 	UpdatedAt        time.Time
 	Team             entity.Team
 	User             userEntity.User
-	Competition      Competition
+	Competition      Competition `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
