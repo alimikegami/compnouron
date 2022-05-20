@@ -1,104 +1,104 @@
 {
-    "ipcMode": null,
-    "executionRoleArn": null,
-    "containerDefinitions": [
-      {
-        "dnsSearchDomains": null,
-        "environmentFiles": null,
-        "logConfiguration": null,
-        "entryPoint": null,
-        "portMappings": [
-          {
-            "hostPort": 8080,
-            "protocol": "tcp",
-            "containerPort": 1323
-          }
-        ],
-        "command": null,
-        "linuxParameters": null,
-        "cpu": 0,
-        "environment": [
-          {
-            "name": "DB_ADDRESS",
-            "value": "compnouron.ct1gypxmi7ge.ap-southeast-3.rds.amazonaws.com"
-          },
-          {
-            "name": "DB_NAME",
-            "value": "compnouron"
-          },
-          {
-            "name": "DB_PASSWORD",
-            "value": "t1Xi1BQdZQeFyGswfjTu"
-          },
-          {
-            "name": "DB_PORT",
-            "value": "3306"
-          },
-          {
-            "name": "DB_USERNAME",
-            "value": "admin"
-          },
-          {
-            "name": "SIGNING_KEY",
-            "value": "kitten"
-          }
-        ],
-        "ulimits": null,
-        "dnsServers": null,
-        "mountPoints": [],
-        "workingDirectory": null,
-        "secrets": null,
-        "dockerSecurityOptions": null,
-        "memory": null,
-        "memoryReservation": null,
-        "volumesFrom": [],
-        "stopTimeout": null,
-        "image": "406582626331.dkr.ecr.ap-southeast-3.amazonaws.com/compnouron:f007c7e43059b39faac0a5074ec3a5338d53ff36",
-        "startTimeout": null,
-        "firelensConfiguration": null,
-        "dependsOn": null,
-        "disableNetworking": null,
-        "interactive": null,
-        "healthCheck": null,
-        "essential": true,
-        "links": null,
-        "hostname": null,
-        "extraHosts": null,
-        "pseudoTerminal": null,
-        "user": null,
-        "readonlyRootFilesystem": null,
-        "dockerLabels": null,
-        "systemControls": null,
-        "privileged": null,
-        "name": "compnouron"
-      }
-    ],
-    "placementConstraints": [],
-    "memory": "512",
-    "taskRoleArn": null,
-    "compatibilities": [
-      "EXTERNAL",
-      "EC2"
-    ],
-    "taskDefinitionArn": "arn:aws:ecs:ap-southeast-3:406582626331:task-definition/compnouron-task-def:1",
-    "family": "compnouron-task-def",
-    "requiresAttributes": [
-      {
-        "targetId": null,
-        "targetType": null,
-        "value": null,
-        "name": "com.amazonaws.ecs.capability.ecr-auth"
-      }
-    ],
-    "pidMode": null,
-    "requiresCompatibilities": [
-      "EC2"
-    ],
-    "networkMode": "bridge",
-    "cpu": "512",
-    "revision": 1,
-    "status": "ACTIVE",
-    "inferenceAccelerators": null,
-    "proxyConfiguration": null,
-    "volumes": []
-  }
+  "ipcMode": null,
+  "executionRoleArn": null,
+  "containerDefinitions": [
+    {
+      "dnsSearchDomains": null,
+      "environmentFiles": null,
+      "logConfiguration": null,
+      "entryPoint": null,
+      "portMappings": [
+        {
+          "hostPort": 8080,
+          "protocol": "tcp",
+          "containerPort": 1323
+        }
+      ],
+      "command": null,
+      "linuxParameters": null,
+      "cpu": 0,
+      "environment": [
+        {
+          "name": "DB_ADDRESS",
+          "value": "compnouron.ct1gypxmi7ge.ap-southeast-3.rds.amazonaws.com"
+        },
+        {
+          "name": "DB_NAME",
+          "value": "compnouron"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "value": "t1Xi1BQdZQeFyGswfjTu"
+        },
+        {
+          "name": "DB_PORT",
+          "value": "3306"
+        },
+        {
+          "name": "DB_USERNAME",
+          "value": "admin"
+        },
+        {
+          "name": "SIGNING_KEY",
+          "value": "kitten"
+        }
+      ],
+      "ulimits": null,
+      "dnsServers": null,
+      "mountPoints": [],
+      "workingDirectory": null,
+      "secrets": null,
+      "dockerSecurityOptions": null,
+      "memory": null,
+      "memoryReservation": null,
+      "volumesFrom": [],
+      "stopTimeout": null,
+      "image": "406582626331.dkr.ecr.ap-southeast-3.amazonaws.com/compnouron:f007c7e43059b39faac0a5074ec3a5338d53ff36",
+      "startTimeout": null,
+      "firelensConfiguration": null,
+      "dependsOn": null,
+      "disableNetworking": null,
+      "interactive": null,
+      "healthCheck": null,
+      "essential": true,
+      "links": null,
+      "hostname": null,
+      "extraHosts": null,
+      "pseudoTerminal": null,
+      "user": null,
+      "readonlyRootFilesystem": null,
+      "dockerLabels": null,
+      "systemControls": null,
+      "privileged": null,
+      "name": "compnouron"
+    }
+  ],
+  "placementConstraints": [],
+  "memory": "900",
+  "taskRoleArn": null,
+  "compatibilities": [
+    "EXTERNAL",
+    "EC2"
+  ],
+  "taskDefinitionArn": "arn:aws:ecs:ap-southeast-3:406582626331:task-definition/compnouron-task-def:5",
+  "family": "compnouron-task-def",
+  "requiresAttributes": [
+    {
+      "targetId": null,
+      "targetType": null,
+      "value": null,
+      "name": "com.amazonaws.ecs.capability.ecr-auth"
+    }
+  ],
+  "pidMode": null,
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "networkMode": "bridge",
+  "cpu": "512",
+  "revision": 5,
+  "status": "ACTIVE",
+  "inferenceAccelerators": null,
+  "proxyConfiguration": null,
+  "volumes": []
+}

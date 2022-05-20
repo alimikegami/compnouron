@@ -90,7 +90,6 @@ func TestGetCompetitionsData(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 }
-
 func TestGetCompetitionRegistrationHistory(t *testing.T) {
 	mockRepo := userRepo.NewUserRepository(t)
 	mockCompetition := competitionRepo.NewCompetitionRepository(t)
