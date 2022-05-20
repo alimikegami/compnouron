@@ -937,8 +937,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "allOf": [
                                 {
@@ -2533,6 +2533,9 @@ const docTemplate = `{
         "dto.RecruitmentResponse": {
             "type": "object",
             "properties": {
+                "ApplicationAcceptanceStatus": {
+                    "type": "integer"
+                },
                 "ID": {
                     "type": "integer"
                 },
@@ -2581,6 +2584,9 @@ const docTemplate = `{
         "dto.TeamMemberResponse": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -2588,6 +2594,12 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "schoolInstitution": {
                     "type": "string"
                 }
             }

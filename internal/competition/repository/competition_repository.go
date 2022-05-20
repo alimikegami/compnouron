@@ -178,7 +178,7 @@ func (cr *CompetitionRepositoryImpl) OpenCompetitionRegistrationPeriod(id uint) 
 
 func (cr *CompetitionRepositoryImpl) GetCompetitionByUserID(userID uint) ([]entity.Competition, error) {
 	var comps []entity.Competition
-	result := cr.db.Find(comps, "user_id = ?", userID)
+	result := cr.db.Find(&comps, "user_id = ?", userID)
 	if result.Error != nil {
 		return []entity.Competition{}, result.Error
 	}
