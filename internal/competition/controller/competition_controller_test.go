@@ -432,3 +432,231 @@ func TestRejectCompetitionRegistration(t *testing.T) {
 		mockUseCase.AssertExpectations(t)
 	})
 }
+
+func TestOpenCompetitionRegistrationPeriod(t *testing.T) {
+	mockUseCase := mocks.NewCompetitionUseCase(t)
+	// setup the endpoint
+	t.Run("success", func(t *testing.T) {
+		mockUseCase.On("OpenCompetitionRegistrationPeriod", uint(1), uint(1)).Return(nil).Once()
+		req, err := http.NewRequest(http.MethodPut, "/competitions", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		token := utils.CreateJWTToken(uint(1), "gmail@gmail.com")
+		c.Set("user", token)
+		c.SetPath("/:id/open")
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		// setup controller/handler
+		compController := CompetitionController{
+			router:        e,
+			CompetitionUC: mockUseCase,
+		}
+
+		// get the response
+		compController.OpenCompetitionRegistrationPeriod(c)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("internal-server-error", func(t *testing.T) {
+		mockUseCase.On("OpenCompetitionRegistrationPeriod", uint(1), uint(1)).Return(errors.New("no affected rows")).Once()
+		req, err := http.NewRequest(http.MethodPut, "/competitions", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		token := utils.CreateJWTToken(uint(1), "gmail@gmail.com")
+		c.Set("user", token)
+		c.SetPath("/:id/open")
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		// setup controller/handler
+		compController := CompetitionController{
+			router:        e,
+			CompetitionUC: mockUseCase,
+		}
+
+		// get the response
+		compController.OpenCompetitionRegistrationPeriod(c)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+}
+
+func TestCloseCompetitionRegistrationPeriod(t *testing.T) {
+	mockUseCase := mocks.NewCompetitionUseCase(t)
+	// setup the endpoint
+	t.Run("success", func(t *testing.T) {
+		mockUseCase.On("CloseCompetitionRegistrationPeriod", uint(1), uint(1)).Return(nil).Once()
+		req, err := http.NewRequest(http.MethodPut, "/competitions", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		token := utils.CreateJWTToken(uint(1), "gmail@gmail.com")
+		c.Set("user", token)
+		c.SetPath("/:id/close")
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		// setup controller/handler
+		compController := CompetitionController{
+			router:        e,
+			CompetitionUC: mockUseCase,
+		}
+
+		// get the response
+		compController.CloseCompetitionRegistrationPeriod(c)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("internal-server-error", func(t *testing.T) {
+		mockUseCase.On("CloseCompetitionRegistrationPeriod", uint(1), uint(1)).Return(errors.New("no affected rows")).Once()
+		req, err := http.NewRequest(http.MethodPut, "/competitions", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		token := utils.CreateJWTToken(uint(1), "gmail@gmail.com")
+		c.Set("user", token)
+		c.SetPath("/:id/close")
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		// setup controller/handler
+		compController := CompetitionController{
+			router:        e,
+			CompetitionUC: mockUseCase,
+		}
+
+		// get the response
+		compController.CloseCompetitionRegistrationPeriod(c)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+}
+
+func TestGetCompetitionByID(t *testing.T) {
+	mockUseCase := mocks.NewCompetitionUseCase(t)
+	// setup the endpoint
+	t.Run("success", func(t *testing.T) {
+		mockUseCase.On("GetCompetitionByID", uint(1)).Return(dto.DetailedCompetitionResponse{
+			ID:                       1,
+			Name:                     "Technoscape",
+			Description:              "Testing",
+			ContactPerson:            "081313131",
+			IsTheSameInstitution:     1,
+			IsTeam:                   1,
+			RegistrationPeriodStatus: 1,
+			TeamCapacity:             4,
+			Level:                    "University Student",
+			UserID:                   1,
+			UserName:                 "BNCC",
+		}, nil).Once()
+		req, err := http.NewRequest(http.MethodGet, "/competitions", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/:id")
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		// setup controller/handler
+		compController := CompetitionController{
+			router:        e,
+			CompetitionUC: mockUseCase,
+		}
+
+		// get the response
+		compController.GetCompetitionByID(c)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("internal-server-error", func(t *testing.T) {
+		mockUseCase.On("GetCompetitionByID", uint(1)).Return(dto.DetailedCompetitionResponse{}, errors.New("unexpected error occured")).Once()
+		req, err := http.NewRequest(http.MethodGet, "/competitions", nil)
+		assert.NoError(t, err, "No request error")
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/:id")
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		// setup controller/handler
+		compController := CompetitionController{
+			router:        e,
+			CompetitionUC: mockUseCase,
+		}
+
+		// get the response
+		compController.GetCompetitionByID(c)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+}
+
+// func TestGetCompetitions(t *testing.T) {
+// 	mockUseCase := mocks.NewCompetitionUseCase(t)
+// 	// setup the endpoint
+// 	t.Run("success", func(t *testing.T) {
+// 		mockUseCase.On("GetCompetitions", uint(1)).Return(dto.DetailedCompetitionResponse{
+// 			ID:                       1,
+// 			Name:                     "Technoscape",
+// 			Description:              "Testing",
+// 			ContactPerson:            "081313131",
+// 			IsTheSameInstitution:     1,
+// 			IsTeam:                   1,
+// 			RegistrationPeriodStatus: 1,
+// 			TeamCapacity:             4,
+// 			Level:                    "University Student",
+// 			UserID:                   1,
+// 			UserName:                 "BNCC",
+// 		}, nil).Once()
+// 		req, err := http.NewRequest(http.MethodGet, "/competitions", nil)
+// 		assert.NoError(t, err, "No request error")
+// 		e := echo.New()
+// 		rec := httptest.NewRecorder()
+// 		c := e.NewContext(req, rec)
+// 		c.SetPath("/:id")
+// 		c.SetParamNames("id")
+// 		c.SetParamValues("1")
+// 		// setup controller/handler
+// 		compController := CompetitionController{
+// 			router:        e,
+// 			CompetitionUC: mockUseCase,
+// 		}
+
+// 		// get the response
+// 		compController.GetCompetitions(c)
+// 		assert.Equal(t, http.StatusOK, rec.Code)
+// 		mockUseCase.AssertExpectations(t)
+// 	})
+
+// 	t.Run("internal-server-error", func(t *testing.T) {
+// 		mockUseCase.On("GetCompetitions", uint(1)).Return(dto.DetailedCompetitionResponse{}, errors.New("unexpected error occured")).Once()
+// 		req, err := http.NewRequest(http.MethodGet, "/competitions", nil)
+// 		assert.NoError(t, err, "No request error")
+// 		e := echo.New()
+// 		rec := httptest.NewRecorder()
+// 		c := e.NewContext(req, rec)
+// 		c.SetPath("/:id")
+// 		c.SetParamNames("id")
+// 		c.SetParamValues("1")
+// 		// setup controller/handler
+// 		compController := CompetitionController{
+// 			router:        e,
+// 			CompetitionUC: mockUseCase,
+// 		}
+
+// 		// get the response
+// 		compController.GetCompetitions(c)
+// 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+// 		mockUseCase.AssertExpectations(t)
+// 	})
+// }
