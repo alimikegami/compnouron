@@ -8,9 +8,9 @@ import (
 
 type RecruitmentApplication struct {
 	ID               uint
-	UserID           uint
-	RecruitmentID    uint
-	AcceptanceStatus uint8
+	UserID           uint  `gorm:"not null"`
+	RecruitmentID    uint  `gorm:"not null"`
+	AcceptanceStatus uint8 `gorm:"not null"`
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	Recruitment      Recruitment `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

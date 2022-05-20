@@ -82,6 +82,25 @@ func (ruc *RecruitmentUseCaseImpl) CreateRecruitmentApplication(recruitmentAppli
 		AcceptanceStatus: 0,
 	}
 
+	rec, err := ruc.rr.GetRecruitmentByID(recruitmentApplicationRequest.RecruitmentID)
+	if err != nil {
+		return err
+	}
+
+	if rec.ApplicationAcceptanceStatus == 0 || rec.ApplicationAcceptanceStatus == 2 {
+		return errors.New("application is not opened yet")
+
+	}
+	teamMembers, err := ruc.tr.GetTeamByID(rec.TeamID)
+	if err != nil {
+		return err
+	}
+	for _, member := range teamMembers.TeamMembers {
+		if member.UserID == userID {
+			return errors.New("you are a team member")
+		}
+	}
+
 	recHis, err := ruc.rr.GetRecruitmentApplicationByUserID(userID)
 	if err != nil {
 		return errors.New("internal server error")
@@ -202,15 +221,21 @@ func (ruc *RecruitmentUseCaseImpl) AcceptRecruitmentApplication(id uint, userID 
 		return errors.New("action unauthorized")
 	}
 
+	recruitmentApplication, err := ruc.rr.GetRecruitmentApplicationByID(id)
+	if err != nil {
+		return err
+	}
+
+	team, err := ruc.tr.GetTeamByID(recruitmentApplication.Recruitment.TeamID)
+	if int(team.Capacity) <= len(team.TeamMembers) {
+		return errors.New("The team is full")
+	}
+
 	err = ruc.rr.AcceptRecruitmentApplication(id)
 	if err != nil {
 		return err
 	}
 
-	recruitmentApplication, err := ruc.rr.GetRecruitmentApplicationByID(id)
-	if err != nil {
-		return err
-	}
 	err = ruc.tr.AddTeamMember(recruitmentApplication.UserID, recruitmentApplication.Recruitment.TeamID, 0)
 	if err != nil {
 		return err
