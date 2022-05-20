@@ -104,7 +104,7 @@ func (cr *CompetitionRepositoryImpl) Register(competitionRegistration entity.Com
 func (cr *CompetitionRepositoryImpl) GetCompetitionRegistration(competitionID uint) (entity.Competition, error) {
 	var competitionRegistration entity.Competition
 
-	result := cr.db.Preload("CompetitionRegistrations", "acceptance_status = 0").Where("id = ?", competitionID).Find(&competitionRegistration)
+	result := cr.db.Preload("CompetitionRegistrations.Team").Preload("CompetitionRegistrations", "acceptance_status = 0").Where("id = ?", competitionID).Find(&competitionRegistration)
 	if result.Error != nil {
 		return entity.Competition{}, result.Error
 	}

@@ -72,15 +72,15 @@ func main() {
 
 	migration.Migrate(db)
 
-	cr := competitionRepository.CreateNewCompetitionRepository(db)
-	cuc := competitionUseCase.CreateNewCompetitionUseCase(cr)
-	cc := competitionController.CreateNewCompetitionController(e, cuc)
-	cc.InitializeCompetitionRoute(config)
-
 	tr := teamRepository.CreateNewTeamRepository(db)
 	tuc := teamUseCase.CreateNewTeamUseCase(tr)
 	tc := teamController.CreateNewTeamController(e, tuc)
 	tc.InitializeTeamRoute(config)
+
+	cr := competitionRepository.CreateNewCompetitionRepository(db)
+	cuc := competitionUseCase.CreateNewCompetitionUseCase(cr, tr)
+	cc := competitionController.CreateNewCompetitionController(e, cuc)
+	cc.InitializeCompetitionRoute(config)
 
 	rr := recruitmentRepository.CreateNewRecruitmentRepository(db)
 	ruc := recruitmentUseCase.CreateNewRecruitmentUseCase(rr, tr)
